@@ -26,6 +26,7 @@ import {
   debateReply,
   presentAssessmentError,
   assessmentDiagnosticReason,
+  ASSESSMENT_FAILURE_CODE,
 } from "./evaluator.mjs";
 import {
   readProviderConfig,
@@ -1370,17 +1371,42 @@ export function createApp(options = {}) {
           attemptId: attempt.id,
           kind: "evaluation",
         });
-      const evaluation = session.assessmentFramework === "bridge-v1"
-        ? await evaluateBridge(attempt, session, { ...options, providerConfig, wordBloomContext: await wordBloom.context(job.user_id) })
-        : await evaluate(
-        attempt,
-        session,
-        session.articleSnapshot,
-        {
+      let evaluation;
+      try {
+        evaluation = session.assessmentFramework === "bridge-v1"
+          ? await evaluateBridge(attempt, session, { ...options, providerConfig, wordBloomContext: await wordBloom.context(job.user_id) })
+          : await evaluate(
+          attempt,
+          session,
+          session.articleSnapshot,
+          {
+            ...options,
+            providerConfig,
+          },
+        );
+      } catch (error) {
+        // A malformed AI response must never strand a required daily activity.
+        // Do not retry or reinterpret it: save a clearly unassessed BRIDGE
+        // self-review instead, with the separately labelled sample map.
+        if (
+          session.assessmentFramework !== "bridge-v1" ||
+          error.code !== ASSESSMENT_FAILURE_CODE
+        )
+          throw error;
+        console.warn(
+          "[bridge-self-review-fallback]",
+          jobId,
+          assessmentDiagnosticReason(error) || "schema_validation",
+        );
+        evaluation = await evaluateBridge(attempt, session, {
           ...options,
-          providerConfig,
-        },
-      );
+          providerConfig: { ...providerConfig, apiKey: "" },
+          wordBloomContext: { enabled: false, catalogue: [], knownWordIds: [], reviewWords: [] },
+        });
+        evaluation.verification_flags.unshift(
+          "The AI response could not be validated. This is self-review only; no AI map or skill rating was recorded.",
+        );
+      }
       if (closed) return;
       await transaction(db, async () => {
         if (

@@ -105,7 +105,7 @@ async function fixture(t, configured = true) {
   };
 }
 
-test("invalid BRIDGE graphs cannot commit feedback or rewards; the same saved answer recovers once", async (t) => {
+test("invalid BRIDGE graphs complete as unassessed self-review without inventing feedback", async (t) => {
   const f = await fixture(t),
     token = await f.guest(),
     other = await f.guest();
@@ -116,35 +116,24 @@ test("invalid BRIDGE graphs cannot commit feedback or rewards; the same saved an
   });
   assert.equal(session.assessmentFramework, "bridge-v1");
   const attempt = await f.submit(token, session);
-  let saved = await f.complete(token, attempt);
-  assert.equal(saved.status, "failed");
+  const saved = await f.complete(token, attempt);
+  assert.equal(saved.status, "completed");
   assert.equal(saved.text, answer);
-  assert.equal(saved.evaluation, undefined);
-  assert.equal((await f.ok("/state", token)).xp, 0);
-  assert.equal(
-    (await f.request(`/attempts/${attempt.id}/thought-map`, token)).status,
-    404,
-  );
+  assert.equal(saved.evaluation.provider, "local");
+  assert.equal(saved.evaluation.rubric_version, "bridge-v1");
+  assert.equal(saved.evaluation.thought_map.status, "not_assessed");
+  assert.deepEqual(saved.evaluation.thought_map.nodes, []);
+  assert.equal(saved.rewards.xp, 15);
+  assert.equal((await f.ok("/state", token)).xp, 15);
+  const map = await f.ok(`/attempts/${attempt.id}/thought-map`, token);
+  assert.deepEqual(map.nodes, []);
   assert.equal(
     (await f.request(`/attempts/${attempt.id}/thought-map`, other)).status,
     404,
   );
-  f.repair();
-  saved = await f.complete(token, attempt);
-  assert.equal(saved.status, "completed");
-  assert.equal(saved.evaluation.rubric_version, "bridge-v1");
-  assert.equal(saved.evaluation.model_version, "offline-bridge-snapshot");
-  assert.equal(saved.evaluation.dimensions.length, 6);
-  assert.equal(saved.evaluation.dimensions[3].status, "not_assessed");
-  assert.equal(saved.rewards.xp, 15);
-  const map = await f.ok(`/attempts/${attempt.id}/thought-map`, token);
-  assert.equal(
-    map.nodes[0].quote,
-    answer.slice(map.nodes[0].source_span.start, map.nodes[0].source_span.end),
-  );
-  assert.equal(f.calls, 2);
+  assert.equal(f.calls, 1);
   await f.complete(token, attempt);
-  assert.equal(f.calls, 2);
+  assert.equal(f.calls, 1);
   await f.restart();
   assert.deepEqual(
     await f.ok(`/attempts/${attempt.id}/thought-map`, token),
