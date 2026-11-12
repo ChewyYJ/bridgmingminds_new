@@ -8,6 +8,10 @@ The production domain serves the homepage and `/api/health` publicly with HTTP 2
 
 Live Chrome verification at a 390 × 844 mobile viewport passed guest creation, onboarding, authenticated `/api/state`, persisted onboarding after reload, and navigation to Spin & Speak. No JavaScript runtime errors occurred and document width stayed within the viewport. The signed-out state request correctly returned 401 before guest creation. The practice screen was captured and visually reviewed. The isolated release-check guest account was deleted successfully through `/api/account` (HTTP 200). No model evaluation or acoustic provider call was made in this smoke check.
 
+## Thought Map presentation — 13 November 2026
+
+Thought Maps now present the learner's explicit main claim as a central node, arrange connected ideas radially around it, and show proposed gaps as orange dashed branches labelled “Strengthen this.” The stored graph, quote provenance, validation and accessible text-outline view remain unchanged. The focused BRIDGE graph suite, lint, TypeScript check, web export and mobile browser check passed.
+
 The implemented local flows are reviewable and tested. The complete master roadmap is **not finished**, and this is **not a production approval**.
 
 Implemented: the opt-in two-activity daily loop, idempotent XP/streak/cosmetic rewards, private reading self-review and recordings, BRIDGE feedback and Thought Maps, integrated WordBloom, optional acoustic processing with real media decoding, provisional pronunciation review scheduling, daily speaking access independent of optional quota, and evidence-backed practice recommendations with user controls.

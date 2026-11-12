@@ -4,9 +4,8 @@ import {
   ScrollView,
   Text,
   View,
-  useWindowDimensions,
 } from "react-native";
-import Svg, { Line, Polygon, Text as SvgText } from "react-native-svg";
+import Svg, { Line } from "react-native-svg";
 import { layoutThoughtMap } from "../../shared/thought-map-layout.mjs";
 import type { ThoughtMap as MapData, ThoughtMapNode } from "../types";
 import { Button, C, Card, T, Tag } from "./ui";
@@ -18,6 +17,14 @@ const statusLabel = {
 };
 const nodeColor = { explicit: C.sage, inferred: C.lilac, missing: C.peach };
 const readable = (word: string) => word.replaceAll("_", " ");
+const nodeHeading = (node: ThoughtMapNode, central: boolean) =>
+  central
+    ? "Your main idea"
+    : node.status === "missing"
+      ? "Strengthen this"
+      : node.status === "explicit"
+        ? "Your idea"
+        : readable(node.type);
 
 export function ThoughtMapView({
   map,
@@ -28,10 +35,7 @@ export function ThoughtMapView({
   answer: string;
   sample?: boolean;
 }) {
-  const { width } = useWindowDimensions();
-  const [view, setView] = useState<"map" | "outline">(
-    width < 700 ? "outline" : "map",
-  );
+  const [view, setView] = useState<"map" | "outline">("map");
   const [selected, setSelected] = useState<ThoughtMapNode | null>(null);
   const [zoom, setZoom] = useState(1);
   const layout = useMemo(() => layoutThoughtMap(map), [map]);
@@ -48,12 +52,12 @@ export function ThoughtMapView({
       <Text style={T.small}>
         {sample
           ? "Demonstration only. This map is not an assessment of your response and earns no progress."
-          : "A provisional interpretation of this response. Tap a node to inspect its evidence or proposed question."}
+          : "Your ideas form the branches. Peach dashed branches show a proposed gap you can strengthen. Tap a node to inspect its evidence or question."}
       </Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-        <Tag color={C.sage}>Explicit · exact quotation</Tag>
+        <Tag color={C.sage}>Your ideas · exact quotation</Tag>
         <Tag color={C.lilac}>Inferred · interpretation</Tag>
-        <Tag color={C.peach}>Missing · proposed gap</Tag>
+        <Tag color={C.peach}>Strengthen · proposed gap</Tag>
       </View>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
         <Button
@@ -91,16 +95,21 @@ export function ThoughtMapView({
             />
           </View>
           <Text style={T.small}>
-            Scroll to pan · {Math.round(zoom * 100)}% · arrows point toward the
-            connected idea
+            Scroll to explore · {Math.round(zoom * 100)}% · your main idea is
+            at the centre
           </Text>
           <ScrollView
             horizontal
             nestedScrollEnabled
             testID="thought-map-canvas"
-            style={{ borderWidth: 1, borderColor: C.border, borderRadius: 12 }}
+            style={{
+              borderWidth: 1,
+              borderColor: C.border,
+              borderRadius: 16,
+              backgroundColor: C.cream,
+            }}
           >
-            <ScrollView nestedScrollEnabled style={{ maxHeight: 460 }}>
+            <ScrollView nestedScrollEnabled style={{ maxHeight: 500 }}>
               <View
                 style={{
                   width: layout.width * zoom,
@@ -120,39 +129,26 @@ export function ThoughtMapView({
                     const to = layout.positions.find(
                       (position) => position.id === edge.target,
                     )!;
-                    const x1 = (from.x + from.width) * zoom,
+                    const x1 = (from.x + from.width / 2) * zoom,
                       y1 = (from.y + from.height / 2) * zoom;
-                    const x2 = to.x * zoom,
+                    const x2 = (to.x + to.width / 2) * zoom,
                       y2 = (to.y + to.height / 2) * zoom;
-                    const angle = Math.atan2(y2 - y1, x2 - x1),
-                      size = 9 * zoom;
-                    const points = `${x2},${y2} ${x2 - size * Math.cos(angle - 0.5)},${y2 - size * Math.sin(angle - 0.5)} ${x2 - size * Math.cos(angle + 0.5)},${y2 - size * Math.sin(angle + 0.5)}`;
+                    const gap =
+                      map.nodes.find((node) => node.id === edge.source)
+                        ?.status === "missing" ||
+                      map.nodes.find((node) => node.id === edge.target)
+                        ?.status === "missing";
                     return (
-                      <React.Fragment key={edge.id}>
-                        <Line
-                          x1={x1}
-                          y1={y1}
-                          x2={x2}
-                          y2={y2}
-                          stroke={C.forest}
-                          strokeWidth={2}
-                          strokeDasharray={
-                            edge.relation === "needs_explanation"
-                              ? "5,4"
-                              : undefined
-                          }
-                        />
-                        <Polygon points={points} fill={C.forest} />
-                        <SvgText
-                          x={(x1 + x2) / 2}
-                          y={(y1 + y2) / 2 - 8}
-                          fontSize={10 * zoom}
-                          fill={C.forest}
-                          textAnchor="middle"
-                        >
-                          {readable(edge.relation)}
-                        </SvgText>
-                      </React.Fragment>
+                      <Line
+                        key={edge.id}
+                        x1={x1}
+                        y1={y1}
+                        x2={x2}
+                        y2={y2}
+                        stroke={gap ? C.orange : C.forest}
+                        strokeWidth={gap ? 2.5 : 2}
+                        strokeDasharray={gap ? "7,6" : undefined}
+                      />
                     );
                   })}
                 </Svg>
@@ -164,7 +160,7 @@ export function ThoughtMapView({
                     <Pressable
                       key={node.id}
                       accessibilityRole="button"
-                      accessibilityLabel={`${readable(node.type)}: ${node.status === "explicit" && sample ? "Explicit sample words" : statusLabel[node.status]}`}
+                      accessibilityLabel={`${nodeHeading(node, position.central)}: ${node.status === "explicit" && sample ? "Explicit sample words" : statusLabel[node.status]}`}
                       accessibilityState={{
                         selected: selected?.id === node.id,
                       }}
@@ -177,38 +173,58 @@ export function ThoughtMapView({
                         width: position.width * zoom,
                         height: position.height * zoom,
                         padding: 12 * zoom,
-                        borderRadius: 12,
+                        borderRadius: position.central ? 999 : 18,
                         gap: 5 * zoom,
-                        borderWidth: selected?.id === node.id ? 3 : 1,
-                        borderColor: C.forest,
+                        borderWidth:
+                          selected?.id === node.id ? 3 : position.central ? 2 : 1,
+                        borderColor:
+                          position.central || node.status !== "missing"
+                            ? C.forest
+                            : C.orange,
                         backgroundColor: pressed
                           ? C.yellow
-                          : nodeColor[node.status],
+                          : position.central
+                            ? C.forest
+                            : nodeColor[node.status],
                       })}
                     >
                       <Text
                         style={[
                           T.h3,
-                          { fontSize: 15 * zoom, lineHeight: 20 * zoom },
+                          {
+                            fontSize: position.central ? 16 * zoom : 15 * zoom,
+                            lineHeight: position.central ? 21 * zoom : 20 * zoom,
+                            color: position.central ? C.paper : C.ink,
+                          },
                         ]}
                       >
-                        {readable(node.type)}
+                        {nodeHeading(node, position.central)}
                       </Text>
                       <Text
                         style={[
                           T.small,
-                          { fontSize: 12 * zoom, lineHeight: 16 * zoom },
+                          {
+                            fontSize: 12 * zoom,
+                            lineHeight: 16 * zoom,
+                            color: position.central ? C.sage : C.muted,
+                          },
                         ]}
                       >
-                        {node.status === "explicit" && sample
-                          ? "Explicit · sample words"
-                          : statusLabel[node.status]}
+                        {position.central
+                          ? "The point your other ideas connect to"
+                          : node.status === "explicit" && sample
+                            ? "Explicit · sample words"
+                            : statusLabel[node.status]}
                       </Text>
                       <Text
                         numberOfLines={3}
                         style={[
                           T.body,
-                          { fontSize: 13 * zoom, lineHeight: 18 * zoom },
+                          {
+                            fontSize: 13 * zoom,
+                            lineHeight: 18 * zoom,
+                            color: position.central ? C.paper : C.ink,
+                          },
                         ]}
                       >
                         {node.text || node.feedback}
@@ -278,9 +294,13 @@ export function ThoughtMapView({
           }}
         >
           <Text style={T.h3}>
-            {sample && selected.status === "explicit"
+            {selected.id === layout?.rootId
+              ? "Your main idea"
+              : sample && selected.status === "explicit"
               ? "Explicit sample words"
-              : statusLabel[selected.status]}
+              : selected.status === "missing"
+                ? "Strengthen this idea"
+                : statusLabel[selected.status]}
           </Text>
           <Text selectable style={T.body}>
             {selected.text ||
