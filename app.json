@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "MindGarden",
+    "slug": "mind-garden",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/mindgarden-icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.mindgarden.practice"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/mindgarden-adaptive.png",
+        "monochromeImage": "./assets/mindgarden-monochrome.png",
+        "backgroundColor": "#FAF8F2"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "app.mindgarden.practice"
+    },
+    "web": {
+      "favicon": "./assets/mindgarden-icon.png",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Record a practice response in MindGarden. You can always choose to write instead.",
+          "enableBackgroundRecording": false
+        }
+      ],
+      "expo-secure-store",
+      "expo-asset",
+      "expo-sharing"
+    ],
+    "scheme": "mindgarden"
+  }
+}

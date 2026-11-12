@@ -1,0 +1,76 @@
+{
+  "name": "mind-garden",
+  "version": "1.0.0",
+  "engines": {
+    "node": "24.x"
+  },
+  "main": "expo-router/entry",
+  "dependencies": {
+    "@expo-google-fonts/dm-sans": "^0.4.2",
+    "@expo-google-fonts/lora": "^0.4.2",
+    "@expo/vector-icons": "^15.1.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@supabase/supabase-js": "^2.118.0",
+    "@vercel/functions": "^3.10.5",
+    "cors": "^2.8.6",
+    "expo": "~57.0.32",
+    "expo-asset": "~57.0.19",
+    "expo-audio": "^57.0.5",
+    "expo-constants": "~57.0.21",
+    "expo-file-system": "^57.0.7",
+    "expo-font": "^57.0.4",
+    "expo-linking": "~57.0.13",
+    "expo-router": "~57.0.30",
+    "expo-secure-store": "^57.0.4",
+    "expo-sharing": "~57.0.25",
+    "expo-status-bar": "~57.0.1",
+    "express": "^5.3.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.53.0",
+    "pg": "^8.23.1",
+    "react": "19.2.3",
+    "react-dom": "^19.2.3",
+    "react-native": "0.86.3",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.4",
+    "react-native-worklets": "0.10.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/react": "~19.2.2",
+    "concurrently": "^10.0.6",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~57.0.2",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env.local server/index.mjs",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web --port 8081",
+    "dev": "concurrently -k -n api,app \"node --env-file-if-exists=.env.local server/index.mjs\" \"expo start --web --port 8081\"",
+    "start:expo": "expo start",
+    "build:web": "expo export --platform web --clear",
+    "test:api": "node --test tests/*.test.mjs",
+    "test:speech-media": "node --test tests/speech-media.integration.mjs",
+    "ai:check": "node --env-file-if-exists=.env.local scripts/ai-check.mjs",
+    "ai:smoke": "node scripts/ai-smoke.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:ai": "playwright test --config tests/e2e-ai.config.ts",
+    "test:e2e:daily-access": "playwright test --config tests/daily-access.config.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "expo lint"
+  },
+  "private": true,
+  "overrides": {
+    "xcode": {
+      "uuid": "11.1.1"
+    }
+  }
+}

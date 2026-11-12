@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "EXPO_NO_DOTENV=1 npm run build:web",
+  "installCommand": "npm ci",
+  "outputDirectory": "dist",
+  "regions": ["sin1"],
+  "fluid": true,
+  "functions": {
+    "api/index.mjs": {
+      "maxDuration": 300,
+      "includeFiles": "server/certs/**",
+      "excludeFiles": "{.env*,.vercel/**,data/**,docs/**,tests/**,test-results/**,playwright-report/**}"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" },
+    { "source": "/health", "destination": "/api/index" },
+    { "source": "/:path*", "destination": "/index.html" }
+  ],
+  "crons": [{ "path": "/api/maintenance", "schedule": "0 18 * * *" }]
+}
