@@ -433,17 +433,34 @@ export default function AudioInput({
             />
             <Text style={dailyAudio.hint}>
               {working
-                ? "Preparing microphone…"
+                ? phase === "idle"
+                  ? "Preparing microphone…"
+                  : "Finishing recording…"
                 : phase === "idle"
                   ? "Tap the microphone to begin"
                   : phase === "paused"
                     ? "Recording paused"
-                    : "Tap to finish your response"}
+                    : "Tap Done when you’re ready"}
             </Text>
             {phase !== "idle" ? (
               <Pressable
                 accessibilityRole="button"
-                disabled={working}
+                accessibilityLabel="Done"
+                disabled={working || busy || elapsed < 1}
+                onPress={() => void finish()}
+                style={[
+                  dailyAudio.button,
+                  (working || busy || elapsed < 1) && { opacity: 0.5 },
+                ]}
+              >
+                <Icon name="check" color="#fff" />
+                <Text style={dailyAudio.buttonText}>Done</Text>
+              </Pressable>
+            ) : null}
+            {phase !== "idle" ? (
+              <Pressable
+                accessibilityRole="button"
+                disabled={working || busy}
                 onPress={pauseResume}
                 style={dailyAudio.secondary}
               >

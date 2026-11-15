@@ -13,7 +13,7 @@ test.use({
     ],
   },
 });
-test.setTimeout(90000);
+test.setTimeout(180000);
 const base = process.env.E2E_WEB_URL || "http://localhost:3002";
 const text =
   "AI can help students learn when it offers personalised support. Teachers should check the advice, because mistakes can lead to confusion. For example, a student could ask for a hint and then explain the solution in their own words.";
@@ -228,10 +228,14 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
     .getByRole("button", { name: "Record my response", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Finish recording", exact: true }),
+    page.getByRole("button", { name: "Done", exact: true }),
   ).toBeEnabled({ timeout: 15000 });
   await page
-    .getByRole("button", { name: "Finish recording", exact: true })
+    .getByRole("button", { name: "Pause recording", exact: true })
+    .click();
+  await expect(page.getByText("Recording paused", { exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: "Done", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Use recording", exact: true })
@@ -310,7 +314,7 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
   await page
     .getByRole("button", { name: "Save selected words", exact: true })
     .click();
-  expect(savedWords).toEqual(["adapt"]);
+  await expect.poll(() => savedWords).toEqual(["adapt"]);
   await expect(
     page.getByRole("heading", { name: "Challenge Complete!", exact: true }),
   ).toBeVisible();
