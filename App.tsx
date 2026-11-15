@@ -102,6 +102,7 @@ export default function App() {
       />
     );
   const immersive = page === "practice" || page === "attempt" || page === "read-aloud";
+  const dailySpeaking = page === "practice" && practiceMode === "spin_speak" && Boolean(state?.profile.dailyWorkout);
   const common = {
     state,
     articles,
@@ -232,11 +233,12 @@ export default function App() {
             ref={pageScroll}
             scrollEnabled={!gardenInteracting}
             key={pathname + JSON.stringify(params)}
-            style={{ flex: 1 }}
+            style={{ flex: 1, ...(dailySpeaking ? { backgroundColor: "#fff" } : {}) }}
             contentContainerStyle={{
-              padding: desktop ? 34 : 20,
-              paddingTop: immersive ? 22 : desktop ? 32 : 23,
-              paddingBottom: 40,
+              padding: dailySpeaking ? 0 : desktop ? 34 : 20,
+              paddingTop: dailySpeaking ? 0 : immersive ? 22 : desktop ? 32 : 23,
+              paddingBottom: dailySpeaking ? 0 : 40,
+              ...(dailySpeaking ? { backgroundColor: "#fff", flexGrow: 1 } : {}),
               alignItems: "center",
             }}
             keyboardShouldPersistTaps="handled"

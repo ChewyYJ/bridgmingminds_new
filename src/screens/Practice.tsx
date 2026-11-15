@@ -29,7 +29,8 @@ import {
   uploadAudio,
 } from "../lib/api";
 import { useApp } from "../lib/state";
-import { Article, Attempt, BrainstormBoard, Job, Mode, Prompt, Session } from "../types";
+import { DailySpeaking } from "./DailySpeaking";
+import { Article, Attempt, Job, Mode, Prompt, Session } from "../types";
 import {
   Button,
   C,
@@ -54,7 +55,6 @@ import AudioInput, {
   AudioPlayback,
   RecordedAudio,
 } from "../components/AudioInput";
-import { BrainstormBoardView, emptyBrainstorm } from "../components/BrainstormBoard";
 
 const names: Record<Mode, string> = {
   spin_speak: "Spin & Speak",
@@ -71,7 +71,7 @@ const categories = [
   "Business",
 ];
 type Stage =
-  "setup" | "prep" | "brainstorm" | "edit" | "debate" | "reflect" | "processing" | "result";
+  "setup" | "prep" | "edit" | "debate" | "reflect" | "processing" | "result";
 type DebateSession = Session & {
   attemptId?: string;
   jobId?: string;
@@ -92,7 +92,6 @@ interface PracticeDraft {
   retryOf?: string;
   submissionKey: string;
   turnKey: string;
-  brainstorm?: BrainstormBoard;
 }
 function newKey() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
@@ -258,7 +257,14 @@ function PetalWheel({
   );
 }
 
-export function Practice({
+export function Practice(props: React.ComponentProps<typeof ClassicPractice>) {
+  const { state } = useApp();
+  if (props.mode === "spin_speak" && state?.profile.dailyWorkout)
+    return <DailySpeaking onClose={props.onClose} onComplete={props.onComplete} onStepChange={props.onResultShown} retryAttempt={props.retryAttempt} />;
+  return <ClassicPractice {...props} />;
+}
+
+function ClassicPractice({
   mode,
   article,
   retryAttempt,
@@ -298,7 +304,6 @@ export function Practice({
   const [rounds, setRounds] = useState(2);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [prep, setPrep] = useState(15);
-  const [brainstorm, setBrainstorm] = useState<BrainstormBoard | null>(null);
   const [input, setInput] = useState<"text" | "audio">("text");
   const [audioUri, setAudioUri] = useState("");
   const [audioId, setAudioId] = useState("");
@@ -428,7 +433,6 @@ export function Practice({
             setAudioUri(draft.audioUri || "");
             setAudioId(draft.audioId || "");
             setInput(draft.responseType || "text");
-            setBrainstorm(draft.brainstorm || draft.session.dailySpeakingJourney?.brainstorm || null);
             setRetryOf(draft.retryOf);
             submissionKey.current = draft.submissionKey || newKey();
             turnKey.current = draft.turnKey || newKey();
@@ -606,7 +610,6 @@ export function Practice({
         retryOf,
         submissionKey: submissionKey.current,
         turnKey: turnKey.current,
-        brainstorm: brainstorm || undefined,
       };
       saveDraft(draftStorageKey.current, JSON.stringify(draft)).catch(() =>
         setError(
@@ -628,7 +631,6 @@ export function Practice({
     audioUri,
     audioId,
     input,
-    brainstorm,
     retryOf,
     draftKey,
   ]);
@@ -643,45 +645,6 @@ export function Practice({
     }, 1000);
     return () => clearTimeout(timer);
   }, [prep, stage]);
-
-  useEffect(() => {
-    if (stage !== "brainstorm" || !brainstorm) return;
-    const update = () =>
-      setPrep(
-        Math.max(
-          0,
-          Math.ceil((new Date(brainstorm.expiresAt).getTime() - Date.now()) / 1000),
-        ),
-      );
-    update();
-    const clock = setInterval(update, 1000);
-    const remaining = Math.max(1, new Date(brainstorm.expiresAt).getTime() - Date.now());
-    const end = setTimeout(() => setStage("edit"), remaining);
-    return () => { clearInterval(clock); clearTimeout(end); };
-  }, [stage, brainstorm]);
-
-  function updateBrainstorm(next: NonNullable<Session["dailySpeakingJourney"]>["brainstorm"]) {
-    if (!next) return;
-    setBrainstorm(next);
-    setSession((current) => current ? { ...current, dailySpeakingJourney: current.dailySpeakingJourney ? { ...current.dailySpeakingJourney, brainstorm: next } : current.dailySpeakingJourney } : current);
-  }
-
-  async function saveBrainstorm(next: BrainstormBoard, done = false) {
-    if (!session || !next) return;
-    const board = done ? { ...next, completedAt: new Date().toISOString() } : next;
-    updateBrainstorm(board);
-    try {
-      await api<Session>(`/sessions/${session.id}/brainstorm`, { method: "PUT", body: board });
-    } catch (cause) {
-      setError(`${errorMessage(cause)} Your board is still saved on this device.`);
-    }
-  }
-
-  useEffect(() => {
-    if (stage !== "brainstorm" || !brainstorm || !session) return;
-    const timer = setTimeout(() => void saveBrainstorm(brainstorm), 700);
-    return () => clearTimeout(timer);
-  }, [stage, brainstorm, session?.id]);
 
   useEffect(() => {
     if (stage !== "processing" || !pendingAttemptId) return;
@@ -755,7 +718,6 @@ export function Practice({
             retryOf,
             submissionKey: submissionKey.current,
             turnKey: turnKey.current,
-            brainstorm: brainstorm || undefined,
           }),
         );
       } catch {
@@ -813,10 +775,9 @@ export function Practice({
       if (!mounted.current) return;
       setSession(created);
       setDebateProvider(created.provider || "");
-      setPrep(created.dailySpeakingJourney ? 45 : 15);
-      setBrainstorm(created.dailySpeakingJourney?.brainstorm || (created.dailySpeakingJourney ? emptyBrainstorm() : null));
+      setPrep(15);
       setStage(
-        mode === "spin_speak" ? (created.dailySpeakingJourney ? "brainstorm" : "prep") : mode === "debate" ? "debate" : "edit",
+        mode === "spin_speak" ? "prep" : mode === "debate" ? "debate" : "edit",
       );
     } catch (e) {
       if (mounted.current) setError(errorMessage(e));
@@ -1183,7 +1144,6 @@ export function Practice({
       ? "Type transcript"
       : "Review transcript"
     : "Review response";
-  const isDailySpeaking = Boolean(session?.dailySpeakingJourney);
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -1233,15 +1193,7 @@ export function Practice({
                 </View>
               ) : null}
               {stage === "setup" && mode === "spin_speak" && (
-                appState?.profile.dailyWorkout ? <View style={daily.entry}>
-                  <View style={daily.avatar}><Icon name="user" size={28} color="#242424" /></View>
-                  <Text style={daily.eyebrow}>DAILY CHALLENGE</Text>
-                  <Text style={daily.title}>Speak with a clear point of view.</Text>
-                  <Text style={daily.copy}>Take 45 seconds to organise your ideas, then share your response in one minute.</Text>
-                  <View style={daily.topic}><Icon name="message-circle" size={20} color="#242424" /><Text style={daily.topicText}>Today’s speaking prompt is ready.</Text></View>
-                  <View style={daily.stats}><Text style={daily.stat}>1 min speaking</Text><Text style={daily.stat}>•</Text><Text style={daily.stat}>{appState.dailyWorkout?.streak.current || 0} day streak</Text></View>
-                  <Pressable accessibilityRole="button" accessibilityLabel="Speak a response" onPress={() => void start()} disabled={busy} style={daily.primary}><Icon name="mic" size={19} color="#fff" /><Text style={daily.primaryText}>{busy ? "Preparing…" : "Speak a response"}</Text><Icon name="chevron-right" size={19} color="#fff" /></Pressable>
-                </View> : <>
+                <>
                   <View style={s.centered}>
                     <Text style={[T.title, s.centerText]}>Choose a topic</Text>
                   </View>
@@ -1500,15 +1452,6 @@ export function Practice({
                   </View>
                 </>
               )}
-              {stage === "brainstorm" && session && brainstorm && (
-                <View style={daily.stage}>
-                  <Text style={daily.eyebrow}>BRAINSTORMING WHITEBOARD · {prep}s</Text>
-                  <Text style={daily.title}>Prepare your answer</Text>
-                  <Text style={daily.copy}>{session.prompt.question}</Text>
-                  <BrainstormBoardView board={brainstorm} onChange={updateBrainstorm} />
-                  <Pressable accessibilityRole="button" onPress={() => { void saveBrainstorm(brainstorm, true); setStage("edit"); }} style={daily.primary}><Text style={daily.primaryText}>Done brainstorming</Text><Icon name="chevron-right" size={19} color="#fff" /></Pressable>
-                </View>
-              )}
               {stage === "edit" && session && (
                 <>
                   <View style={s.chips}>
@@ -1542,10 +1485,9 @@ export function Practice({
                       collapsed
                     />
                   ) : null}
-                  <Card style={{ gap: 20, ...(isDailySpeaking ? daily.recordCard : {}) }}>
-                    {isDailySpeaking ? <View style={{ alignItems: "center", gap: 9 }}><Text style={daily.eyebrow}>SPEAKING SESSION · 1 MINUTE</Text><Text style={daily.recordTitle}>Speak your response</Text><Text style={daily.copy}>Share your thoughts clearly and confidently. Your board is saved with this attempt.</Text></View> : null}
+                  <Card style={{ gap: 20 }}>
                     {!audioId && !busy && !recordingActive && (
-                      isDailySpeaking ? null : <View style={s.chips}>
+                      <View style={s.chips}>
                         <Chip
                           selected={input === "text"}
                           onPress={() => setInput("text")}
@@ -1560,11 +1502,11 @@ export function Practice({
                         </Chip>
                       </View>
                     )}
-                    {(isDailySpeaking || input === "audio") && !audioId ? (
+                    {input === "audio" && !audioId ? (
                       recordingConsent ? (
                         <AudioInput
                           onRecorded={handleAudio}
-                          onCancel={() => isDailySpeaking ? setStage("brainstorm") : setInput("text")}
+                          onCancel={() => setInput("text")}
                           onCaptureActive={setRecordingActive}
                           busy={busy}
                         />
@@ -1572,7 +1514,7 @@ export function Practice({
                         <RecordingConsent
                           busy={busy}
                           onAllow={() => void allowRecordingStorage()}
-                          onWrite={() => isDailySpeaking ? setStage("brainstorm") : setInput("text")}
+                          onWrite={() => setInput("text")}
                         />
                       )
                     ) : (
@@ -2601,20 +2543,4 @@ const s = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 10,
   },
-});
-
-const daily = StyleSheet.create({
-  entry: { alignItems: "center", gap: 16, paddingVertical: 22, paddingHorizontal: 18, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e7e7e7", borderRadius: 26 },
-  avatar: { width: 54, height: 54, borderRadius: 27, borderWidth: 1, borderColor: "#242424", alignItems: "center", justifyContent: "center" },
-  eyebrow: { color: "#737373", fontFamily: "DMBold", fontSize: 12, letterSpacing: 0.7, textAlign: "center" },
-  title: { color: "#181818", fontFamily: "DMBold", fontSize: 28, lineHeight: 34, textAlign: "center" },
-  copy: { color: "#737373", fontSize: 15, lineHeight: 22, textAlign: "center", maxWidth: 520 },
-  topic: { width: "100%", minHeight: 104, padding: 18, gap: 10, justifyContent: "center", alignItems: "center", borderRadius: 18, backgroundColor: "#f8f8f8" },
-  topicText: { color: "#181818", fontSize: 17, lineHeight: 23, fontFamily: "DMMedium", textAlign: "center" },
-  stats: { flexDirection: "row", gap: 8, flexWrap: "wrap", justifyContent: "center" }, stat: { color: "#737373", fontSize: 13 },
-  primary: { minHeight: 52, width: "100%", maxWidth: 390, borderRadius: 28, backgroundColor: "#242424", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, paddingHorizontal: 20 },
-  primaryText: { color: "#fff", fontFamily: "DMBold", fontSize: 16 },
-  stage: { gap: 16, padding: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e7e7e7", borderRadius: 26 },
-  recordCard: { backgroundColor: "#fff", borderColor: "#e7e7e7", borderWidth: 1, paddingVertical: 26 },
-  recordTitle: { color: "#181818", fontFamily: "DMBold", fontSize: 24, lineHeight: 30, textAlign: "center" },
 });

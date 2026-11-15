@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, Platform, StyleSheet, Text, View } from "react-native";
+import {
+  AppState,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import {
   RecordingPresets,
   requestRecordingPermissionsAsync,
@@ -191,12 +198,14 @@ export default function AudioInput({
   onCaptureActive,
   busy = false,
   sharing = false,
+  appearance = "garden",
 }: {
   onRecorded: (audio: RecordedAudio) => Promise<void>;
   onCancel: () => void;
   onCaptureActive?: (active: boolean) => void;
   busy?: boolean;
   sharing?: boolean;
+  appearance?: "garden" | "daily";
 }) {
   const recorder = useAudioRecorder({
     ...RecordingPresets.HIGH_QUALITY,
@@ -299,7 +308,7 @@ export default function AudioInput({
       const permission = await requestRecordingPermissionsAsync();
       if (!permission.granted)
         throw new Error(
-          "Microphone access is off. Enable it in your device or browser settings, or choose Write instead.",
+          "Microphone access is off. Enable it in your device or browser settings, then try again.",
         );
       await setAudioModeAsync({
         allowsRecording: true,
@@ -314,7 +323,7 @@ export default function AudioInput({
       setError(
         e instanceof Error
           ? e.message
-          : "Microphone unavailable. You can write your response instead.",
+          : "Microphone unavailable. Check your device settings and try again.",
       );
     } finally {
       setWorking(false);
@@ -356,6 +365,105 @@ export default function AudioInput({
   }
 
   const level = Math.max(0, Math.min(1, ((state.metering ?? -55) + 60) / 60));
+  if (appearance === "daily")
+    return (
+      <View style={{ alignItems: "center", gap: 24, width: "100%" }}>
+        <ErrorNote message={error} />
+        {phase === "review" && recorded ? (
+          <>
+            <View style={dailyAudio.ring}>
+              <Icon name="check" size={46} color="#555" />
+            </View>
+            <Text style={dailyAudio.hint}>Your recording is ready</Text>
+            <AudioPlayback uri={recorded.uri} />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Use recording"
+              disabled={busy || working}
+              onPress={() => void onRecorded(recorded)}
+              style={dailyAudio.button}
+            >
+              <Text style={dailyAudio.buttonText}>
+                {busy ? "Saving…" : "Use recording"}
+              </Text>
+              <Icon name="chevron-right" color="#fff" />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => void discard(false)}
+              disabled={busy || working}
+              style={dailyAudio.secondary}
+            >
+              <Text style={dailyAudio.hint}>Record again</Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                phase === "idle" ? "Record my response" : "Finish recording"
+              }
+              disabled={working || busy || (phase !== "idle" && elapsed < 1)}
+              onPress={() => void (phase === "idle" ? start() : finish())}
+              style={dailyAudio.outerRing}
+            >
+              <View style={dailyAudio.middleRing}>
+                <View style={dailyAudio.ring}>
+                  <Icon
+                    name={phase === "idle" ? "mic" : "square"}
+                    size={48}
+                    color="#555"
+                  />
+                </View>
+              </View>
+            </Pressable>
+            <Text
+              accessibilityLabel={`${phase === "idle" ? 60 : 60 - elapsed} seconds remaining`}
+              style={dailyAudio.timer}
+            >
+              {phase === "idle"
+                ? "01:00"
+                : `00:${String(60 - elapsed).padStart(2, "0")}`}
+            </Text>
+            <View style={dailyAudio.wave}>
+              {[8, 12, 18, 13, 28, 46, 28, 19, 14, 10, 6].map((height, i) => (
+                <View
+                  key={i}
+                  style={{
+                    width: 6,
+                    borderRadius: 4,
+                    backgroundColor: "#c4c4c4",
+                    height: phase === "recording" ? 6 + level * height : height,
+                  }}
+                />
+              ))}
+            </View>
+            <Text style={dailyAudio.hint}>
+              {working
+                ? "Preparing microphone…"
+                : phase === "idle"
+                  ? "Tap the microphone to begin"
+                  : phase === "paused"
+                    ? "Recording paused"
+                    : "Tap to finish your response"}
+            </Text>
+            {phase !== "idle" ? (
+              <Pressable
+                accessibilityRole="button"
+                disabled={working}
+                onPress={pauseResume}
+                style={dailyAudio.secondary}
+              >
+                <Text style={dailyAudio.hint}>
+                  {phase === "paused" ? "Resume recording" : "Pause recording"}
+                </Text>
+              </Pressable>
+            ) : null}
+          </>
+        )}
+      </View>
+    );
   return (
     <View style={[s.container, phase === "review" && s.reviewContainer]}>
       <ErrorNote message={error} />
@@ -482,6 +590,56 @@ export default function AudioInput({
     </View>
   );
 }
+
+const dailyAudio = StyleSheet.create({
+  outerRing: {
+    width: 192,
+    height: 192,
+    borderRadius: 96,
+    backgroundColor: "#fcfcfc",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 22,
+  },
+  middleRing: {
+    width: 156,
+    height: 156,
+    borderRadius: 78,
+    backgroundColor: "#f6f6f6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ring: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#ededed",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  timer: { fontFamily: "DMBold", fontSize: 28, color: "#181818" },
+  hint: { fontFamily: "DM", fontSize: 14, color: "#555", textAlign: "center" },
+  wave: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    height: 48,
+  },
+  button: {
+    borderRadius: 28,
+    minHeight: 50,
+    backgroundColor: "#242424",
+    alignSelf: "stretch",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 10,
+    padding: 12,
+  },
+  buttonText: { color: "#fff", fontFamily: "DMBold", fontSize: 15 },
+  secondary: { padding: 12, minHeight: 44 },
+});
 
 const s = StyleSheet.create({
   container: {
