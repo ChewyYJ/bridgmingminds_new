@@ -109,6 +109,16 @@ async function fixture(t, configured = true) {
     guest,
     submit,
     complete,
+    preflight(path, method) {
+      return original(base + path, {
+        method: "OPTIONS",
+        headers: {
+          Origin: "http://localhost:8081",
+          "Access-Control-Request-Method": method,
+          "Access-Control-Request-Headers": "content-type",
+        },
+      });
+    },
     repair() {
       broken = false;
     },
@@ -199,8 +209,13 @@ test("planning notes and map evidence persist across retries and restart", async
   await f.ok("/daily-workout/enroll", token, {});
   const session = await f.ok("/sessions", token, { mode: "spin_speak", promptId: "society-shared-space" });
   const planningNotes = "Borrow tools from neighbours.";
+  const boardPath = `/sessions/${session.id}/brainstorm`;
+  const preflight = await f.preflight(boardPath, "PUT");
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get("access-control-allow-origin"), "http://localhost:8081");
+  assert.ok(preflight.headers.get("access-control-allow-methods")?.split(", ").includes("PUT"));
   const instant = new Date().toISOString();
-  await f.ok(`/sessions/${session.id}/brainstorm`, token, {
+  await f.ok(boardPath, token, {
     version: "daily-whiteboard-v1",
     startedAt: instant,
     expiresAt: new Date(Date.now() + 60_000).toISOString(),

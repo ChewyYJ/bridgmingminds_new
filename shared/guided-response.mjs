@@ -38,8 +38,17 @@ export function isGuidedResponseDraft(value) {
     typeof value.createdAt !== "string" ||
     !Number.isFinite(Date.parse(value.createdAt)) ||
     !Array.isArray(value.annotations) ||
-    value.annotations.length < 2 ||
+    (value.vocabularyEligibleCount === undefined && value.annotations.length < 2) ||
     value.annotations.length > 5
+  )
+    return false;
+  if (
+    value.vocabularyEligibleCount !== undefined &&
+    (!Number.isSafeInteger(value.vocabularyEligibleCount) ||
+      value.vocabularyEligibleCount < 0 ||
+      !Array.isArray(value.vocabulary) ||
+      value.vocabulary.length < (value.vocabularyEligibleCount ? 1 : 0) ||
+      value.vocabulary.length > value.vocabularyEligibleCount)
   )
     return false;
   if (value.vocabulary !== undefined) {
