@@ -38,6 +38,7 @@ import {
 import { articles, prompts } from "./content.mjs";
 import { installFriends } from "./friends.mjs";
 import { createNewsService } from "./news.mjs";
+import { selectDailyNews, dailyNewsPrompt } from "./daily-news.mjs";
 import {
   createGuidedResponseService,
   parseGuidedResponseInput,
@@ -1013,15 +1014,28 @@ export function createApp(options = {}) {
       let prompt;
       let learningFocus;
       let article;
+      let newsSource;
+      const profile = parse((await getUser(req.userId)).profile);
+      const isDailyNews = data.mode === "spin_speak" && profile.dailyWorkout && !data.promptId && !data.topic;
       if (data.mode === "read_reflect") {
         article = articles.find((a) => a.id === data.articleId);
         if (!article) throw failure(400, "Choose a reading before reflecting.");
+        const dailyHistory = (await db.prepare("SELECT data FROM sessions WHERE user_id=?").all(req.userId)).map((row) => parse(row.data)).filter((session) => session.newsSource);
+        if (!selectDailyNews({ items: [article], history: dailyHistory })) throw failure(409, "This story was already used for your daily speaking. Choose a different reading.");
         prompt = {
           id: `${article.id}-reflect-${data.questionIndex || 0}`,
           question: article.questions[data.questionIndex || 0],
           category: article.category,
           context: article.summary,
         };
+      } else if (isDailyNews) {
+        const feed = await news.getFeed({ timezone: profile.timezone, recentDays: 7 });
+        const history = (await db.prepare("SELECT data FROM sessions WHERE user_id=?").all(req.userId)).map((row) => parse(row.data));
+        newsSource = selectDailyNews({ items: feed.articles, history, reserved: articles, interests: profile.interests || [] });
+        if (!newsSource) throw failure(503, feed.status === "unavailable" ? "News is temporarily unavailable. Please try again shortly." : "There are no new headlines left for your daily question. Check back for a fresh story.");
+        prompt = dailyNewsPrompt(newsSource);
+        const recommendation = (await learner.summary(req.userId)).recommendation;
+        if (recommendation) learningFocus = { recommendationId: recommendation.id, dimension: recommendation.dimension, label: recommendation.label, instruction: recommendation.focus, policyVersion: LEARNER_POLICY };
       } else {
         let pool = prompts.filter((p) => p.mode === data.mode);
         if (data.promptId) pool = pool.filter((p) => p.id === data.promptId);
@@ -1053,6 +1067,7 @@ export function createApp(options = {}) {
         prompt,
         articleId: article?.id,
         articleSnapshot: article,
+        ...(newsSource ? { newsSource } : {}),
         position:
           data.position === "surprise"
             ? Math.random() < 0.5

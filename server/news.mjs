@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 
 // Fixed sources only: neither feed URLs nor redirect targets come from clients.
-// Personal, noncommercial reading; publisher text never enters the AI workflow.
+// Only headline metadata may inform daily practice. Article bodies are not fetched.
 export const NEWS_SOURCES = Object.freeze([
   Object.freeze({ id: 'npr', name: 'NPR', url: 'https://feeds.npr.org/1001/rss.xml', hosts: ['www.npr.org', 'npr.org'], category: 'Society' }),
   Object.freeze({ id: 'nasa', name: 'NASA', url: 'https://www.nasa.gov/feed/', hosts: ['www.nasa.gov', 'science.nasa.gov', 'nasa.gov'], category: 'Science' }),
@@ -193,7 +193,7 @@ export function createNewsService({ fetchImpl = globalThis.fetch, now = () => ne
     lastAttempt = new Date(now()).getTime();
   }
   return {
-    async getFeed({ timezone = 'UTC' } = {}) {
+    async getFeed({ timezone = 'UTC', recentDays = 0 } = {}) {
       const currentTime = new Date(now()).getTime();
       if (inFlight) await inFlight;
       else if (lastAttempt === null || currentTime - lastAttempt >= (failedSources.length ? FAILURE_RETRY_MS : CACHE_MS) || currentTime < lastAttempt) {
@@ -211,7 +211,9 @@ export function createNewsService({ fetchImpl = globalThis.fetch, now = () => ne
           const date = new Date(article.publishedAt);
           const dedupKey = new URL(article.sourceUrl);
           dedupKey.hash = '';
-          if (date > current || dayIn(formatter, date) !== day || seen.has(dedupKey.href)) return false;
+          const recent = Math.min(7, Math.max(0, Number(recentDays) || 0));
+          const eligible = recent ? current.getTime() - date.getTime() <= recent * 86400000 : dayIn(formatter, date) === day;
+          if (date > current || !eligible || seen.has(dedupKey.href)) return false;
           seen.add(dedupKey.href);
           return true;
         }).sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));

@@ -6,7 +6,12 @@ The learner records a one-minute pitch, receives first-attempt feedback, chooses
 
 ## Behaviour
 
+- New daily questions use recent headlines (up to seven days) from the existing allowlisted news feeds. The headline, publisher, date and source link are shown; this is headline-based discussion, not an invented article summary.
+- Stories in the curated Read & Reflect catalogue and stories already assigned to that learner are excluded by source URL, headline or ID. Concurrent requests and retries respect the same reservations. If no unused recent story is available, the UI offers retry instead of recycling a question.
+- Planning lasts 60 seconds; speaking remains 60 seconds. Existing in-progress boards keep their original expiry.
+
 - Feedback appears before optional practice. The original evaluation and rewards remain unchanged by follow-up answers or vocabulary selection.
+- A compact BRIDGE letter row reveals each criterion on demand: Big Idea, Reasons, Illustrations, Different Perspectives, Glue and Expression. Unassessed criteria are explicitly labelled, not displayed as low scores.
 - Each guiding answer is checked against its specific question. The result distinguishes answered, partly answered and not answered, with an explanation and next step. Users can record or type, retry failed checks, or skip.
 - Viewing a sample is a separate choice. The sample uses the original pitch and any follow-up answers, preserving the learner's meaning.
 - Samples can introduce zero to three words from the approved vocabulary catalogue. Exact occurrences are highlighted, with catalogue definitions. Words already saved or used by the learner are excluded.

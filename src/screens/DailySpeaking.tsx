@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -21,12 +22,14 @@ import {
 import { useApp } from "../lib/state";
 import type {
   Attempt,
+  Evaluation,
   BrainstormBoard,
   Job,
   Session,
   WordBloomSummary,
 } from "../types";
 import { getThoughtGuide } from "../../shared/thought-guide.mjs";
+import { getBridgeRubric } from "../../shared/bridge-rubric.mjs";
 import {
   isGuidedResponseDraft,
   type GuidedResponseDraft,
@@ -98,7 +101,8 @@ export function DailySpeaking({
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [seconds, setSeconds] = useState(45);
+  const [seconds, setSeconds] = useState(60);
+  const [loadVersion, setLoadVersion] = useState(0);
   const [consent, setConsent] = useState(
     Boolean(state?.profile.consent?.recording),
   );
@@ -152,7 +156,7 @@ export function DailySpeaking({
         const raw = await loadDraft(storage);
         if (!active) return;
         const saved = raw ? (JSON.parse(raw) as Draft) : null;
-        if (saved?.version === 1) {
+        if (saved?.version === 1 && !(saved.step === "entry" && !saved.attempt && !saved.board && !saved.session.newsSource)) {
           setSession(saved.session);
           setBoard(saved.board);
           setAttempt(saved.attempt);
@@ -198,7 +202,7 @@ export function DailySpeaking({
     return () => {
       active = false;
     };
-  }, [storage, retryAttempt]);
+  }, [storage, retryAttempt, loadVersion]);
 
   useEffect(() => {
     if (!ready || !session) return;
@@ -536,7 +540,7 @@ export function DailySpeaking({
   }
   function nextBoard() {
     setBoard(createDailyBoard());
-    setSeconds(45);
+    setSeconds(60);
     setStep("board");
     setError("");
   }
@@ -692,6 +696,7 @@ export function DailySpeaking({
             {error ? (
               <View accessibilityRole="alert" style={s.error}>
                 <Text style={s.small}>{error}</Text>
+                {!session ? <Action label="Retry question" secondary onPress={() => { setError(""); setReady(false); setLoadVersion((version) => version + 1); }} /> : null}
               </View>
             ) : null}
             {!ready ? (
@@ -709,14 +714,20 @@ export function DailySpeaking({
                   <Text style={s.copy}>
                     {dailyCompleted
                       ? "Done today. Keep exploring."
-                      : "45 seconds to plan. One minute to speak."}
+                      : "One minute to plan. One minute to speak."}
                   </Text>
                 </View>
                 <View style={s.topicCard}>
                   <Icon name="message-circle" color="#242424" size={24} />
-                  <Text style={s.small}>Your prompt</Text>
+                  <Text style={s.small}>{session?.newsSource ? "In the news" : "Your prompt"}</Text>
+                  {session?.newsSource ? <>
+                    <Text style={s.body}>{session.newsSource.title}</Text>
+                    <Pressable accessibilityRole="link" accessibilityLabel={`Read source at ${session.newsSource.source}`} onPress={() => void Linking.openURL(session.newsSource!.sourceUrl).catch(() => setError("Couldn’t open the source. Please try again."))} style={s.quiet}>
+                      <Text style={s.small}>{session.newsSource.source} · {new Date(session.newsSource.publishedAt).toLocaleDateString("en", { month: "short", day: "numeric" })} ↗</Text>
+                    </Pressable>
+                  </> : null}
                   <Text style={s.topic}>
-                    {session?.prompt.question || "Loading today’s question…"}
+                    {session?.prompt.question || (ready ? "Your news question is unavailable." : "Loading today’s question…")}
                   </Text>
                 </View>
                 <Action
@@ -736,11 +747,11 @@ export function DailySpeaking({
             )}
             {step === "board" && board && (
               <>
-                <Text style={s.copy}>A point. A reason. An example.</Text>
+                <Text style={s.copy}>{session?.newsSource ? session.prompt.question : "A point. A reason. An example."}</Text>
                 <View style={s.timerPill}>
                   <Icon name="clock" color="#242424" size={17} />
                   <Text style={s.name}>
-                    00:{String(seconds).padStart(2, "0")}
+                    {String(Math.floor(seconds / 60)).padStart(2, "0")}:{String(seconds % 60).padStart(2, "0")}
                   </Text>
                 </View>
                 <View
@@ -749,7 +760,7 @@ export function DailySpeaking({
                   <DailyBoard
                     board={board}
                     onChange={setBoard}
-                    topic={session?.prompt.question || "My view"}
+                    topic={session?.newsSource?.title || session?.prompt.question || "My view"}
                     onDone={finishBoard}
                   />
                 </View>
@@ -891,6 +902,7 @@ export function DailySpeaking({
                       : "First try · AI feedback"}
                   </Text>
                 </View>
+                <BridgeLetters evaluation={evaluation} />
                 {tab !== "Areas to Improve" ? (
                   <FeedbackLine
                     icon="star"
@@ -1288,6 +1300,29 @@ export function DailySpeaking({
       </ScrollView>
     </KeyboardAvoidingView>
   );
+}
+
+const bridgeCriteria = getBridgeRubric().criteria;
+function BridgeLetters({ evaluation }: { evaluation: Evaluation }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const criterion = bridgeCriteria.find((item) => item.key === selected);
+  const dimension = evaluation.dimensions.find((item) => item.key === selected);
+  return <View style={{ gap: 12 }}>
+    <View accessibilityLabel="BRIDGE framework" style={{ flexDirection: "row", gap: 6, width: "100%", maxWidth: 360, alignSelf: "center" }}>
+      {bridgeCriteria.map((item) => <Pressable key={item.key} accessibilityRole="button" accessibilityLabel={`${item.key} · ${item.label}`} accessibilityState={{ selected: selected === item.key }} aria-pressed={selected === item.key} onPress={() => setSelected(selected === item.key ? null : item.key)} style={{ flex: 1, minHeight: 44, borderRadius: 9, borderWidth: 1, borderColor: C.border, backgroundColor: selected === item.key ? C.sage : C.paper, alignItems: "center", justifyContent: "center" }}>
+        <Text style={s.name}>{item.key}</Text>
+      </Pressable>)}
+    </View>
+    {criterion ? <View testID="bridge-criterion-detail" style={[s.card, { backgroundColor: C.cream }]}>
+      <Text style={s.name}>{criterion.key} · {criterion.label}</Text>
+      <Text style={s.small}>{criterion.description}</Text>
+      {evaluation.provider === "local" ? <Text style={s.small}>AI feedback is unavailable for this attempt.</Text> : !dimension || dimension.status === "not_assessed" ? <Text style={s.small}>Not assessed for this question.</Text> : <>
+        {dimension.status === "insufficient_evidence" ? <Text style={s.small}>Not enough evidence yet.</Text> : null}
+        {dimension.strength ? <Text style={s.body}>{dimension.strength}</Text> : null}
+        {dimension.improvement ? <Text style={s.body}>{dimension.improvement}</Text> : null}
+      </>}
+    </View> : null}
+  </View>;
 }
 
 function ScriptText({ script }: { script: GuidedResponseDraft }) {

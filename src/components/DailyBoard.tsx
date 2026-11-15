@@ -23,7 +23,7 @@ export function createDailyBoard(): BrainstormBoard {
   return {
     version: "daily-whiteboard-v1",
     startedAt,
-    expiresAt: new Date(Date.parse(startedAt) + 45000).toISOString(),
+    expiresAt: new Date(Date.parse(startedAt) + 60000).toISOString(),
     strokes: [],
     notes: [
       { id: "benefits", text: "", x: 8, y: 25 },
@@ -240,6 +240,9 @@ export function DailyBoard({
               style={[s.tool, tool === value && s.selected]}
             >
               <Icon name={icon} color="#242424" size={20} />
+              {value === "link" ? (
+                <Text style={{ fontFamily: "DMMedium", fontSize: 10, color: C.ink }}>Link</Text>
+              ) : null}
             </Pressable>
           ))}
         </View>

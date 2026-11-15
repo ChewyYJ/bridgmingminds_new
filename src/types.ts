@@ -283,6 +283,7 @@ export interface Article {
   image?: string;
 }
 export interface Session {
+  newsSource?: { id: string; title: string; source: string; sourceUrl: string; publishedAt: string; category: string };
   learningFocus?: { recommendationId: string; dimension: string; label: string; instruction: string; policyVersion: string };
   assessmentFramework?: "bridge-v1";
   dailySpeakingJourney?: {
