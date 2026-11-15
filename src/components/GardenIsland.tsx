@@ -1,4 +1,5 @@
 import React, { memo, useId } from "react";
+import { Platform } from "react-native";
 import Svg, {
   Circle,
   ClipPath,
@@ -188,8 +189,7 @@ export const GardenIsland = memo(function GardenIsland({
       height={height}
       viewBox="0 0 1000 760"
       pointerEvents="none"
-      accessible={false}
-      accessibilityElementsHidden
+      {...(Platform.OS === "web" ? { "aria-hidden": true } : { accessible: false, accessibilityElementsHidden: true })}
     >
       <Defs>
         <LinearGradient id={topId} x1="0" y1="0" x2=".55" y2="1">
@@ -1062,8 +1062,7 @@ export const MeadowPlant = memo(function MeadowPlant({
       height={size}
       viewBox="0 0 100 100"
       pointerEvents="none"
-      accessible={false}
-      accessibilityElementsHidden
+      {...(Platform.OS === "web" ? { "aria-hidden": true } : { accessible: false, accessibilityElementsHidden: true })}
     >
       {dead && (
         <Defs>

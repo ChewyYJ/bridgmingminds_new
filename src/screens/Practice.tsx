@@ -1240,7 +1240,7 @@ export function Practice({
                   <Text style={daily.copy}>Take 45 seconds to organise your ideas, then share your response in one minute.</Text>
                   <View style={daily.topic}><Icon name="message-circle" size={20} color="#242424" /><Text style={daily.topicText}>Today’s speaking prompt is ready.</Text></View>
                   <View style={daily.stats}><Text style={daily.stat}>1 min speaking</Text><Text style={daily.stat}>•</Text><Text style={daily.stat}>{appState.dailyWorkout?.streak.current || 0} day streak</Text></View>
-                  <Pressable accessibilityRole="button" onPress={() => void start()} disabled={busy} style={daily.primary}><Icon name="mic" size={19} color="#fff" /><Text style={daily.primaryText}>{busy ? "Preparing…" : "Speak a response"}</Text><Icon name="chevron-right" size={19} color="#fff" /></Pressable>
+                  <Pressable accessibilityRole="button" accessibilityLabel="Speak a response" onPress={() => void start()} disabled={busy} style={daily.primary}><Icon name="mic" size={19} color="#fff" /><Text style={daily.primaryText}>{busy ? "Preparing…" : "Speak a response"}</Text><Icon name="chevron-right" size={19} color="#fff" /></Pressable>
                 </View> : <>
                   <View style={s.centered}>
                     <Text style={[T.title, s.centerText]}>Choose a topic</Text>

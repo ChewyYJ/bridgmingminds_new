@@ -44,7 +44,7 @@ import type {
   WordReviewOutcome,
 } from "../types";
 
-export function DailyPlanIntro() {
+export function DailyPlanIntro({ onStart }: { onStart?: () => void }) {
   const { refresh } = useApp();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -54,6 +54,7 @@ export function DailyPlanIntro() {
     try {
       await api("/daily-workout/enroll", { method: "POST", body: {} });
       await refresh();
+      onStart?.();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Please try again.");
     } finally {
@@ -61,9 +62,11 @@ export function DailyPlanIntro() {
     }
   }
   return (
-    <Card style={{ gap: 12, backgroundColor: C.sage }}>
-      <Tag>New daily workout</Tag>
-      <Text style={T.h2}>Two small steps. A little more clarity.</Text>
+    <Card style={{ gap: 16, backgroundColor: "#fff", borderColor: "#e7e7e7", alignItems: "center", padding: 28 }}>
+      <Icon name="calendar" size={30} color="#242424" />
+      <Text style={{ ...T.h2, color: "#181818", textAlign: "center" }}>Daily Challenge</Text>
+      <Text style={{ ...T.body, color: "#737373", textAlign: "center" }}>Organise your ideas on a whiteboard, then speak your response.</Text>
+      <Text style={{ ...T.small, color: "#737373" }}>45s brainstorm · 1 min speaking</Text>
       <Text style={T.body}>
         Read Aloud + Spin &amp; Speak. Complete both to secure your daily streak
         and earn 25 XP plus one cosmetic seed. Extra practice stays available.
@@ -76,6 +79,8 @@ export function DailyPlanIntro() {
       <ErrorNote message={error} />
       <Button
         label="Start my daily workout"
+        icon="mic"
+        style={{ backgroundColor: "#242424", borderRadius: 28 }}
         onPress={() => void enroll()}
         loading={busy}
       />
@@ -110,6 +115,14 @@ export function DailyHome({
       <Text accessibilityRole="header" style={T.title}>
         Hi, {state.profile.displayName.split(" ")[0]}.
       </Text>
+      <Card style={{ backgroundColor: "#fff", borderColor: "#e7e7e7", gap: 16, alignItems: "center", padding: 28 }}>
+        <Icon name="calendar" size={30} color="#242424" />
+        <Text style={{ ...T.h2, color: "#181818" }}>Daily Challenge</Text>
+        <Text style={{ ...T.body, color: "#737373", textAlign: "center" }}>Organise your thoughts, then share your point of view.</Text>
+        <Text style={{ ...T.small, color: "#737373" }}>45s whiteboard · 1 min speaking</Text>
+        {spin.completed ? <Text style={T.small}>Today’s speaking challenge is complete. Extra practice is available.</Text> : null}
+        <Button label="Open Daily Challenge" icon="mic" onPress={() => start("spin_speak")} style={{ backgroundColor: "#242424", borderRadius: 28 }} />
+      </Card>
       <Card style={{ backgroundColor: C.sage, gap: 16 }}>
         <Text style={T.label}>Today’s Mind Workout</Text>
         <Text

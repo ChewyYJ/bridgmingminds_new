@@ -166,7 +166,7 @@ export function Home({
       <Text accessibilityRole="header" style={T.title}>
         Hi, {first}.
       </Text>
-      <DailyPlanIntro />
+      <DailyPlanIntro onStart={() => start("spin_speak")} />
       <PracticeWeek week={state.practiceWeek} />
       <View style={{ flexDirection: wide ? "row" : "column", gap: 22 }}>
         <View style={{ flex: wide ? 2 : undefined, gap: 22 }}>
