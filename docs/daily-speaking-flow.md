@@ -11,7 +11,7 @@ The learner records a one-minute pitch, receives first-attempt feedback, chooses
 - Planning lasts 60 seconds; speaking remains 60 seconds. Existing in-progress boards keep their original expiry.
 
 - Feedback appears before optional practice. The original evaluation and rewards remain unchanged by follow-up answers or vocabulary selection.
-- A compact BRIDGE letter row reveals each criterion on demand: Big Idea, Reasons, Illustrations, Different Perspectives, Glue and Expression. Unassessed criteria are explicitly labelled, not displayed as low scores.
+- A vertical BRIDGE summary shows every criterion in a compact card without tapping, with short explanations and labelled What worked / Try next feedback: Big Idea, Reasons, Illustrations, Different Perspectives, Glue and Expression. Unassessed criteria are explicitly labelled, not displayed as low scores.
 - Each guiding answer is checked against its specific question. The result distinguishes answered, partly answered and not answered, with an explanation and next step. Users can record or type, retry failed checks, or skip.
 - Viewing a sample is a separate choice. The sample uses the original pitch and any follow-up answers, preserving the learner's meaning.
 - Samples can introduce zero to three words from the approved vocabulary catalogue. Exact occurrences are highlighted, with catalogue definitions. Words already saved or used by the learner are excluded.

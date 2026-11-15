@@ -902,7 +902,6 @@ export function DailySpeaking({
                       : "First try · AI feedback"}
                   </Text>
                 </View>
-                <BridgeLetters evaluation={evaluation} />
                 {tab !== "Areas to Improve" ? (
                   <FeedbackLine
                     icon="star"
@@ -917,19 +916,7 @@ export function DailySpeaking({
                     text={feedback?.priority_gap || evaluation.retry_prompt}
                   />
                 ) : null}
-                {tab !== "Overall"
-                  ? evaluation.dimensions
-                      .filter((d) =>
-                        tab === "Strengths" ? d.strength : d.improvement,
-                      )
-                      .map((d) => (
-                        <FeedbackLine
-                          key={d.key}
-                          icon="check"
-                          text={`${d.label || d.key}: ${tab === "Strengths" ? d.strength : d.improvement}`}
-                        />
-                      ))
-                  : null}
+                <BridgeSummary evaluation={evaluation} tab={tab} />
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => setShowMap(!showMap)}
@@ -1303,26 +1290,66 @@ export function DailySpeaking({
 }
 
 const bridgeCriteria = getBridgeRubric().criteria;
-function BridgeLetters({ evaluation }: { evaluation: Evaluation }) {
-  const [selected, setSelected] = useState<string | null>(null);
-  const criterion = bridgeCriteria.find((item) => item.key === selected);
-  const dimension = evaluation.dimensions.find((item) => item.key === selected);
-  return <View style={{ gap: 12 }}>
-    <View accessibilityLabel="BRIDGE framework" style={{ flexDirection: "row", gap: 6, width: "100%", maxWidth: 360, alignSelf: "center" }}>
-      {bridgeCriteria.map((item) => <Pressable key={item.key} accessibilityRole="button" accessibilityLabel={`${item.key} · ${item.label}`} accessibilityState={{ selected: selected === item.key }} aria-pressed={selected === item.key} onPress={() => setSelected(selected === item.key ? null : item.key)} style={{ flex: 1, minHeight: 44, borderRadius: 9, borderWidth: 1, borderColor: C.border, backgroundColor: selected === item.key ? C.sage : C.paper, alignItems: "center", justifyContent: "center" }}>
-        <Text style={s.name}>{item.key}</Text>
-      </Pressable>)}
+const bridgeHints: Record<string, string> = {
+  B: "Your main point",
+  R: "Why you think so",
+  I: "Examples that support your point",
+  D: "Other views, when relevant",
+  G: "How your ideas connect",
+  E: "Clear wording, not pronunciation",
+};
+function BridgeSummary({
+  evaluation,
+  tab,
+}: {
+  evaluation: Evaluation;
+  tab: string;
+}) {
+  return (
+    <View accessibilityLabel="BRIDGE framework" style={{ gap: 12 }}>
+      {bridgeCriteria.map((criterion) => {
+        const dimension = evaluation.dimensions.find(
+          (item) => item.key === criterion.key,
+        );
+        const unavailable = evaluation.provider === "local";
+        const unassessed = !dimension || dimension.status === "not_assessed";
+        return (
+          <View key={criterion.key} testID={`bridge-criterion-${criterion.key}`} style={s.bridgeCard}>
+            <View style={s.bridgeHeader}>
+              <View style={s.bridgeLetter}><Text style={s.bridgeLetterText}>{criterion.key}</Text></View>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={s.name}>{criterion.label}</Text>
+                <Text style={s.small}>{bridgeHints[criterion.key]}</Text>
+              </View>
+            </View>
+            {unavailable ? (
+              <Text style={s.small}>AI feedback unavailable.</Text>
+            ) : unassessed ? (
+              <Text style={s.small}>Not assessed for this question.</Text>
+            ) : (
+              <>
+                {dimension.status === "insufficient_evidence" ? (
+                  <Text style={s.small}>Not enough evidence yet.</Text>
+                ) : null}
+                {tab !== "Areas to Improve" && dimension.strength ? (
+                  <View style={s.bridgeFeedback}>
+                    <Text style={s.bridgeLabel}>What worked</Text>
+                    <Text style={s.bridgeText}>{dimension.strength}</Text>
+                  </View>
+                ) : null}
+                {tab !== "Strengths" && dimension.improvement ? (
+                  <View style={[s.bridgeFeedback, s.bridgeNext]}>
+                    <Text style={s.bridgeLabel}>Try next</Text>
+                    <Text style={s.bridgeText}>{dimension.improvement}</Text>
+                  </View>
+                ) : null}
+              </>
+            )}
+          </View>
+        );
+      })}
     </View>
-    {criterion ? <View testID="bridge-criterion-detail" style={[s.card, { backgroundColor: C.cream }]}>
-      <Text style={s.name}>{criterion.key} · {criterion.label}</Text>
-      <Text style={s.small}>{criterion.description}</Text>
-      {evaluation.provider === "local" ? <Text style={s.small}>AI feedback is unavailable for this attempt.</Text> : !dimension || dimension.status === "not_assessed" ? <Text style={s.small}>Not assessed for this question.</Text> : <>
-        {dimension.status === "insufficient_evidence" ? <Text style={s.small}>Not enough evidence yet.</Text> : null}
-        {dimension.strength ? <Text style={s.body}>{dimension.strength}</Text> : null}
-        {dimension.improvement ? <Text style={s.body}>{dimension.improvement}</Text> : null}
-      </>}
-    </View> : null}
-  </View>;
+  );
 }
 
 function ScriptText({ script }: { script: GuidedResponseDraft }) {
@@ -1444,6 +1471,32 @@ function Reward({
 }
 
 const s = StyleSheet.create({
+  bridgeCard: {
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 12,
+    padding: 14,
+    gap: 12,
+    backgroundColor: C.paper,
+  },
+  bridgeHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
+  bridgeLetter: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: C.sage,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bridgeLetterText: { fontFamily: "DMBold", fontSize: 18, color: C.ink },
+  bridgeFeedback: { gap: 4 },
+  bridgeNext: {
+    backgroundColor: C.cream,
+    borderRadius: 8,
+    padding: 10,
+  },
+  bridgeLabel: { fontFamily: "DMBold", fontSize: 12, color: C.muted },
+  bridgeText: { fontFamily: "DM", fontSize: 14, lineHeight: 21, color: C.ink },
   root: { flex: 1, backgroundColor: C.cream },
   scroll: {
     flexGrow: 1,
