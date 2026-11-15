@@ -8,10 +8,12 @@ export function PrivateRecordingPlayback({
   id,
   startSeconds = 0,
   autoLoad = false,
+  playLabel,
 }: {
   id: string;
   startSeconds?: number;
   autoLoad?: boolean;
+  playLabel?: string;
 }) {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
@@ -69,6 +71,7 @@ export function PrivateRecordingPlayback({
           key={`${id}:${startSeconds}`}
           uri={url}
           startSeconds={startSeconds}
+          playLabel={playLabel}
         />
       ) : null}
       {!autoLoad || !url || error ? (

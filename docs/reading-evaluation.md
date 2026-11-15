@@ -22,6 +22,23 @@ OpenAI qualitative results do not enter the Azure-specific pronunciation/WordBlo
 
 ## UI
 
+### Optional ElevenLabs sample reader
+
+After audio feedback, **Listen to a sample** prepares an ElevenLabs reading of the exact assigned passage. Users can play/pause it, follow the passage text and choose **Read again**. Generation is opt-in and sends only the passage text, never the learner’s recording, transcript or feedback. The interface labels it as an AI sample rather than an ideal accent to imitate.
+
+Configure these **server-only** variables in `.env.local` and in the deployment environment, then restart the API:
+
+```dotenv
+ELEVENLABS_API_KEY=your_private_key
+ELEVENLABS_VOICE_ID=your_selected_voice_id
+# Optional; defaults to the model below.
+ELEVENLABS_MODEL_ID=eleven_multilingual_v2
+```
+
+Use a voice accessible to that ElevenLabs account. The integration uses the official [Create speech API](https://elevenlabs.io/docs/api-reference/text-to-speech/convert) and MP3 output. Missing configuration leaves the sample unavailable while feedback and practice remain usable; there is no substitute voice presented as ElevenLabs. This feature was implemented without live ElevenLabs credentials, so provider synthesis still needs a live check after configuration.
+
+The authenticated sample endpoint accepts only an owned, recorded Read Aloud attempt with completed speech feedback. It uses the saved passage, disallows arbitrary text or voice overrides, caches a sample per attempt/passage/voice/model, prevents overlapping generation with a lease and permits up to ten new generations per user per day. Replaying a cached sample makes no provider call and awards no XP. Generated audio uses the existing private storage, signed playback and thirty-day expiry/deletion flow. Tests cover the provider request, bounded/malformed audio, missing configuration, ownership, feedback gating, caching, expiry, playback, unchanged rewards and mobile UI. UI audio uses a synthetic test tone; it does not claim to validate ElevenLabs voice quality.
+
 The display name is **BridgingMinds** and the former Garden tab is **Homeland**. Native bundle IDs, saved-data keys and the existing route remain stable so the rename does not disconnect users from saved work.
 
 Home puts the current day streak in a larger top-right card with an outline flame icon, a warm gold accent and a clear secured/start status. It uses the existing streak data; no streak rules or rewards change. Zero and active streak states were checked at 320, 390 and 1440 px without overflow.

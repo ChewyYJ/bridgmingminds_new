@@ -5,6 +5,7 @@ import { useApp } from "../lib/state";
 import type { ReadAloudAttempt, SpeechAssessment } from "../types";
 import { Button, C, Card, ErrorNote, T } from "./ui";
 import { ReadingEvaluation } from "./ReadingEvaluation";
+import { ReadingSample } from "./ReadingSample";
 import { PrivateRecordingPlayback } from "./PrivateRecording";
 
 interface SpeechJob {
@@ -171,10 +172,17 @@ export function ReadingSpeech({
   annotated.push(attempt.passage.text.slice(cursor));
   if (result?.readingEvaluation)
     return (
-      <ReadingEvaluation
-        evaluation={result.readingEvaluation}
-        audioId={attempt.audioId}
-      />
+      <View style={{ gap: 14 }}>
+        <ReadingEvaluation
+          evaluation={result.readingEvaluation}
+          audioId={attempt.audioId}
+        />
+        <ReadingSample
+          key={attempt.id}
+          attemptId={attempt.id}
+          passage={attempt.passage.text}
+        />
+      </View>
     );
   if (feedbackRequested && !result)
     return (
@@ -421,6 +429,13 @@ export function ReadingSpeech({
             </View>
           ) : null}
         </View>
+      ) : null}
+      {result ? (
+        <ReadingSample
+          key={attempt.id}
+          attemptId={attempt.id}
+          passage={attempt.passage.text}
+        />
       ) : null}
     </View>
   );

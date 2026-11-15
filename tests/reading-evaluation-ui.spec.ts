@@ -24,6 +24,20 @@ test("Read Aloud Done evaluates audio without a written review; five cards, play
     };
   });
   let assignment: any, attempt: any;
+  let sampleRequests = 0,
+    sampleAvailable = true;
+  // Sample playback uses the recorded test tone; ElevenLabs itself is tested separately.
+  await page.route("**/api/read-aloud/attempts/*/sample", async (route) => {
+    if (route.request().method() === "POST") {
+      sampleRequests++;
+      return route.fulfill({
+        json: { audioId: attempt.audioId, provider: "elevenlabs" },
+      });
+    }
+    return route.fulfill({
+      json: { available: sampleAvailable, sample: null },
+    });
+  });
   const evaluation = {
     rubricVersion: "reading-evaluation-v1",
     summary: "Your words were easy to follow.",
@@ -102,6 +116,7 @@ test("Read Aloud Done evaluates audio without a written review; five cards, play
     .getByRole("button", { name: "Grow my garden", exact: true })
     .click();
   await page.getByRole("button", { name: "Read aloud", exact: true }).click();
+  await expect(page.getByTestId("reading-sample")).toHaveCount(0);
   await page
     .getByRole("button", { name: "Record the passage", exact: true })
     .click();
@@ -146,8 +161,32 @@ test("Read Aloud Done evaluates audio without a written review; five cards, play
   await page.screenshot({
     path: info.outputPath("reading-feedback-desktop.png"),
   });
+  expect(sampleRequests).toBe(0);
+  const sample = page.getByTestId("reading-sample");
+  await sample
+    .getByRole("button", { name: "Listen to a sample", exact: true })
+    .click();
+  await sample
+    .getByRole("button", { name: "Play sample", exact: true })
+    .click();
+  await expect(
+    sample.getByRole("button", { name: "Pause playback", exact: true }),
+  ).toBeVisible();
+  await sample
+    .getByRole("button", { name: "Pause playback", exact: true })
+    .click();
+  await expect(sample).toContainText(assignment.passage.text);
+  expect(sampleRequests).toBe(1);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await sample.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: info.outputPath("sample-reader-phone.png") });
+  sampleAvailable = false;
   await page.reload();
   await expect(page.getByTestId("reading-evaluation")).toBeVisible();
+  await expect(
+    sample.getByRole("button", { name: "Listen to a sample", exact: true }),
+  ).toBeDisabled();
+  await expect(sample).toContainText("Sample audio isn’t available yet");
   await page
     .getByRole("button", { name: "Play recording", exact: true })
     .click();

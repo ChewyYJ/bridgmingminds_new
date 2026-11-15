@@ -28,14 +28,24 @@ export interface RecordedAudio {
 export function AudioPlayback({
   uri,
   startSeconds = 0,
+  playLabel = "Play recording",
 }: {
   uri: string;
   startSeconds?: number;
+  playLabel?: string;
 }) {
   return Platform.OS === "web" ? (
-    <WebAudioPlayback uri={uri} startSeconds={startSeconds} />
+    <WebAudioPlayback
+      uri={uri}
+      startSeconds={startSeconds}
+      playLabel={playLabel}
+    />
   ) : (
-    <NativeAudioPlayback uri={uri} startSeconds={startSeconds} />
+    <NativeAudioPlayback
+      uri={uri}
+      startSeconds={startSeconds}
+      playLabel={playLabel}
+    />
   );
 }
 
@@ -44,9 +54,11 @@ export function AudioPlayback({
 function WebAudioPlayback({
   uri,
   startSeconds,
+  playLabel,
 }: {
   uri: string;
   startSeconds: number;
+  playLabel: string;
 }) {
   const audio = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -111,7 +123,7 @@ function WebAudioPlayback({
     <View style={{ gap: 8 }}>
       <View style={s.row}>
         <Button
-          label={playing ? "Pause playback" : "Play recording"}
+          label={playing ? "Pause playback" : playLabel}
           icon={playing ? "pause" : "play"}
           variant="secondary"
           onPress={() => void toggle()}
@@ -129,9 +141,11 @@ function WebAudioPlayback({
 function NativeAudioPlayback({
   uri,
   startSeconds,
+  playLabel,
 }: {
   uri: string;
   startSeconds: number;
+  playLabel: string;
 }) {
   const player = useAudioPlayer(uri);
   const status = useAudioPlayerStatus(player);
@@ -169,7 +183,7 @@ function NativeAudioPlayback({
     <View style={{ gap: 8 }}>
       <View style={s.row}>
         <Button
-          label={status.playing ? "Pause playback" : "Play recording"}
+          label={status.playing ? "Pause playback" : playLabel}
           icon={status.playing ? "pause" : "play"}
           variant="secondary"
           onPress={() => void toggle()}

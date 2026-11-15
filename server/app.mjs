@@ -15,6 +15,7 @@ import { openDatabase, transaction } from "./database.mjs";
 import { createAudioStorage } from "./audio-storage.mjs";
 import { installAudioRoutes } from "./audio-routes.mjs";
 import { installReadingSpeech } from "./reading-speech-jobs.mjs";
+import { installReadingSample } from "./reading-sample.mjs";
 import { createUsageService } from "./usage.mjs";
 import { createDailyWorkoutService } from "./daily-workout.mjs";
 import { installReadAloud } from "./read-aloud.mjs";
@@ -1879,6 +1880,7 @@ export function createApp(options = {}) {
       }),
   });
   const { transcribeAudio, cleanupAudio } = audioRoutes;
+  installReadingSample({ app, db, wrap, getAttempt, audioRoutes, audioStorage, limit, failure, options });
   const readingSpeech = installReadingSpeech({ app, db, wrap, getAttempt, getUser, wordBloom,
     audioRoutes, audioStorage, limit, cloud, options, daily: dailyWorkout });
   installReadAloud({ app, db, wrap, mutate, getUser, daily: dailyWorkout,
