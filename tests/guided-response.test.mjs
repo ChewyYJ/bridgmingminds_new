@@ -159,14 +159,25 @@ test("daily sample words require explicit selection, persist once and reach Read
   const token = await f.guest();
   const { attempt } = await f.completed(token);
   await f.request("/daily-workout/enroll", token, {});
+  const dailyInput = { ...input("spin_speak", ["", "", ""]), daily: true };
+  f.respond((request) => {
+    const { response_format } = JSON.parse(request.body);
+    const schema = response_format.json_schema.schema.properties.vocabulary;
+    assert.equal(schema.minItems, 1);
+    assert.equal(schema.maxItems, 3);
+    assert.ok(schema.items.enum.includes("evidence"));
+    assert.deepEqual(response_format.json_schema.schema.required, ["text", "vocabulary"]);
+    assert.equal(response_format.json_schema.schema.properties.annotations, undefined);
+    return response({ text: draftText, vocabulary: [] });
+  });
+  assert.equal((await f.generate(token, attempt, dailyInput)).status, 502);
   const sample = "A small trial could provide evidence. We can examine our assumption that it represents everyone.";
-  f.respond(() => response({ text: sample, annotations: [
-    { quote: "A small trial", label: "Position", explanation: "Keeps the original proposal." },
-    { quote: "represents everyone", label: "Limit", explanation: "Keeps the stated limit." },
-  ], vocabulary: ["evidence", "assumption"] }));
-  const result = await f.generate(token, attempt, { ...input("spin_speak", ["", "", ""]), daily: true });
+  f.respond(() => response({ text: sample, vocabulary: ["evidence", "assumption"] }));
+  const result = await f.generate(token, attempt, dailyInput);
   assert.equal(result.status, 200);
   assert.equal(isGuidedResponseDraft(result.data), true);
+  assert.ok(result.data.vocabularyEligibleCount >= 2);
+  assert.deepEqual(result.data.annotations, []);
   assert.deepEqual(result.data.vocabulary.map((word) => word.wordId), ["evidence", "assumption"]);
   assert.equal((await f.request("/wordbloom/summary", token)).data.words.length, 0, "viewing a script does not save words");
   const path = `/attempts/${attempt.id}/vocabulary`;
@@ -191,24 +202,50 @@ test("daily sample words require explicit selection, persist once and reach Read
   assert.deepEqual(after.rewards, attempt.rewards);
 });
 
+test("daily samples can have zero words when no catalogue words are eligible", async (t) => {
+  const f = await fixture(t);
+  const token = await f.guest();
+  const { attempt } = await f.completed(token);
+  await f.request("/daily-workout/enroll", token, {});
+  await f.request("/me", token, { wordBloomEnabled: false }, "PATCH");
+  f.respond((request) => {
+    const body = JSON.parse(request.body);
+    const context = JSON.parse(body.messages[1].content);
+    assert.deepEqual(context.vocabulary, []);
+    const schema = body.response_format.json_schema.schema.properties.vocabulary;
+    assert.equal(schema.minItems, 0);
+    assert.equal(schema.maxItems, 0);
+    return response({ text: draftText, vocabulary: [] });
+  });
+  const result = await f.generate(token, attempt, { ...input("spin_speak", ["", "", ""]), daily: true });
+  assert.equal(result.status, 200);
+  assert.deepEqual(result.data.vocabulary, []);
+  assert.equal(result.data.vocabularyEligibleCount, 0);
+});
+
 test("guiding answers are assessed against their own question and leave first-try feedback intact", async (t) => {
   const f = await fixture(t);
   const token = await f.guest();
   const { attempt } = await f.completed(token);
-  const answer = "A small trial gives us observations before a larger change.";
+  const answer = "A small trial gives us observations before a larger change. We can compare both outcomes.";
   f.respond((request) => {
     const context = JSON.parse(JSON.parse(request.body).messages[1].content);
     assert.equal(context.ANSWER, answer);
     assert.equal(context.QUESTION, getThoughtGuide(attempt.mode, attempt.evaluation)[1].question);
-    return response({ status: "answered", feedback: "You explain why a trial helps.", next_step: "Give one observation you would look for.", evidence_quote: "gives us observations" });
+    assert.deepEqual(context.EXCERPTS, [
+      { id: 1, text: "A small trial gives us observations before a larger change." },
+      { id: 2, text: "We can compare both outcomes." },
+    ]);
+    return response({ status: "answered", feedback: "You explain why a trial helps.", next_step: "Give one observation you would look for.", evidence_id: 1 });
   });
   const checked = await f.request(`/attempts/${attempt.id}/guiding-answer`, token, { index: 1, answer });
   assert.equal(checked.status, 200);
   assert.equal(checked.data.status, "answered");
+  assert.equal(checked.data.evidence_quote, "A small trial gives us observations before a larger change.");
   const after = (await f.request(`/attempts/${attempt.id}`, token)).data;
   assert.deepEqual(after.evaluation, attempt.evaluation);
   assert.equal(after.guidingPractice[1].answer, answer);
-  f.respond(() => response({ status: "answered", feedback: "Unsupported", next_step: "Try again", evidence_quote: "invented quote" }));
+  f.respond(() => response({ status: "answered", feedback: "Unsupported", next_step: "Try again", evidence_id: 99 }));
   assert.equal((await f.request(`/attempts/${attempt.id}/guiding-answer`, token, { index: 1, answer })).status, 502);
 });
 

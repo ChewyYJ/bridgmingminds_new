@@ -14,7 +14,7 @@ The learner records a one-minute pitch, receives first-attempt feedback, chooses
 - A vertical BRIDGE summary shows every criterion in a compact card without tapping, with short explanations and labelled What worked / Try next feedback: Big Idea, Reasons, Illustrations, Different Perspectives, Glue and Expression. Unassessed criteria are explicitly labelled, not displayed as low scores.
 - Each guiding answer is checked against its specific question. The result distinguishes answered, partly answered and not answered, with an explanation and next step. Users can record or type, retry failed checks, or skip.
 - Viewing a sample is a separate choice. The sample uses the original pitch and any follow-up answers, preserving the learner's meaning.
-- Samples can introduce zero to three words from the approved vocabulary catalogue. Exact occurrences are highlighted, with catalogue definitions. Words already saved or used by the learner are excluded.
+- Samples introduce one to three words from the approved vocabulary catalogue when eligible words are available. Exact occurrences are highlighted, with catalogue definitions. Words already saved or used by the learner are excluded. An empty eligible list allows a sample with zero new words.
 - Viewing feedback or a daily sample does not automatically add words. Only selected words are saved; duplicate saves are idempotent, and selection is checked against the server's saved sample.
 - Saved words appear in My Dictionary and are eligible for Read & Reflect and future Read Aloud assignments. An already assigned passage stays stable.
 - Optional stages never award additional completion XP. Users can skip either stage and complete the challenge.

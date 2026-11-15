@@ -1253,7 +1253,7 @@ export function DailySpeaking({
             {step === "sample-offer" && (
               <>
                 <Text style={s.copy}>
-                  Your ideas, expressed more clearly. Up to 3 useful new words.
+                  Your ideas, expressed more clearly, with 1–3 new words when available.
                 </Text>
                 <Action
                   label="View sample script"
@@ -1291,9 +1291,9 @@ export function DailySpeaking({
                     <Text style={s.name}>
                       New vocabulary ({script.vocabulary?.length || 0})
                     </Text>
-                    <Text style={s.small}>
-                      Pick words to save to My Dictionary.
-                    </Text>
+                    {script.vocabulary?.length ? (
+                      <Text style={s.small}>Pick words to save to My Dictionary.</Text>
+                    ) : null}
                     {(script.vocabulary || []).map((word) => {
                       const saved = savedWordIds.includes(word.wordId);
                       const selected = selectedWordIds.includes(word.wordId);
@@ -1347,9 +1347,16 @@ export function DailySpeaking({
                       );
                     })}
                     {!script.vocabulary?.length ? (
-                      <Text style={s.small}>
-                        No new words are needed for this sample.
-                      </Text>
+                      script.vocabularyEligibleCount === 0 ? (
+                        <Text style={s.small}>There are no eligible new words for this sample.</Text>
+                      ) : (
+                        <Action
+                          label="Regenerate with vocabulary"
+                          secondary
+                          disabled={busy}
+                          onPress={() => void generateScript()}
+                        />
+                      )
                     ) : (
                       <Action
                         label="Save selected words"

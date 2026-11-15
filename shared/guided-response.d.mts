@@ -1,4 +1,5 @@
 export interface GuidedResponseDraft {
+  vocabularyEligibleCount?: number;
   vocabulary?: {
     wordId: string;
     word: string;
