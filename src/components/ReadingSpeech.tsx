@@ -330,7 +330,7 @@ export function ReadingSpeech({ attempt }: { attempt: ReadAloudAttempt }) {
           ))}
           {job?.wordBloomReview?.words.length ? (
             <View testID="speech-wordbloom-review" style={{ gap: 8 }}>
-              <Text style={T.h3}>WordBloom reading review · provisional</Text>
+              <Text style={T.h3}>Vocabulary reading review · provisional</Text>
               {job.wordBloomReview.words.map((word) => (
                 <Text key={word.wordId} style={T.body}>
                   {word.wordId}:{" "}

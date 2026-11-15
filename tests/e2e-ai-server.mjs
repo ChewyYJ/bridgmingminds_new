@@ -281,7 +281,7 @@ globalThis.fetch = async (url, options = {}) => {
       false,
       "Guidance notes leaked into assessment or debate provider messages",
     );
-    if (body.response_format?.json_schema?.name === "bridgingminds_bridge_v2") {
+    if (body.response_format?.json_schema?.name === "bridgingminds_bridge_v3") {
       const format = body.response_format.json_schema;
       assert.equal(format.strict, true);
       assert.equal(format.schema.properties.dimensions.minItems, 6);
@@ -291,6 +291,7 @@ globalThis.fetch = async (url, options = {}) => {
       const reply = bridgeFixture(
         supplied.ANSWER,
         supplied.applicable_dimensions,
+        supplied.PLANNING_NOTES,
       );
       if (
         supplied.wordbloom?.enabled &&

@@ -940,6 +940,17 @@ export function createApp(options = {}) {
   }));
   app.get("/api/home/today", wrap(async (req, res) => res.json(await dailyWorkout.today(req.userId))));
   app.get("/api/wordbloom/summary", wrap(async (req, res) => res.json(await wordBloom.summary(req.userId))));
+  app.post("/api/wordbloom/reviews", mutate(async (req, res) => {
+    z.object({}).strict().parse(req.body);
+    res.json(await wordBloom.startReview(req.userId));
+  }));
+  app.post("/api/wordbloom/reviews/:id", mutate(async (req, res) => {
+    const data = z.object({
+      step: z.enum(["recall", "reflect"]),
+      answer: z.string().trim().min(1).max(1000),
+    }).strict().parse(req.body);
+    res.json(await wordBloom.reviewStep(req.userId, req.params.id, data.step, data.answer));
+  }));
   app.patch("/api/wordbloom/:id", mutate(async (req, res) => {
     const data = z.object({ action: z.enum(["dismiss", "familiar"]) }).strict().parse(req.body);
     res.json(await wordBloom.changeWord(req.userId, req.params.id, data.action));
@@ -1091,6 +1102,7 @@ export function createApp(options = {}) {
           sessionId: z.string().uuid(),
           text: z.string().trim().max(10000).default(""),
           selfReflection: selfReflectionSchema.optional(),
+          planningNotes: z.string().trim().max(2000).optional(),
           responseType: z.enum(["text", "audio"]).default("text"),
           retryOf: z.string().uuid().optional(),
           audioId: z.string().uuid().optional(),
@@ -1103,6 +1115,7 @@ export function createApp(options = {}) {
       if (data.responseType === "text") textSchema.parse(data.text);
       if (data.audioId)
         await audioRoutes.assertOwnAudio(data.audioId, req.userId);
+      let planningNotes = data.planningNotes;
       if (data.retryOf) {
         const original = await getAttempt(data.retryOf, req.userId);
         if (
@@ -1110,6 +1123,7 @@ export function createApp(options = {}) {
           original.status !== "completed"
         )
           throw failure(400, "Retry a completed answer from this challenge.");
+        planningNotes ??= original.planningNotes;
       }
       if (data.idempotencyKey) {
         const existing = (
@@ -1125,6 +1139,7 @@ export function createApp(options = {}) {
       }
       const attempt = {
         ...data,
+        planningNotes: session.assessmentFramework === "bridge-v1" ? planningNotes : undefined,
         id: id(),
         mode: session.mode,
         prompt: session.prompt.question,

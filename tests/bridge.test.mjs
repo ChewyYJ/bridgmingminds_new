@@ -118,6 +118,97 @@ test("unelicited dimensions are forced to N/A; insufficient evidence is distinct
   );
 });
 
+test("map separates planning evidence, spoken development, and suggestions", () => {
+  const planningNotes = "🌱 Share tools with neighbours.";
+  const note = "Share tools with neighbours.";
+  const raw = bridgeFixture(text, undefined, note);
+  const result = validateBridge(raw, { ...attempt, planningNotes }, session, "offline", "openai");
+  const map = result.thought_map;
+  assert.equal(map.version, "thought-map-v2");
+  assert.equal(map.topic, session.prompt.question);
+  assert.equal(map.comparedNotes, true);
+  assert.equal(map.nodes[0].development, "developed");
+  assert.equal(map.nodes[1].development, "needs_elaboration");
+  assert.equal(map.nodes[2].status, "missing");
+  const planned = map.nodes.find((node) => node.id === "planned");
+  assert.equal(planned.status, "brainstorm_only");
+  assert.equal(planned.source_span, undefined);
+  assert.equal(planningNotes.slice(planned.note_span.start, planned.note_span.end), note);
+  assert.throws(() => validate(raw), { code: "assessment_invalid_response" });
+  assert.throws(
+    () => validateBridge(raw, { ...attempt, text: text + " SHARE TOOLS WITH NEIGHBOURS!", planningNotes }, session, "offline", "openai"),
+    { code: "assessment_invalid_response" },
+  );
+});
+
+test("live evaluation keeps exact excerpts and omits unsafe branches and cycles", () => {
+  const note = "Share tools with neighbours.";
+  const raw = bridgeFixture(text, undefined, note);
+  const [claim, reason, gap] = raw.argument_graph.nodes;
+  claim.text = "A summary of the claim.";
+  claim.note_quote = "This was never planned.";
+  reason.source_quote = "This was never said.";
+  gap.text = "This cannot be attributed to the learner.";
+  raw.argument_graph.edges.push(
+    { id: "a", source: "claim", target: "planned", relation: "qualifies" },
+    { id: "b", source: "planned", target: "claim", relation: "supports" },
+  );
+  const result = validateBridge(
+    raw,
+    { ...attempt, planningNotes: note },
+    session,
+    "offline",
+    "openai",
+    { allowPartial: true },
+  );
+  assert.ok(result.dimensions.some(({ level }) => level !== null));
+  const map = result.thought_map;
+  assert.equal(map.validationIncomplete, true);
+  assert.deepEqual(map.nodes.map(({ id }) => id), ["claim", "limit", "planned"]);
+  assert.equal(map.nodes[0].text, claim.source_quote);
+  assert.equal(map.nodes[0].note_span, undefined);
+  assert.equal(map.nodes[2].text, note);
+  assert.deepEqual(map.edges.map(({ id }) => id), ["e3", "planned-support"]);
+
+  claim.source_quote = "Another fabricated quote.";
+  const noEvidence = validateBridge(
+    raw,
+    { ...attempt, planningNotes: note },
+    session,
+    "offline",
+    "openai",
+    { allowPartial: true },
+  );
+  assert.deepEqual(noEvidence.thought_map.nodes, []);
+  assert.equal(noEvidence.thought_map.validationIncomplete, true);
+  assert.deepEqual(noEvidence.feedback, result.feedback);
+});
+
+test("invalid optional vocabulary cannot discard a valid map or retain fabricated usage", () => {
+  const raw = bridgeFixture(text);
+  const excerpt = raw.argument_graph.nodes[0].source_quote;
+  const candidate = {
+    word_id: "collaborate",
+    source_quote: excerpt,
+    reason: "Try this word for working together.",
+    improvement_type: "optional_enrichment",
+    confidence: "high",
+  };
+  raw.vocabulary_candidates = [
+    { ...candidate, source_quote: "Fabricated quotation." },
+    candidate,
+    candidate,
+  ];
+  raw.productive_uses = [
+    { word_id: "collaborate", source_quote: excerpt, confidence: "high" },
+  ];
+  const result = validateBridge(raw, attempt, session, "offline", "openai", { allowPartial: true });
+  assert.equal(result.thought_map.nodes.length, 4);
+  assert.equal(result.thought_map.validationIncomplete, undefined);
+  assert.deepEqual(result.wordbloom.candidates.map(({ wordId }) => wordId), ["collaborate"]);
+  assert.deepEqual(result.wordbloom.uses, []);
+});
+
 test("local mode never turns keywords into ratings, claims or inferred reasoning", async () => {
   const answer = {
     ...attempt,
@@ -240,6 +331,10 @@ for (const [name, mutate] of [
 test("layout has bounded, non-overlapping nodes and exact demo spans; corrupt graphs cannot hang layout", () => {
   const layout = layoutThoughtMap(THOUGHT_MAP_SAMPLE);
   assert.ok(layout);
+  assert.equal(layout.centre.x + layout.centre.width / 2, layout.width / 2);
+  assert.ok(layout.positions.some((position) => position.x < layout.centre.x));
+  assert.ok(layout.positions.some((position) => position.x > layout.centre.x));
+  assert.equal(layout.positions.find((position) => position.id === "link").parent, "reason");
   for (const position of layout.positions) {
     assert.ok(
       position.x >= 0 &&
@@ -302,7 +397,7 @@ test("provider transport separates instructions from user data and validates act
   assert.equal(result.model_version, "offline-response-snapshot");
   assert.equal(
     captured.response_format.json_schema.name,
-    "bridgingminds_bridge_v2",
+    "bridgingminds_bridge_v3",
   );
   assert.match(captured.messages[0].content, /untrusted data/);
   assert.deepEqual(JSON.parse(captured.messages[1].content).ANSWER, text);

@@ -193,6 +193,7 @@ export function Field({
   keyboardType,
   autoCapitalize,
   editable = true,
+  maxLength,
 }: {
   value: string;
   onChangeText: (s: string) => void;
@@ -204,6 +205,7 @@ export function Field({
   keyboardType?: any;
   autoCapitalize?: any;
   editable?: boolean;
+  maxLength?: number;
 }) {
   return (
     <View style={{ gap: 8 }}>
@@ -223,6 +225,7 @@ export function Field({
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         editable={editable}
+        maxLength={maxLength}
         style={[
           styles.field,
           multiline && {

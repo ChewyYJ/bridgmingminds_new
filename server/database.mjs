@@ -108,6 +108,13 @@ CREATE TABLE IF NOT EXISTS vocabulary_observations (
 CREATE INDEX IF NOT EXISTS vocabulary_due ON user_vocabulary(user_id,status,due_at);
 CREATE INDEX IF NOT EXISTS vocabulary_exposure_users ON vocabulary_exposures(user_id,assigned_at);
 CREATE INDEX IF NOT EXISTS vocabulary_observation_users ON vocabulary_observations(user_id,created_at);
+CREATE TABLE IF NOT EXISTS vocabulary_reviews (
+  id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  vocabulary_id TEXT NOT NULL REFERENCES user_vocabulary(id) ON DELETE CASCADE,
+  scheduled_at TEXT NOT NULL, data TEXT NOT NULL,
+  UNIQUE(user_id,vocabulary_id,scheduled_at)
+);
+CREATE INDEX IF NOT EXISTS vocabulary_review_users ON vocabulary_reviews(user_id);
   `);
   db.exec(`CREATE TABLE IF NOT EXISTS skill_observations (
     id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,

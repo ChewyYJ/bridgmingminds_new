@@ -5,6 +5,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createApp } from "../server/app.mjs";
+import { wordBloomWord } from "../shared/wordbloom-catalogue.mjs";
 
 const answer =
   "We could work together on a shared garden. Each neighbour could suggest a plant and explain what it needs.";
@@ -104,6 +105,116 @@ async function fixture(t) {
     },
   };
 }
+
+test("dictionary reviews resume, rotate contexts and award the daily completion bonus once", async (t) => {
+  const f = await fixture(t);
+  const token = await f.guest();
+  const other = await f.guest();
+  await f.spin(token);
+  const baseline = await f.ok("/state", token);
+  const dictionary = () => f.ok("/wordbloom/summary", token);
+  const start = () => f.ok("/wordbloom/reviews", token, {});
+  const reviewPath = (id) => `/wordbloom/reviews/${id}`;
+  const complete = (id, answer) =>
+    f.ok(reviewPath(id), token, {
+      step: "reflect",
+      answer,
+    });
+  const [saved] = (await dictionary()).words;
+  assert.equal(saved.recallDue, true);
+  const [first, duplicate] = await Promise.all([start(), start()]);
+  assert.deepEqual(first, duplicate);
+  assert.equal(first.word, undefined);
+  assert.ok(first.passage.includes("____"));
+  assert.equal(
+    (
+      await f.request(reviewPath(first.id), other, {
+        step: "recall",
+        answer: "collaborate",
+      })
+    ).status,
+    404,
+  );
+  assert.equal(
+    (
+      await f.request(reviewPath(first.id), token, {
+        step: "reflect",
+        answer: "We collaborate in teams.",
+      })
+    ).status,
+    409,
+  );
+  const recallInput = { step: "recall", answer: "Collaborate" };
+  await f.ok(reviewPath(first.id), token, recallInput);
+  await f.restart();
+  assert.equal((await start()).recall.correct, true);
+  assert.equal(
+    (
+      await f.request(reviewPath(first.id), token, {
+        step: "reflect",
+        answer: "We help one another.",
+      })
+    ).status,
+    400,
+  );
+  const reflection =
+    "We can collaborate by sharing the research and the writing.";
+  const [done, retried] = await Promise.all([
+    complete(first.id, reflection),
+    complete(first.id, reflection),
+  ]);
+  assert.deepEqual(done.result, retried.result);
+  assert.equal(done.result.xp, 5);
+  assert.equal(done.result.dueAt, "2026-11-13T08:00:00.000Z");
+  assert.equal((await f.ok("/state", token)).xp, baseline.xp + 5);
+  assert.equal(await start(), null);
+
+  const additional = wordBloomWord("evidence");
+  const sameDay = "2026-11-12T09:00:00.000Z";
+  f.setTime(sameDay);
+  await f.db
+    .prepare(
+      `INSERT INTO user_vocabulary (id,user_id,word_id,source_attempt_id,source_day,status,data,due_at,interval_days,exposure_count,productive_count,created_at,updated_at)
+    SELECT ?,user_id,?,source_attempt_id,source_day,'scheduled',?,due_at,3,0,0,?,? FROM user_vocabulary WHERE id=?`,
+    )
+    .run(
+      randomUUID(),
+      additional.id,
+      JSON.stringify({ ...additional, source: saved.source }),
+      sameDay,
+      sameDay,
+      saved.id,
+    );
+  const second = await start();
+  await f.ok(reviewPath(second.id), token, { step: "recall", answer: "guess" });
+  const secondDone = await complete(
+    second.id,
+    "I would look for evidence in the bus arrival logs.",
+  );
+  assert.equal(secondDone.result.correct, 0);
+  assert.equal(secondDone.result.xp, 0);
+  assert.equal((await f.ok("/home/today", token)).completed, 1);
+
+  f.setTime(done.result.dueAt);
+  const later = await start();
+  assert.notEqual(later.title, first.title);
+  await f.ok(reviewPath(later.id), token, recallInput);
+  const laterDone = await complete(
+    later.id,
+    "We can collaborate on the poster and share the editing.",
+  );
+  assert.equal(laterDone.result.streak, 2);
+  assert.equal(laterDone.result.dueAt, "2026-11-20T08:00:00.000Z");
+  const evidence = (await dictionary()).words.find((word) => word.wordId === "evidence");
+  await f.ok(`/wordbloom/${evidence.id}`, token, { action: "familiar" }, "PATCH");
+  f.setTime(laterDone.result.dueAt);
+  const third = await start();
+  await f.ok(reviewPath(third.id), token, recallInput);
+  const thirdDone = await complete(third.id, reflection);
+  assert.equal(thirdDone.result.streak, 3);
+  assert.equal(thirdDone.result.dueAt, "2026-12-20T08:00:00.000Z");
+  assert.equal((await f.ok("/export", token)).wordBloom.reviews.length, 4);
+});
 
 test("speaking → WordBloom → reading → adaptive review uses actual persisted activities without extra XP", async (t) => {
   const f = await fixture(t),

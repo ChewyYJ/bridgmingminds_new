@@ -106,6 +106,7 @@ export interface Attempt {
   text: string;
   responseType: "text" | "audio";
   selfReflection?: string;
+  planningNotes?: string;
   status: "draft" | "queued" | "processing" | "completed" | "failed";
   retryOf?: string;
   audioId?: string;
@@ -184,6 +185,24 @@ export interface ReadingWord {
 }
 export type WordReviewOutcome =
   "not_assessed" | "needs_practice" | "comfortable";
+export interface VocabularyRecallProgress {
+  dueAt: string;
+  reviews: number;
+  correct: number;
+  streak: number;
+}
+export interface VocabularyReview {
+  id: string;
+  title: string;
+  passage: string;
+  meaning: string;
+  word?: string;
+  recall?: { answer: string; correct: boolean };
+  example?: string;
+  reflectionPrompt?: string;
+  reflection?: string;
+  result?: VocabularyRecallProgress & { xp: number; completedAt: string };
+}
 export interface WordBloomItem {
   id: string;
   wordId: string;
@@ -202,6 +221,8 @@ export interface WordBloomItem {
   intervalDays: number;
   exposureCount: number;
   productiveUseCandidates: number;
+  recallProgress?: VocabularyRecallProgress;
+  recallDue?: boolean;
   pronunciationReview?: {
     policyVersion: string;
     validationStatus: "unvalidated";
@@ -306,14 +327,19 @@ export interface ThoughtMapNode {
     | "qualifier"
     | "rebuttal";
   text: string | null;
-  status: "explicit" | "inferred" | "missing";
+  status: "explicit" | "inferred" | "missing" | "brainstorm_only";
+  development?: "developed" | "needs_elaboration" | null;
   source_span?: { start: number; end: number };
+  note_span?: { start: number; end: number };
   quote?: string;
   confidence: string;
   feedback: string;
 }
 export interface ThoughtMap {
   version: string;
+  topic?: string;
+  comparedNotes?: boolean;
+  validationIncomplete?: boolean;
   status: "provisional" | "insufficient_evidence" | "not_assessed";
   nodes: ThoughtMapNode[];
   edges: {

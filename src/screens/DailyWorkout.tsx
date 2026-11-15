@@ -219,7 +219,7 @@ export function DailyHome({
         <Button
           label="Read & Reflect"
           variant="ghost"
-          onPress={() => router.push("/discover" as never)}
+          onPress={() => router.push("/vocabulary-review")}
         />
       </View>
     </View>

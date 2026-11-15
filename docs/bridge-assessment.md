@@ -26,25 +26,35 @@ Every assessed dimension and the primary judged feedback require an exact, uniqu
 
 ## Thought Map contract
 
-The structured provider output is limited to 12 nodes and 24 edges. Node types cover claim, reason, evidence, warrant, backing, qualifier and rebuttal. Edges use supports, explains, challenges, qualifies or needs-explanation relationships.
+The topic in the centre follows Novak and Cañas’s idea of a focus question. Branches use Toulmin roles to show where a reason, example or warrant belongs. Claim–Evidence–Reasoning offers a simpler coaching sequence for short answers. For narrative or reflective prompts, BRIDGE applicability controls which gaps are relevant. [Novak and Cañas, IHMC](https://cmap.ihmc.us/docs/theory-of-concept-maps.php) · [Toulmin](https://doi.org/10.1017/CBO9780511840005.007) · [McNeill and colleagues](https://public.websites.umich.edu/~krajcik/Papers/McNeill_et_al_JLS_2006.pdf)
 
-- **Explicit:** text must equal the exact source quote. The server anchors its span, and tapping the node highlights it in the authentic response.
-- **Inferred:** a proposed interpretation with no quotation or source span. It is never labelled as the learner's words.
-- **Missing:** null text and no quotation/span; feedback is a proposed gap or question to consider, not fabricated content.
+The `thought-map-v2` graph permits up to 12 nodes and 24 edges. The centre is the actual prompt. Claim, reason, evidence, warrant, backing, qualifier and rebuttal nodes connect through supports, explains, challenges, qualifies or needs-explanation links.
+
+- **Green · Well developed.** A clear contribution supported by a verbatim response excerpt.
+- **Yellow · Needs elaboration.** An idea present in the response that needs more explanation, an example or a clearer link. Includes an actionable next step.
+- **Red · Suggested gap.** A relevant missing link, example or alternative perspective. Includes a guiding question or next step.
+- **Blue · Planned, left unsaid.** A clear idea anchored in the planning notes with no equivalent in the complete response. Includes a way to bring it into a later response.
+- **Neutral.** Tentative AI interpretations and saved older response nodes whose development was never classified.
+
+The current integration saves optional typed prep notes as `planningNotes` on the attempt before recording or text submission. The AI compares meaning across notes and the saved response while BRIDGE scores use response evidence. Exact response and note excerpts are validated separately. The model may cite both sources for a shared idea. If a response contains a partial version of an idea, the node is yellow. The server checks for an exact normalized match before accepting a blue node. Semantic equivalence and quality remain provisional model judgments. With no notes, the map uses the response alone. Post-response self-reflection and guiding-question notes are separate inputs.
 
 Ordinary backend code checks schema bounds, ID uniqueness, existing endpoints, duplicate/self edges, acyclicity, exact spans and status/text consistency. A nonempty graph requires at least one explicit node. Empty maps are allowed for insufficient interpretable evidence. These checks establish integrity, not semantic correctness of a model's classification or inference.
+
+If the model returns an invalid branch or connection, the evaluator keeps the remaining verifiable graph and shows that the map is incomplete. Quoted node text is taken directly from the saved source. When no verifiable response node remains, the sample map is available alongside any BRIDGE feedback that independently passed validation.
+
+WordBloom entries are checked independently for unique terms and exact response evidence. Invalid suggestions or usage observations are omitted before vocabulary progress is recorded.
 
 Maps are stored with the evaluation in the existing attempt JSON so validated feedback, map and daily participation rewards commit atomically. `GET /api/attempts/:id/thought-map` returns only the owner's persisted map and never generates new feedback. Account export includes it; deletion removes it with the attempt. No schema migration is needed for these additional JSON fields.
 
 ## UI and platform decision
 
-The feedback screen leads with one strength, one priority gap and one open question, then a retry action. The six-criterion breakdown is optional. The map has zoom controls, scrolling to pan, node selection, exact-source highlighting, an accessible full text outline, textual status labels and a legend. Revisions retain both original texts and, where available, both persisted maps; no skill gain is inferred from score differences.
+The feedback screen leads with one strength, one priority gap and one open question, then a retry action. The six-criterion breakdown is optional. The map uses a wide canvas with branches on both sides of the topic, curved connectors, zoom, source inspection, a text outline and visible status labels. The outline retains every argument relation. Revisions reuse the original planning snapshot and keep the original and revised responses and maps independently inspectable.
 
 The master prompt's web-specific React Flow/Dagre suggestion was adapted to the existing Expo/React Native architecture: bounded directed-graph layout in shared JavaScript, native Views/Pressables and the already installed `react-native-svg`. This keeps iOS, Android and web on one implementation without a DOM-only dependency. Mobile defaults to the text outline; the map remains available. Actual device gesture and screen-reader validation remains release work.
 
 Without a provider key, all BRIDGE ratings are null and the map is **not assessed**. Local keywords are never turned into claims, semantic ratings or inferred reasoning. A separate original sample demonstrates graph interaction, explicitly labelled as sample content and never saved as learner evidence or credited as progress.
 
-The existing optional thought-guide notes, private recording playback, linked revision and report-concern flow remain available. Nothing silently rewrites the saved response. Generated drafts remain a separate explicit coaching aid rather than a replacement assessment or automatic answer.
+Planning notes are submitted with the response to the configured evaluation provider when AI is enabled. They are stored with the owned attempt and included in account export and deletion. When the shared whiteboard is ready, use its readable text as the planning snapshot. Its layout coordinates and drawings are outside the current evaluator contract.
 
 ## Verification and remaining work
 

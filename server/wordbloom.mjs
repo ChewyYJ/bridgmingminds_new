@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { localDay } from "./daily-workout.mjs";
 import { createVocabularyPronunciation } from "./vocabulary-pronunciation.mjs";
 import { anchorProviderEvidence } from "./evaluator.mjs";
+import { vocabularyExercise } from "./vocabulary-exercises.mjs";
 import {
   wordBloomCatalogue,
   wordBloomWord,
@@ -11,6 +12,17 @@ import {
 } from "../shared/wordbloom-catalogue.mjs";
 
 const activeStatuses = new Set(["scheduled", "introduced", "review_due"]);
+const reviewReward = 5;
+const recallDays = [1, 7, 30];
+const dayMs = 86_400_000;
+const reviewError = (status, message) =>
+  Object.assign(new Error(message), { status });
+const recallKey = (text) =>
+  text
+    .normalize("NFKC")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s\u2010-\u2015]+/g, "-");
 export function reviewInterval(days, outcome) {
   if (outcome === "needs_practice") return Math.max(1, Math.floor(days / 2));
   if (outcome === "comfortable")
@@ -67,6 +79,13 @@ export function createWordBloomService({ db, now = () => new Date() }) {
         "SELECT * FROM user_vocabulary WHERE user_id=? ORDER BY created_at,id",
       )
       .all(uid);
+  const recallProgress = (row) =>
+    JSON.parse(row.data).recallProgress || {
+      dueAt: row.created_at,
+      reviews: 0,
+      correct: 0,
+      streak: 0,
+    };
   const publicWord = (row) => ({
     ...JSON.parse(row.data),
     id: row.id,
@@ -76,7 +95,160 @@ export function createWordBloomService({ db, now = () => new Date() }) {
     intervalDays: Number(row.interval_days),
     exposureCount: Number(row.exposure_count),
     productiveUseCandidates: Number(row.productive_count),
+    recallProgress: recallProgress(row),
+    recallDue:
+      activeStatuses.has(row.status) && recallProgress(row).dueAt <= instant(),
   });
+  function reviewView(id, data) {
+    const { exercise, meaning, recall, reflection, word, result } = data;
+    return {
+      id,
+      title: exercise.title,
+      passage: exercise.passage,
+      meaning,
+      ...(recall && {
+        recall,
+        word,
+        example: exercise.example,
+        reflectionPrompt: exercise.prompt,
+      }),
+      ...(result && { result, reflection }),
+    };
+  }
+  async function withReview(uid, operation) {
+    return db.transaction(async () => {
+      await db.lockUser(uid);
+      const user = await profile(uid);
+      if (!enabled(user))
+        throw reviewError(
+          409,
+          "Enable vocabulary practice in My Dictionary to start a review.",
+        );
+      return operation(user);
+    });
+  }
+  async function startReview(uid) {
+    return withReview(uid, async () => {
+      const at = instant();
+      const due = (await rows(uid))
+        .filter(
+          (row) =>
+            activeStatuses.has(row.status) && recallProgress(row).dueAt <= at,
+        )
+        .sort((a, b) =>
+          recallProgress(a).dueAt.localeCompare(recallProgress(b).dueAt),
+        );
+      for (const row of due) {
+        const progress = recallProgress(row);
+        const existing = await db
+          .prepare(
+            "SELECT id,data FROM vocabulary_reviews WHERE user_id=? AND vocabulary_id=? AND scheduled_at=?",
+          )
+          .get(uid, row.id, progress.dueAt);
+        if (existing) return reviewView(existing.id, JSON.parse(existing.data));
+        const word = publicWord(row);
+        const exercise = vocabularyExercise(word.wordId, progress.reviews);
+        if (!exercise) continue;
+        const id = randomUUID();
+        const data = { exercise, meaning: word.meaning, word: word.word };
+        await db
+          .prepare(
+            "INSERT INTO vocabulary_reviews (id,user_id,vocabulary_id,scheduled_at,data) VALUES(?,?,?,?,?)",
+          )
+          .run(id, uid, row.id, progress.dueAt, JSON.stringify(data));
+        return reviewView(id, data);
+      }
+      return null;
+    });
+  }
+  async function reviewStep(uid, id, step, answer) {
+    return withReview(uid, async (user) => {
+      const review = await db
+        .prepare("SELECT * FROM vocabulary_reviews WHERE id=? AND user_id=?")
+        .get(id, uid);
+      if (!review) throw reviewError(404, "Review not found.");
+      const data = JSON.parse(review.data);
+      if (data.result || (step === "recall" && data.recall))
+        return reviewView(id, data);
+      const row = await db
+        .prepare("SELECT * FROM user_vocabulary WHERE id=? AND user_id=?")
+        .get(review.vocabulary_id, uid);
+      const prior = row && recallProgress(row);
+      if (
+        !prior ||
+        !activeStatuses.has(row.status) ||
+        prior.dueAt !== review.scheduled_at
+      )
+        throw reviewError(
+          409,
+          "This review is no longer due. Open a new review from My Dictionary.",
+        );
+      if (step === "recall") {
+        data.recall = {
+          answer,
+          correct: recallKey(answer) === recallKey(data.word),
+        };
+      } else {
+        if (!data.recall)
+          throw reviewError(409, "Try the recall exercise first.");
+        if (!wordSpans(answer, data.word).length)
+          throw reviewError(
+            400,
+            `Use “${data.word}” as written in your reflection.`,
+          );
+        if (answer.trim().split(/\s+/).length < 4)
+          throw reviewError(
+            400,
+            "Write a sentence that puts the word into context.",
+          );
+        const at = instant();
+        const streak = data.recall.correct ? prior.streak + 1 : 0;
+        const interval =
+          recallDays[Math.min(Math.max(streak - 1, 0), recallDays.length - 1)];
+        const progress = {
+          dueAt: new Date(Date.parse(at) + interval * dayMs).toISOString(),
+          reviews: prior.reviews + 1,
+          correct: prior.correct + Number(data.recall.correct),
+          streak,
+        };
+        const day = localDay(new Date(at), user.timezone || "UTC");
+        const reward = await db
+          .prepare(
+            "INSERT INTO reward_ledger VALUES(?,?,?,?,?,?,?) ON CONFLICT(user_id,source_key) DO NOTHING",
+          )
+          .run(
+            randomUUID(),
+            uid,
+            `vocabulary-review:${day}`,
+            day,
+            "vocabulary_review",
+            JSON.stringify({
+              xp: reviewReward,
+              completionId: id,
+              activity: "read_reflect",
+            }),
+            at,
+          );
+        const xp = reward.changes ? reviewReward : 0;
+        if (xp)
+          await db.prepare("UPDATE users SET xp=xp+? WHERE id=?").run(xp, uid);
+        const wordData = { ...JSON.parse(row.data), recallProgress: progress };
+        await db
+          .prepare(
+            "UPDATE user_vocabulary SET data=?,updated_at=? WHERE id=? AND user_id=?",
+          )
+          .run(JSON.stringify(wordData), at, row.id, uid);
+        data.reflection = answer;
+        data.result = { ...progress, xp, completedAt: at };
+      }
+      await db
+        .prepare(
+          "UPDATE vocabulary_reviews SET data=? WHERE id=? AND user_id=?",
+        )
+        .run(JSON.stringify(data), id, uid);
+      return reviewView(id, data);
+    });
+  }
   async function context(uid) {
     const user = await profile(uid);
     if (!enabled(user))
@@ -460,6 +632,13 @@ export function createWordBloomService({ db, now = () => new Date() }) {
           )
           .all(uid)
       ).map((row) => ({ ...row, data: JSON.parse(row.data) })),
+      reviews: (
+        await db
+          .prepare(
+            "SELECT * FROM vocabulary_reviews WHERE user_id=? ORDER BY scheduled_at",
+          )
+          .all(uid)
+      ).map((row) => ({ ...row, data: JSON.parse(row.data) })),
     };
   }
   return {
@@ -471,6 +650,8 @@ export function createWordBloomService({ db, now = () => new Date() }) {
     recordPronunciation: pronunciation.record,
     summary,
     changeWord,
+    startReview,
+    reviewStep,
     exportData,
   };
 }

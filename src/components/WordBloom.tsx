@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
+import { router } from "expo-router";
 import type {
   ReadingWord,
   WordBloomSummary,
@@ -7,7 +8,7 @@ import type {
 } from "../types";
 import { api, isDraftOwner } from "../lib/api";
 import { useApp } from "../lib/state";
-import { Button, C, Card, ErrorNote, T, Tag } from "./ui";
+import { Button, C, Card, ErrorNote, Icon, T } from "./ui";
 
 export function WordBloomPreview({ ids }: { ids?: string[] }) {
   return ids?.length ? <WordBloomPanel ids={ids} /> : null;
@@ -85,36 +86,53 @@ function WordBloomPanel({
   }
   const words =
     data?.words.filter((word) => progress || ids?.includes(word.id)) || [];
+  const saved = words.filter(({ status }) => status !== "dismissed");
+  const due = saved.filter(({ recallDue }) => recallDue).length;
+  const consistent = saved.filter(
+    ({ recallProgress }) => (recallProgress?.streak ?? 0) >= 3,
+  ).length;
   return (
     <Card
       testID={progress ? "wordbloom-progress" : "wordbloom-preview"}
-      style={{ gap: 14, backgroundColor: C.sage }}
+      style={{ gap: 14, backgroundColor: progress ? "#FFFCF4" : C.sage }}
     >
-      <Tag>WordBloom · optional</Tag>
-      <Text accessibilityRole="header" style={T.h2}>
-        {progress ? "Words along the way" : "Words to discover"}
-      </Text>
-      <Text style={T.body}>
-        {progress
-          ? "Reading exposures and provisional mentions are separate observations. Neither proves vocabulary mastery."
-          : "A small vocabulary opportunity from your response. Simple English is welcome; these are options, not corrections or replacement answers."}
-      </Text>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <Icon name="book-open" size={22} />
+        <Text accessibilityRole="header" style={T.h2}>
+          {progress ? "My Dictionary" : "Words to discover"}
+        </Text>
+      </View>
+      {!progress ? (
+        <Text style={T.body}>Explore words suggested from your response.</Text>
+      ) : null}
       <ErrorNote message={error} />
       {!data ? (
         <Text style={T.small}>Loading your vocabulary…</Text>
       ) : (
         <>
           {!data.enabled ? (
-            <Text style={T.small}>
-              WordBloom is paused. Already assigned passages stay as received;
-              new passages will not schedule these words.
-            </Text>
+            <Text style={T.small}>Vocabulary practice is paused.</Text>
           ) : null}
           {!words.length ? (
             <Text style={T.small}>
-              Words appear only when a useful opportunity is found. There is no
-              extra task to complete.
+              Words from Spin &amp; Speak will appear here when there’s a useful
+              suggestion.
             </Text>
+          ) : null}
+          {progress && saved.length ? (
+            <View style={{ gap: 10 }}>
+              <Text style={T.small}>
+                {saved.length} saved · {due} due · {consistent} with consistent
+                recall
+              </Text>
+              {data.enabled && due > 0 ? (
+                <Button
+                  label="Start Read & Reflect"
+                  icon="arrow-right"
+                  onPress={() => router.push("/vocabulary-review")}
+                />
+              ) : null}
+            </View>
           ) : null}
           {words.map((word) => (
             <View
@@ -129,14 +147,31 @@ function WordBloomPanel({
             >
               <Text style={T.h3}>{word.word}</Text>
               <Text style={T.body}>{word.meaning}</Text>
-              <Text style={T.small}>Example: {word.example}</Text>
+              <Text style={T.small}>{word.example}</Text>
+              <Text selectable style={T.body}>
+                From your response “{word.source.span.quote}”
+              </Text>
               {!progress ? (
-                <>
-                  <Text selectable style={T.body}>
-                    From your response: “{word.source.span.quote}”
-                  </Text>
-                  <Text style={T.small}>{word.source.reason}</Text>
-                </>
+                <Text style={T.small}>{word.source.reason}</Text>
+              ) : null}
+              {progress &&
+              word.recallProgress &&
+              word.status !== "dismissed" &&
+              word.status !== "familiar" ? (
+                <Text style={T.body}>
+                  {word.recallProgress.streak >= 3
+                    ? "Consistent recall"
+                    : word.recallProgress.reviews
+                      ? "Practising"
+                      : "New word"}
+                  {" · "}
+                  {word.recallProgress.correct}/{word.recallProgress.reviews}{" "}
+                  recall exercises correct
+                  {" · "}
+                  {word.recallDue
+                    ? "Due for review"
+                    : `Next review ${new Date(word.recallProgress.dueAt).toLocaleDateString(undefined, { timeZone: state!.profile.timezone })}`}
+                </Text>
               ) : null}
               <Text testID={`wordbloom-status-${word.wordId}`} style={T.small}>
                 {word.status === "dismissed"
@@ -199,18 +234,29 @@ function WordBloomPanel({
       )}
       {error ? (
         <Button
-          label="Reload WordBloom"
+          label="Reload My Dictionary"
           variant="secondary"
           onPress={() => setVersion((value) => value + 1)}
         />
       ) : null}
       {progress && data ? (
         <Button
-          label={data.enabled ? "Pause WordBloom" : "Resume WordBloom"}
+          label={
+            data.enabled
+              ? "Pause vocabulary practice"
+              : "Resume vocabulary practice"
+          }
           variant="secondary"
           disabled={!!busy}
           loading={busy === "preference"}
           onPress={() => void toggle()}
+        />
+      ) : null}
+      {!progress && data && words.length ? (
+        <Button
+          label="Open My Dictionary"
+          variant="ghost"
+          onPress={() => router.push("/profile")}
         />
       ) : null}
     </Card>

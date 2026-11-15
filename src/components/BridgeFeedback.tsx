@@ -4,6 +4,7 @@ import { getBridgeRubric } from "../../shared/bridge-rubric.mjs";
 import {
   THOUGHT_MAP_SAMPLE,
   THOUGHT_MAP_SAMPLE_TEXT,
+  THOUGHT_MAP_SAMPLE_NOTES,
 } from "../../shared/thought-map-sample.mjs";
 import { api } from "../lib/api";
 import type { Attempt } from "../types";
@@ -129,7 +130,13 @@ export function BridgeFeedback({
         />
       </Card>
       {map?.nodes.length ? (
-        <ThoughtMapView map={map} answer={attempt.text} />
+        <ThoughtMapView
+          map={map}
+          topic={attempt.prompt}
+          answer={attempt.text}
+          notes={attempt.planningNotes}
+          written={attempt.responseType === "text"}
+        />
       ) : (
         <Card style={{ gap: 12 }}>
           <Text style={T.h2}>
@@ -139,7 +146,9 @@ export function BridgeFeedback({
           <Text style={T.body}>
             {evaluation.provider === "local"
               ? "Local coaching has not extracted claims or reasoning from your response. Your saved words remain available below."
-              : "There was insufficient interpretable evidence for an extracted map. Missing evidence is not a low score."}
+              : map?.validationIncomplete
+                ? "The AI map could not be verified against your saved sources. Your BRIDGE feedback is available."
+                : "There was insufficient interpretable evidence for an extracted map. Missing evidence is not a low score."}
           </Text>
           <Button
             label={sample ? "Close sample map" : "View sample map"}
@@ -151,7 +160,9 @@ export function BridgeFeedback({
       {sample && !map?.nodes.length ? (
         <ThoughtMapView
           map={THOUGHT_MAP_SAMPLE}
+          topic="How could a shared garden help a neighbourhood?"
           answer={THOUGHT_MAP_SAMPLE_TEXT}
+          notes={THOUGHT_MAP_SAMPLE_NOTES}
           sample
         />
       ) : null}
@@ -248,7 +259,10 @@ export function BridgeFeedback({
                 </Text>
                 <ThoughtMapView
                   map={previous.evaluation.thought_map}
+                  topic={previous.prompt}
                   answer={previous.text}
+                  notes={previous.planningNotes}
+                  written={previous.responseType === "text"}
                 />
                 <Text style={T.small}>
                   The current map above uses your revised response. Compare the

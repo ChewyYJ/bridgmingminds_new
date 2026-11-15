@@ -80,6 +80,7 @@ interface PracticeDraft {
   session: Session;
   text: string;
   selfReflection?: string;
+  planningNotes?: string;
   transcriptEdited?: boolean;
   transcriptionMessage?: string;
   stage: Stage;
@@ -284,6 +285,7 @@ export function Practice({
   const [stage, setStage] = useState<Stage>("setup");
   const [session, setSession] = useState<Session | null>(null);
   const [text, setText] = useState("");
+  const [planningNotes, setPlanningNotes] = useState("");
   const [selfReflection, setSelfReflection] = useState("");
   const [reflectionExpanded, setReflectionExpanded] = useState(false);
   const [showResponse, setShowResponse] = useState(false);
@@ -412,6 +414,7 @@ export function Practice({
           if (draft.session?.id && matchesRequested(draft)) {
             setSession(draft.session);
             setText(draft.text || "");
+            setPlanningNotes(draft.planningNotes ?? draft.attempt?.planningNotes ?? "");
             setTranscriptEdited(
               draft.transcriptEdited ??
                 Boolean(!draft.text?.trim() && draft.attempt?.text?.trim()),
@@ -523,6 +526,7 @@ export function Practice({
           );
           if (!active) return;
           setSession(current);
+          setPlanningNotes(startingRetryAttempt.planningNotes || "");
           setStage("edit");
           if (startingRetryAttempt.status === "draft") {
             setAttempt(startingRetryAttempt);
@@ -591,6 +595,7 @@ export function Practice({
         session,
         text,
         selfReflection,
+        planningNotes,
         transcriptEdited,
         transcriptionMessage,
         stage,
@@ -615,6 +620,7 @@ export function Practice({
     session,
     text,
     selfReflection,
+    planningNotes,
     transcriptEdited,
     transcriptionMessage,
     stage,
@@ -699,6 +705,7 @@ export function Practice({
             session,
             text,
             selfReflection,
+            planningNotes,
             transcriptEdited,
             transcriptionMessage,
             stage,
@@ -767,7 +774,8 @@ export function Practice({
       if (!mounted.current) return;
       setSession(created);
       setDebateProvider(created.provider || "");
-      setPrep(15);
+      setPlanningNotes("");
+      setPrep(created.assessmentFramework === "bridge-v1" ? 45 : 15);
       setStage(
         mode === "spin_speak" ? "prep" : mode === "debate" ? "debate" : "edit",
       );
@@ -914,6 +922,7 @@ export function Practice({
             sessionId: session.id,
             text: text.trim(),
             selfReflection: note,
+            planningNotes: planningNotes.trim(),
             responseType: audioId ? "audio" : "text",
             audioId: audioId || undefined,
             retryOf,
@@ -961,6 +970,7 @@ export function Practice({
         body: {
           sessionId: session.id,
           text: "",
+          planningNotes: planningNotes.trim(),
           responseType: "audio",
           audioId: uploaded.id,
           durationSeconds: recording.duration,
@@ -1084,6 +1094,7 @@ export function Practice({
     setAudioUri("");
     setInput("text");
     setSelfReflection("");
+    setPlanningNotes(current.planningNotes || "");
     setShowResponse(false);
     setTranscriptEdited(false);
     setTranscriptionMessage("");
@@ -1435,6 +1446,22 @@ export function Practice({
                       Find one point. Give it a reason.
                     </Text>
                   </View>
+                  {session.assessmentFramework === "bridge-v1" ? (
+                    <Card style={{ gap: 8 }}>
+                      <Field
+                        label="Planning notes (optional)"
+                        value={planningNotes}
+                        onChangeText={setPlanningNotes}
+                        maxLength={2000}
+                        multiline
+                        placeholder="Jot down your points, reasons or examples…"
+                        style={{ minHeight: 105 }}
+                      />
+                      <Text style={T.small}>
+                        When AI feedback is enabled, your notes are submitted with your response to build the Thought Map.
+                      </Text>
+                    </Card>
+                  ) : null}
                   <View style={s.centered}>
                     <Button
                       label="Skip prep"

@@ -33,7 +33,7 @@ async function fixture(t) {
     const body = JSON.parse(options.body),
       supplied = JSON.parse(body.messages[1].content);
     const raw =
-      body.response_format.json_schema.name === "bridgingminds_bridge_v2"
+      body.response_format.json_schema.name === "bridgingminds_bridge_v3"
         ? bridgeFixture(supplied.ANSWER, supplied.applicable_dimensions)
         : {
             dimensions: [

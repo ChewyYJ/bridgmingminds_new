@@ -72,6 +72,53 @@ async function capture(page: Page, file: string) {
   await page.screenshot({ path: join(folder, file), fullPage: true });
 }
 
+test("My Dictionary starts a resumable Read & Reflect review", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1440, height: 960 });
+  await onboard(page);
+  await speak(page);
+  await page
+    .getByRole("button", { name: "Open My Dictionary", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "My Dictionary", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByTestId("wordbloom-item-collaborate")).toContainText(
+    "Due for review",
+  );
+  await page
+    .getByRole("button", { name: "Start Read & Reflect", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "The school podcast" }),
+  ).toBeVisible();
+  await page
+    .getByRole("textbox", { name: "Which word fits the blank?" })
+    .fill("collaborate");
+  await page.getByRole("button", { name: "Check answer", exact: true }).click();
+  await expect(page.getByText("You recalled “collaborate”")).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("You recalled “collaborate”")).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("read-and-reflect.png"),
+    fullPage: true,
+  });
+  await page
+    .getByRole("textbox", { name: "Your reflection · use “collaborate”" })
+    .fill("We can collaborate by sharing the research and the writing.");
+  await page.getByRole("button", { name: "Complete review" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Review complete" }),
+  ).toBeVisible();
+  await expect(page.getByText("+5 XP earned")).toBeVisible();
+  await page.getByRole("button", { name: "Back to My Dictionary" }).click();
+  await expect(page.getByTestId("wordbloom-item-collaborate")).toContainText(
+    "1/1 recall exercises correct",
+  );
+  expect((await state(page)).xp).toBe(20);
+});
+
 test("WordBloom travels from a real speaking response into reading without a third activity", async ({
   page,
 }) => {
@@ -127,13 +174,13 @@ test("WordBloom travels from a real speaking response into reading without a thi
     "1 provisional later-use candidates",
   );
   await page
-    .getByRole("button", { name: "Pause WordBloom", exact: true })
+    .getByRole("button", { name: "Pause vocabulary practice", exact: true })
     .click();
   await expect(page.getByTestId("wordbloom-progress")).toContainText(
-    "WordBloom is paused",
+    "Vocabulary practice is paused",
   );
   await page
-    .getByRole("button", { name: "Resume WordBloom", exact: true })
+    .getByRole("button", { name: "Resume vocabulary practice", exact: true })
     .click();
   await page
     .getByRole("button", { name: "I know collaborate", exact: true })

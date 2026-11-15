@@ -124,7 +124,7 @@ OPENAI_MODEL=gpt-6-luna
 OPENAI_TRANSCRIPTION_MODEL=gpt-transcribe
 ```
 
-Do not put secrets in an `EXPO_PUBLIC_*` variable. Those values are compiled into the client. The optional integration sends submitted answers and relevant prompt, reading summary or bounded debate context to OpenAI; transcription sends the selected recording. It has not been tested against a paid provider account in this build. Model access and billing belong to the configured account.
+Do not put secrets in an `EXPO_PUBLIC_*` variable. Those values are compiled into the client. The optional integration sends submitted answers and relevant context to OpenAI, including any BRIDGE planning notes for the Thought Map. Transcription sends the selected recording. It has not been tested against a paid provider account in this build. Model access and billing belong to the configured account.
 
 See the [minimal AI setup and troubleshooting guide](docs/ai-setup.md) for supported overrides, official model references, deprecation warnings and an intentional first live check. Health distinguishes configured settings from verified provider access; no automatic probe is made. Existing `.env.local` model overrides remain in effect until changed and the API restarted.
 

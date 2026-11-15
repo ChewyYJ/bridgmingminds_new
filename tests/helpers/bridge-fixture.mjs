@@ -1,5 +1,5 @@
 // Deterministic transport fixture, never a real assessment or production fallback.
-export function bridgeFixture(answer, applicable = ["B", "R", "I", "G", "E"]) {
+export function bridgeFixture(answer, applicable = ["B", "R", "I", "G", "E"], notes = "") {
   const excerpts = (answer.match(/[^.!?\n]+[.!?]/gu) || [answer])
     .map((text) => text.trim())
     .filter(
@@ -12,7 +12,7 @@ export function bridgeFixture(answer, applicable = ["B", "R", "I", "G", "E"]) {
     second = excerpts[1] || first;
   if (!first)
     throw new Error("Synthetic BRIDGE fixture needs a unique short excerpt.");
-  return {
+  const result = {
     dimensions: ["B", "R", "I", "D", "G", "E"].map((key) => ({
       key,
       level: applicable.includes(key) ? 3 : null,
@@ -36,6 +36,8 @@ export function bridgeFixture(answer, applicable = ["B", "R", "I", "G", "E"]) {
           text: first,
           source_quote: first,
           status: "explicit",
+          development: "developed",
+          note_quote: null,
           confidence: "medium",
           feedback:
             "This is an exact response excerpt in the synthetic fixture.",
@@ -46,6 +48,8 @@ export function bridgeFixture(answer, applicable = ["B", "R", "I", "G", "E"]) {
           text: second,
           source_quote: second,
           status: "explicit",
+          development: "needs_elaboration",
+          note_quote: null,
           confidence: "medium",
           feedback: "Inspect how this excerpt relates to the point.",
         },
@@ -55,6 +59,8 @@ export function bridgeFixture(answer, applicable = ["B", "R", "I", "G", "E"]) {
           text: null,
           source_quote: null,
           status: "missing",
+          development: null,
+          note_quote: null,
           confidence: "low",
           feedback: "What connection could make this reasoning clearer?",
         },
@@ -64,6 +70,8 @@ export function bridgeFixture(answer, applicable = ["B", "R", "I", "G", "E"]) {
           text: "The idea may depend on the situation.",
           source_quote: null,
           status: "inferred",
+          development: null,
+          note_quote: null,
           confidence: "low",
           feedback: "A proposed interpretation, not a learner quotation.",
         },
@@ -83,4 +91,24 @@ export function bridgeFixture(answer, applicable = ["B", "R", "I", "G", "E"]) {
     vocabulary_candidates: [],
     productive_uses: [],
   };
+  if (notes) {
+    result.argument_graph.nodes.push({
+      id: "planned",
+      type: "reason",
+      text: notes,
+      source_quote: null,
+      note_quote: notes,
+      status: "brainstorm_only",
+      development: null,
+      confidence: "medium",
+      feedback: "Explain how this planned point supports the main idea.",
+    });
+    result.argument_graph.edges.push({
+      id: "planned-support",
+      source: "planned",
+      target: "claim",
+      relation: "supports",
+    });
+  }
+  return result;
 }

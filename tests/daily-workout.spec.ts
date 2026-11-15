@@ -344,7 +344,7 @@ test("local BRIDGE shows six criteria and a clearly separate interactive sample 
   await expect(page.getByTestId("thought-map-source")).toHaveCount(0);
   await page.getByRole("button", { name: "Map view", exact: true }).click();
   await page.getByRole("button", { name: "Zoom in", exact: true }).click();
-  await expect(page.getByText(/Scroll to explore · 125%/)).toBeVisible();
+  await expect(page.getByText("Scroll sideways to explore")).toBeVisible();
   await screenshot(page, "bridge-sample-map-mobile.png");
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.getByTestId("thought-map-node-claim").focus();

@@ -30,6 +30,7 @@ import { Settings } from "./src/screens/Settings";
 import { Practice, Feedback } from "./src/screens/Practice";
 import Friends from "./src/screens/Friends";
 import { ReadAloud } from "./src/screens/DailyWorkout";
+import { VocabularyReviewScreen } from "./src/screens/VocabularyReview";
 import { Mode, Page, Article, Attempt } from "./src/types";
 import { api } from "./src/lib/api";
 const nav: [Page, string, string][] = [
@@ -57,7 +58,7 @@ export default function App() {
     id?: string;
   }>();
   const page = (pathname.split("/")[1] || "home") as
-    Page | "practice" | "attempt" | "friends" | "read-aloud";
+    Page | "practice" | "attempt" | "friends" | "read-aloud" | "vocabulary-review";
   const practiceMode: Mode =
     params.mode === "debate" || params.mode === "read_reflect"
       ? params.mode
@@ -101,7 +102,7 @@ export default function App() {
         }}
       />
     );
-  const immersive = page === "practice" || page === "attempt" || page === "read-aloud";
+  const immersive = page === "practice" || page === "attempt" || page === "read-aloud" || page === "vocabulary-review";
   const common = {
     state,
     articles,
@@ -241,9 +242,11 @@ export default function App() {
             }}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={{ width: "100%", maxWidth: immersive ? 1050 : 1280 }}>
+            <View style={{ width: "100%", maxWidth: page === "read-aloud" ? 1050 : 1280 }}>
               {page === "read-aloud" ? (
                 <ReadAloud key={state.profile.id} />
+              ) : page === "vocabulary-review" ? (
+                <VocabularyReviewScreen key={state.profile.id} />
               ) : page === "home" ? (
                 <Home {...common} />
               ) : page === "play" ? (

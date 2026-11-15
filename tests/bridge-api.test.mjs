@@ -21,12 +21,19 @@ async function fixture(t, configured = true) {
       supplied = JSON.parse(body.messages[1].content);
     assert.equal(
       body.response_format.json_schema.name,
-      "bridgingminds_bridge_v2",
+      "bridgingminds_bridge_v3",
     );
     assert.equal(supplied.selfReflection, undefined);
-    const raw = bridgeFixture(supplied.ANSWER, supplied.applicable_dimensions);
+    const raw = bridgeFixture(supplied.ANSWER, supplied.applicable_dimensions, supplied.PLANNING_NOTES);
     calls++;
-    if (broken) raw.argument_graph.edges[0].target = "missing-node";
+    if (broken) {
+      raw.argument_graph.edges[0].target = "missing-node";
+      raw.productive_uses = [{
+        word_id: "collaborate",
+        source_quote: raw.argument_graph.nodes[0].source_quote,
+        confidence: "high",
+      }];
+    }
     return Response.json({
       model: "offline-bridge-snapshot",
       choices: [
@@ -74,11 +81,12 @@ async function fixture(t, configured = true) {
     return result.data;
   };
   const guest = async () => (await ok("/auth/guest", null, {})).token;
-  const submit = async (token, session) =>
+  const submit = async (token, session, fields = {}) =>
     ok("/attempts", token, {
       sessionId: session.id,
       text: answer,
       selfReflection: "PRIVATE_NOTE_NOT_ASSESSMENT_EVIDENCE",
+      ...fields,
     });
   const complete = async (token, attempt) => {
     await ok(`/attempts/${attempt.id}/evaluate`, token, {});
@@ -105,7 +113,7 @@ async function fixture(t, configured = true) {
   };
 }
 
-test("invalid BRIDGE graphs complete as unassessed self-review without inventing feedback", async (t) => {
+test("invalid vocabulary and a broken connection do not discard verified feedback or map branches", async (t) => {
   const f = await fixture(t),
     token = await f.guest(),
     other = await f.guest();
@@ -119,14 +127,18 @@ test("invalid BRIDGE graphs complete as unassessed self-review without inventing
   const saved = await f.complete(token, attempt);
   assert.equal(saved.status, "completed");
   assert.equal(saved.text, answer);
-  assert.equal(saved.evaluation.provider, "local");
+  assert.equal(saved.evaluation.provider, "openai");
   assert.equal(saved.evaluation.rubric_version, "bridge-v1");
-  assert.equal(saved.evaluation.thought_map.status, "not_assessed");
-  assert.deepEqual(saved.evaluation.thought_map.nodes, []);
+  assert.equal(saved.evaluation.thought_map.status, "provisional");
+  assert.equal(saved.evaluation.thought_map.validationIncomplete, true);
+  assert.ok(saved.evaluation.dimensions.some((dimension) => dimension.level !== null));
+  assert.deepEqual(saved.evaluation.wordbloom?.uses || [], []);
   assert.equal(saved.rewards.xp, 15);
   assert.equal((await f.ok("/state", token)).xp, 15);
   const map = await f.ok(`/attempts/${attempt.id}/thought-map`, token);
-  assert.deepEqual(map.nodes, []);
+  assert.equal(map.nodes.length, 4);
+  assert.equal(map.edges.length, 2);
+  assert.ok(map.edges.every((edge) => edge.target !== "missing-node"));
   assert.equal(
     (await f.request(`/attempts/${attempt.id}/thought-map`, other)).status,
     404,
@@ -168,4 +180,24 @@ test("enrollment does not rewrite historical rubrics; new daily sessions use BRI
     legacy.evaluation,
   );
   assert.equal(f.calls, 0);
+});
+
+test("planning notes and map evidence persist across retries and restart", async (t) => {
+  const f = await fixture(t);
+  f.repair();
+  const token = await f.guest();
+  await f.ok("/daily-workout/enroll", token, {});
+  const session = await f.ok("/sessions", token, { mode: "spin_speak" });
+  const planningNotes = "Borrow tools from neighbours.";
+  const original = await f.submit(token, session, { planningNotes: "  " + planningNotes });
+  const saved = await f.complete(token, original);
+  assert.equal(saved.planningNotes, planningNotes);
+  const map = saved.evaluation.thought_map;
+  assert.equal(map.comparedNotes, true);
+  assert.equal(map.nodes.find((node) => node.id === "planned").quote, planningNotes);
+  const retry = await f.submit(token, session, { retryOf: original.id });
+  assert.equal(retry.planningNotes, planningNotes);
+  await f.complete(token, retry);
+  await f.restart();
+  assert.deepEqual(await f.ok(`/attempts/${original.id}/thought-map`, token), map);
 });

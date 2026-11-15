@@ -73,11 +73,13 @@ async function nav(page: Page, name: string) {
     .first()
     .click();
 }
-async function startSpeaking(page: Page) {
+async function startSpeaking(page: Page, planningNotes?: string) {
   await page.getByRole("button", { name: "Spin & Speak", exact: true }).click();
   await page
     .getByRole("button", { name: "Spin a prompt", exact: true })
     .click();
+  if (planningNotes)
+    await page.getByRole("textbox", { name: "Planning notes (optional)" }).fill(planningNotes);
   await page.getByRole("button", { name: "Skip prep", exact: true }).click();
 }
 async function reopenAudioDraft(page: Page) {
@@ -1715,6 +1717,33 @@ test("configured friend voice is transcribed, corrected, resumed and shared only
   } finally {
     await context.close();
   }
+});
+
+test("daily Thought Map uses the laptop canvas and shows saved planning evidence", async ({ page }, testInfo) => {
+  await onboard(page, "Map Learner");
+  await page.getByRole("button", { name: "Start my daily workout", exact: true }).click();
+  const note = "Mention what happens during school holidays.";
+  await startSpeaking(page, note);
+  await page.getByRole("textbox", { name: "Your response", exact: true }).fill(answer);
+  await page.getByRole("button", { name: "Get feedback", exact: true }).click();
+  const canvas = page.getByTestId("thought-map-canvas");
+  const planned = page.getByTestId("thought-map-node-planned");
+  await expect(planned).toContainText("Planned, left out");
+  await expect(page.getByTestId("thought-map-node-claim")).toContainText("Well developed");
+  await expect(page.getByTestId("thought-map-node-reason")).toContainText("Needs elaboration");
+  await expect(page.getByTestId("thought-map-node-link")).toContainText("Suggested gap");
+  const bounds = (await canvas.boundingBox())!;
+  const reason = (await page.getByTestId("thought-map-node-reason").boundingBox())!;
+  const plannedBounds = (await planned.boundingBox())!;
+  expect(bounds.width).toBeGreaterThan(1000);
+  expect(Math.abs(reason.x - plannedBounds.x)).toBeGreaterThan(200);
+  await planned.click();
+  await expect(page.getByTestId("thought-map-note-source")).toContainText(note);
+  await expect(page.getByTestId("thought-map-source")).toHaveCount(0);
+  await expect(page.getByTestId("thought-map-selected")).toContainText("Next step");
+  await canvas.screenshot({ path: testInfo.outputPath("thought-map-laptop.png") });
+  await page.getByRole("button", { name: "Text outline", exact: true }).click();
+  await expect(page.getByTestId("thought-map-outline-planned")).toBeVisible();
 });
 
 test("daily BRIDGE rejects a broken graph, recovers the same answer, and persists inspectable maps across a revision", async ({
