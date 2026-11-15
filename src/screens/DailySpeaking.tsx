@@ -647,8 +647,8 @@ export function DailySpeaking({
                               "script",
                               "complete",
                             ].includes(step))
-                            ? "#e2ead7"
-                            : "#f4f4f4",
+                            ? C.sage
+                            : C.cream,
                       },
                     ]}
                   >
@@ -865,7 +865,7 @@ export function DailySpeaking({
                       style={[s.tab, tab === name && s.tabActive]}
                     >
                       <Text
-                        style={[s.tabText, tab === name && { color: "#fff" }]}
+                        style={[s.tabText, tab === name && { fontFamily: "DMBold" }]}
                       >
                         {name}
                       </Text>
@@ -1183,7 +1183,7 @@ export function DailySpeaking({
                           disabled={busy || saved}
                           style={[
                             s.card,
-                            selected && { borderColor: "#345b48" },
+                            selected && { borderColor: C.forest, backgroundColor: C.cream },
                           ]}
                           onPress={() =>
                             setSelectedWordIds((ids) =>
@@ -1205,7 +1205,7 @@ export function DailySpeaking({
                                 saved || selected ? "check-square" : "square"
                               }
                               size={20}
-                              color="#345b48"
+                              color={C.forest}
                             />
                             <Text style={s.name}>
                               {word.word}
@@ -1304,7 +1304,7 @@ function ScriptText({ script }: { script: GuidedResponseDraft }) {
   for (const annotation of highlights) {
     fragments.push(script.text.slice(cursor, annotation.start));
     fragments.push(
-      <Text key={annotation.start} style={{ backgroundColor: "#ede6dd" }}>
+      <Text key={annotation.start} style={{ backgroundColor: C.sage }}>
         {annotation.quote}
       </Text>,
     );
@@ -1421,9 +1421,9 @@ const s = StyleSheet.create({
     width: "100%",
     maxWidth: 680,
     minHeight: 460,
-    backgroundColor: "#fff",
+    backgroundColor: C.paper,
     borderWidth: 1,
-    borderColor: "#e8ebe5",
+    borderColor: C.border,
     borderRadius: 24,
     padding: 24,
     gap: 20,
@@ -1501,7 +1501,7 @@ const s = StyleSheet.create({
   },
   progressFill: { height: "100%", backgroundColor: "#666", borderRadius: 5 },
   topicCard: {
-    backgroundColor: "#f8f8f8",
+    backgroundColor: C.cream,
     borderRadius: 18,
     padding: 20,
     minHeight: 160,
@@ -1519,7 +1519,7 @@ const s = StyleSheet.create({
   },
   action: {
     minHeight: 48,
-    borderRadius: 28,
+    borderRadius: 10,
     backgroundColor: C.forest,
     flexDirection: "row",
     alignItems: "center",
@@ -1542,15 +1542,15 @@ const s = StyleSheet.create({
     gap: 7,
     paddingVertical: 7,
     paddingHorizontal: 17,
-    borderRadius: 22,
-    backgroundColor: "#f1eeea",
+    borderRadius: 10,
+    backgroundColor: C.sage,
   },
   card: {
     borderWidth: 1,
-    borderColor: "#e8ebe5",
-    borderRadius: 17,
+    borderColor: C.border,
+    borderRadius: 12,
     padding: 17,
-    backgroundColor: "#fff",
+    backgroundColor: C.paper,
     gap: 10,
   },
   status: {
@@ -1560,17 +1560,19 @@ const s = StyleSheet.create({
     minHeight: 38,
   },
   divider: { height: 1, backgroundColor: "#f3f3f3" },
-  tabs: { flexDirection: "row", gap: 4 },
+  tabs: { flexDirection: "row", gap: 3, padding: 3, backgroundColor: C.cream, borderRadius: 12 },
   tab: {
     flex: 1,
-    minHeight: 36,
-    borderRadius: 22,
-    backgroundColor: "#f4f4f4",
+    minHeight: 40,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: "transparent",
+    backgroundColor: "transparent",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 5,
   },
-  tabActive: { backgroundColor: C.forest },
+  tabActive: { backgroundColor: C.sage, borderColor: C.border },
   tabText: {
     fontFamily: "DMMedium",
     fontSize: 11,
@@ -1596,7 +1598,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     minHeight: 48,
-    backgroundColor: "#fafafa",
+    backgroundColor: C.cream,
     paddingHorizontal: 10,
     borderRadius: 10,
   },

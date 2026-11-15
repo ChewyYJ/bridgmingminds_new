@@ -17,7 +17,7 @@ The learner records a one-minute pitch, receives first-attempt feedback, chooses
 
 ## Presentation
 
-Shared sans-serif headings, warm background, white bordered cards and one green primary action establish a consistent visual style. Secondary actions are quiet text. Feedback opens with two concise points; the thought map and guiding-answer details are collapsed. Recording and typing use separate views. The back button returns to first-attempt feedback.
+Shared sans-serif headings, warm ivory backgrounds, cream bordered cards and charcoal primary actions establish a consistent visual style. Buttons use 10px corners; feedback tabs use beige selected states and softly rectangular shapes matching the supplied reference. Secondary actions are quiet text. Feedback opens with two concise points; the thought map and guiding-answer details are collapsed. Recording and typing use separate views. The back button returns to first-attempt feedback.
 
 ## Verification
 

@@ -13,7 +13,7 @@ import type {
   BrainstormNote,
   BrainstormPoint,
 } from "../types";
-import { Icon } from "./ui";
+import { C, Icon } from "./ui";
 
 function key() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
@@ -334,7 +334,7 @@ export function DailyBoard({
           accessibilityRole="button"
           accessibilityLabel="Done brainstorming"
           onPress={onDone}
-          style={[s.pill, { backgroundColor: "#242424" }]}
+          style={[s.pill, { backgroundColor: C.forest }]}
         >
           <Text style={[s.label, { color: "#fff" }]}>Done</Text>
         </Pressable>
@@ -475,7 +475,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  selected: { backgroundColor: "#f2f2f2", borderColor: "#ccc" },
+  selected: { backgroundColor: C.sage, borderColor: C.border },
   footer: { flexDirection: "row", alignItems: "center", gap: 6 },
   round: {
     width: 38,
@@ -490,7 +490,7 @@ const s = StyleSheet.create({
   pill: {
     minWidth: 66,
     minHeight: 38,
-    borderRadius: 22,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: "#eee",
     alignItems: "center",

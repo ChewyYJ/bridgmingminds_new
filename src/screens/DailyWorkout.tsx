@@ -145,7 +145,7 @@ function ChallengeHub({
                 flexDirection: "row",
                 gap: 7,
                 alignItems: "center",
-                backgroundColor: "#eef2e8",
+                backgroundColor: C.sage,
                 paddingVertical: 8,
                 paddingHorizontal: 13,
                 borderRadius: 24,
@@ -228,7 +228,7 @@ function ChallengeHub({
                     width: 48,
                     height: 48,
                     borderRadius: 16,
-                    backgroundColor: "#eef2e8",
+                    backgroundColor: C.sage,
                     alignItems: "center",
                     justifyContent: "center",
                   }}

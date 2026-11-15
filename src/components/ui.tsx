@@ -14,17 +14,17 @@ import Feather from "@expo/vector-icons/Feather";
 import { usePressMotion } from "./Motion";
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export const C = {
-  cream: "#FAF8F2",
-  paper: "#FFFFFF",
-  forest: "#345B48",
-  ink: "#293C32",
-  muted: "#687261",
-  sage: "#E9EEDD",
-  peach: "#F6E3D2",
-  lilac: "#EBE6F5",
-  border: "#E5E7DE",
-  yellow: "#F6EAC3",
-  orange: "#C48451",
+  cream: "#F5F0E9",
+  paper: "#FFFCF8",
+  forest: "#34312E",
+  ink: "#292623",
+  muted: "#746C63",
+  sage: "#E6DCD1",
+  peach: "#EEE1D4",
+  lilac: "#E8E1DA",
+  border: "#D9CFC4",
+  yellow: "#F0DFAE",
+  orange: "#AE8352",
   red: "#A5453F",
 };
 export const T = StyleSheet.create({

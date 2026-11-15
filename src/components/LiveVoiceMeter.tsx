@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { C } from "./ui";
 
 const BAR_COUNT = 19;
 const empty = () => Array<number>(BAR_COUNT).fill(0);
@@ -71,7 +72,7 @@ export function LiveVoiceMeter({
               width: 5,
               borderRadius: 4,
               height: 5 + level * 43,
-              backgroundColor: active && level > 0.02 ? "#345b48" : "#d1d5cf",
+              backgroundColor: active && level > 0.02 ? C.forest : C.border,
             }}
           />
         ))}
