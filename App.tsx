@@ -198,7 +198,22 @@ export default function App() {
                   <Text style={[T.h2, { fontSize: 18 }]}>BridgingMinds</Text>
                 </View>
               )}
-              {page !== "garden" && (
+              {page === "home" ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Open your profile"
+                  onPress={() => navigate("profile")}
+                  testID="home-profile-avatar"
+                  style={({ pressed }) => [
+                    s.avatar,
+                    { width: 44, height: 44, opacity: pressed ? 0.7 : 1 },
+                  ]}
+                >
+                  <Text style={[T.h3, { fontSize: 18 }]}>
+                    {state.profile.displayName.charAt(0).toUpperCase()}
+                  </Text>
+                </Pressable>
+              ) : page !== "garden" ? (
                 <View
                   style={{
                     flexDirection: "row",
@@ -226,7 +241,7 @@ export default function App() {
                     />
                   )}
                 </View>
-              )}
+              ) : null}
             </View>
           )}
           <ScrollView
