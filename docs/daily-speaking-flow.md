@@ -22,6 +22,8 @@ The learner records a one-minute pitch, receives first-attempt feedback, chooses
 
 ## Presentation
 
+The news entry screen includes an animated wheel for drawing another headline before brainstorming. Each spin creates a fresh news session using the existing cross-activity exclusions. A failed request retains the current question and reuses its request key on retry; a successful draw persists in the local draft. Spinning is unavailable once a board or response exists, so existing work cannot be attached to another topic. The wheel respects reduced-motion preferences and uses outline icons without emoji. `tests/news-wheel.spec.ts` checks real session selection, failure/retry, reload, the selected board, and phone/desktop layouts.
+
 Shared sans-serif headings, warm ivory backgrounds, cream bordered cards and charcoal primary actions establish a consistent visual style. Buttons use 10px corners; feedback tabs use beige selected states and softly rectangular shapes matching the supplied reference. Secondary actions are quiet text. Feedback opens with two concise points; the thought map and guiding-answer details are collapsed. Recording and typing use separate views. The back button returns to first-attempt feedback.
 
 ## Verification

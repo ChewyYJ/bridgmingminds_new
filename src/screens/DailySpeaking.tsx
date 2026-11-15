@@ -36,6 +36,8 @@ import {
 } from "../../shared/guided-response.mjs";
 import AudioInput, { type RecordedAudio } from "../components/AudioInput";
 import { DailyBoard, createDailyBoard } from "../components/DailyBoard";
+import { NewsWheel } from "../components/NewsWheel";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import { ThoughtMapView } from "../components/ThoughtMap";
 import { C, Icon } from "../components/ui";
 import Svg, { Path } from "react-native-svg";
@@ -100,6 +102,8 @@ export function DailySpeaking({
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [spinning, setSpinning] = useState(false);
+  const reducedMotion = useReducedMotion();
   const [error, setError] = useState("");
   const [seconds, setSeconds] = useState(60);
   const [loadVersion, setLoadVersion] = useState(0);
@@ -127,6 +131,7 @@ export function DailySpeaking({
   const [savedWordIds, setSavedWordIds] = useState<string[]>([]);
   const submissionKey = useRef(unique());
   const sessionKey = useRef(unique());
+  const spinKey = useRef<string | null>(null);
   const lock = useRef(false);
   const mounted = useRef(true);
   const complete = useRef(onComplete);
@@ -156,7 +161,15 @@ export function DailySpeaking({
         const raw = await loadDraft(storage);
         if (!active) return;
         const saved = raw ? (JSON.parse(raw) as Draft) : null;
-        if (saved?.version === 1 && !(saved.step === "entry" && !saved.attempt && !saved.board && !saved.session.newsSource)) {
+        if (
+          saved?.version === 1 &&
+          !(
+            saved.step === "entry" &&
+            !saved.attempt &&
+            !saved.board &&
+            !saved.session.newsSource
+          )
+        ) {
           setSession(saved.session);
           setBoard(saved.board);
           setAttempt(saved.attempt);
@@ -538,7 +551,40 @@ export function DailySpeaking({
       setBusy(false);
     }
   }
+  async function spinNews() {
+    if (!ready || lock.current || board || attempt || retryAttempt) return;
+    lock.current = true;
+    setBusy(true);
+    setSpinning(true);
+    setError("");
+    spinKey.current ||= unique();
+    try {
+      const [next] = await Promise.all([
+        api<Session>("/sessions", {
+          method: "POST",
+          body: { mode: "spin_speak", idempotencyKey: spinKey.current },
+        }),
+        // Let the wheel complete one turn; reduced-motion users get the result immediately.
+        new Promise<void>((resolve) =>
+          setTimeout(resolve, reducedMotion ? 0 : 1100),
+        ),
+      ]);
+      if (!mounted.current) return;
+      setSession(next);
+      submissionKey.current = unique();
+      spinKey.current = null;
+    } catch (cause) {
+      if (mounted.current) setError(message(cause));
+    } finally {
+      lock.current = false;
+      if (mounted.current) {
+        setBusy(false);
+        setSpinning(false);
+      }
+    }
+  }
   function nextBoard() {
+    if (!session || lock.current) return;
     setBoard(createDailyBoard());
     setSeconds(60);
     setStep("board");
@@ -696,7 +742,17 @@ export function DailySpeaking({
             {error ? (
               <View accessibilityRole="alert" style={s.error}>
                 <Text style={s.small}>{error}</Text>
-                {!session ? <Action label="Retry question" secondary onPress={() => { setError(""); setReady(false); setLoadVersion((version) => version + 1); }} /> : null}
+                {!session ? (
+                  <Action
+                    label="Retry question"
+                    secondary
+                    onPress={() => {
+                      setError("");
+                      setReady(false);
+                      setLoadVersion((version) => version + 1);
+                    }}
+                  />
+                ) : null}
               </View>
             ) : null}
             {!ready ? (
@@ -717,17 +773,57 @@ export function DailySpeaking({
                       : "One minute to plan. One minute to speak."}
                   </Text>
                 </View>
-                <View style={s.topicCard}>
+                {!board && !attempt && !retryAttempt ? (
+                  <NewsWheel
+                    busy={spinning}
+                    disabled={!ready || busy}
+                    onSpin={() => void spinNews()}
+                  />
+                ) : null}
+                <View
+                  style={s.topicCard}
+                  accessibilityLiveRegion="polite"
+                  testID="daily-news-question"
+                >
                   <Icon name="message-circle" color="#242424" size={24} />
-                  <Text style={s.small}>{session?.newsSource ? "In the news" : "Your prompt"}</Text>
-                  {session?.newsSource ? <>
-                    <Text style={s.body}>{session.newsSource.title}</Text>
-                    <Pressable accessibilityRole="link" accessibilityLabel={`Read source at ${session.newsSource.source}`} onPress={() => void Linking.openURL(session.newsSource!.sourceUrl).catch(() => setError("Couldn’t open the source. Please try again."))} style={s.quiet}>
-                      <Text style={s.small}>{session.newsSource.source} · {new Date(session.newsSource.publishedAt).toLocaleDateString("en", { month: "short", day: "numeric" })} ↗</Text>
-                    </Pressable>
-                  </> : null}
+                  <Text style={s.small}>
+                    {session?.newsSource ? "In the news" : "Your prompt"}
+                  </Text>
+                  {session?.newsSource ? (
+                    <>
+                      <Text style={s.body}>{session.newsSource.title}</Text>
+                      <Pressable
+                        accessibilityRole="link"
+                        accessibilityLabel={`Read source at ${session.newsSource.source}`}
+                        onPress={() =>
+                          void Linking.openURL(
+                            session.newsSource!.sourceUrl,
+                          ).catch(() =>
+                            setError(
+                              "Couldn’t open the source. Please try again.",
+                            ),
+                          )
+                        }
+                        style={s.quiet}
+                      >
+                        <Text style={s.small}>
+                          {session.newsSource.source} ·{" "}
+                          {new Date(
+                            session.newsSource.publishedAt,
+                          ).toLocaleDateString("en", {
+                            month: "short",
+                            day: "numeric",
+                          })}{" "}
+                          ↗
+                        </Text>
+                      </Pressable>
+                    </>
+                  ) : null}
                   <Text style={s.topic}>
-                    {session?.prompt.question || (ready ? "Your news question is unavailable." : "Loading today’s question…")}
+                    {session?.prompt.question ||
+                      (ready
+                        ? "Your news question is unavailable."
+                        : "Loading today’s question…")}
                   </Text>
                 </View>
                 <Action
@@ -738,6 +834,7 @@ export function DailySpeaking({
                 />
                 <Pressable
                   accessibilityRole="button"
+                  disabled={busy}
                   onPress={() => void leave()}
                   style={s.quiet}
                 >
@@ -747,11 +844,16 @@ export function DailySpeaking({
             )}
             {step === "board" && board && (
               <>
-                <Text style={s.copy}>{session?.newsSource ? session.prompt.question : "A point. A reason. An example."}</Text>
+                <Text style={s.copy}>
+                  {session?.newsSource
+                    ? session.prompt.question
+                    : "A point. A reason. An example."}
+                </Text>
                 <View style={s.timerPill}>
                   <Icon name="clock" color="#242424" size={17} />
                   <Text style={s.name}>
-                    {String(Math.floor(seconds / 60)).padStart(2, "0")}:{String(seconds % 60).padStart(2, "0")}
+                    {String(Math.floor(seconds / 60)).padStart(2, "0")}:
+                    {String(seconds % 60).padStart(2, "0")}
                   </Text>
                 </View>
                 <View
@@ -760,7 +862,11 @@ export function DailySpeaking({
                   <DailyBoard
                     board={board}
                     onChange={setBoard}
-                    topic={session?.newsSource?.title || session?.prompt.question || "My view"}
+                    topic={
+                      session?.newsSource?.title ||
+                      session?.prompt.question ||
+                      "My view"
+                    }
                     onDone={finishBoard}
                   />
                 </View>
@@ -876,7 +982,10 @@ export function DailySpeaking({
                       style={[s.tab, tab === name && s.tabActive]}
                     >
                       <Text
-                        style={[s.tabText, tab === name && { fontFamily: "DMBold" }]}
+                        style={[
+                          s.tabText,
+                          tab === name && { fontFamily: "DMBold" },
+                        ]}
                       >
                         {name}
                       </Text>
@@ -955,7 +1064,12 @@ export function DailySpeaking({
             )}
             {step === "guide" && (
               <>
-                {busy ? <View style={s.center}><ActivityIndicator color={C.forest} /><Text style={s.small}>Checking your answer…</Text></View> : null}
+                {busy ? (
+                  <View style={s.center}>
+                    <ActivityIndicator color={C.forest} />
+                    <Text style={s.small}>Checking your answer…</Text>
+                  </View>
+                ) : null}
                 <Text style={s.copy}>
                   Choose a question. Build on your first answer.
                 </Text>
@@ -1182,7 +1296,10 @@ export function DailySpeaking({
                           disabled={busy || saved}
                           style={[
                             s.card,
-                            selected && { borderColor: C.forest, backgroundColor: C.cream },
+                            selected && {
+                              borderColor: C.forest,
+                              backgroundColor: C.cream,
+                            },
                           ]}
                           onPress={() =>
                             setSelectedWordIds((ids) =>
@@ -1314,9 +1431,15 @@ function BridgeSummary({
         const unavailable = evaluation.provider === "local";
         const unassessed = !dimension || dimension.status === "not_assessed";
         return (
-          <View key={criterion.key} testID={`bridge-criterion-${criterion.key}`} style={s.bridgeCard}>
+          <View
+            key={criterion.key}
+            testID={`bridge-criterion-${criterion.key}`}
+            style={s.bridgeCard}
+          >
             <View style={s.bridgeHeader}>
-              <View style={s.bridgeLetter}><Text style={s.bridgeLetterText}>{criterion.key}</Text></View>
+              <View style={s.bridgeLetter}>
+                <Text style={s.bridgeLetterText}>{criterion.key}</Text>
+              </View>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={s.name}>{criterion.label}</Text>
                 <Text style={s.small}>{bridgeHints[criterion.key]}</Text>
@@ -1648,7 +1771,13 @@ const s = StyleSheet.create({
     minHeight: 38,
   },
   divider: { height: 1, backgroundColor: "#f3f3f3" },
-  tabs: { flexDirection: "row", gap: 3, padding: 3, backgroundColor: C.cream, borderRadius: 12 },
+  tabs: {
+    flexDirection: "row",
+    gap: 3,
+    padding: 3,
+    backgroundColor: C.cream,
+    borderRadius: 12,
+  },
   tab: {
     flex: 1,
     minHeight: 40,
