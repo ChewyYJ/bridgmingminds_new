@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { READING_CRITERIA } from "../../shared/reading-rubric.mjs";
 import {
   ActivityIndicator,
+  ScrollView,
   Pressable,
   Text,
   View,
@@ -119,54 +122,97 @@ function ChallengeHub({
       }}
       testID="daily-hub"
     >
-      <View style={{ gap: 9 }}>
+      <View style={{ gap: 14 }}>
         <View
           style={{
             flexDirection: "row",
-            flexWrap: "wrap",
-            alignItems: "center",
+            alignItems: "flex-start",
             justifyContent: "space-between",
             gap: 14,
           }}
         >
-          <Text
-            accessibilityRole="header"
-            style={{
-              fontFamily: "DMBold",
-              fontSize: wide ? 38 : 29,
-              color: C.ink,
-            }}
-          >
-            Daily challenge
-          </Text>
-          {daily ? (
-            <View
+          <View style={{ flex: 1, gap: 9, paddingTop: 4 }}>
+            <Text
+              accessibilityRole="header"
               style={{
-                flexDirection: "row",
-                gap: 7,
-                alignItems: "center",
-                backgroundColor: C.sage,
-                paddingVertical: 8,
-                paddingHorizontal: 13,
-                borderRadius: 24,
+                fontFamily: "DMBold",
+                fontSize: wide ? 38 : 29,
+                color: C.ink,
               }}
             >
-              <Icon name={complete ? "check-circle" : "circle"} size={17} />
+              Daily challenge
+            </Text>
+            <Text testID="daily-streak-status" style={T.body}>
+              {complete
+                ? "Both done. See you tomorrow."
+                : `${first}, choose where to start.`}
+            </Text>
+          </View>
+          <View
+            testID="home-streak"
+            accessible
+            accessibilityLabel={`${daily?.streak.current ?? 0} day streak. ${daily?.streak.securedToday ? "Today secured." : "Complete both daily activities to build your streak."}`}
+            style={{
+              minWidth: wide ? 156 : 112,
+              paddingHorizontal: wide ? 22 : 14,
+              paddingVertical: 14,
+              borderRadius: 14,
+              backgroundColor: "#F7EAD2",
+              borderWidth: 1,
+              borderColor: "#E8D2AD",
+              alignItems: "center",
+              gap: 3,
+            }}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
+              <Ionicons
+                name="flame-outline"
+                size={wide ? 32 : 28}
+                color="#916A36"
+              />
               <Text
-                testID="daily-progress"
-                style={{ ...T.small, fontFamily: "DMBold" }}
+                style={{
+                  fontFamily: "DMBold",
+                  fontSize: wide ? 38 : 32,
+                  lineHeight: wide ? 44 : 38,
+                  color: C.ink,
+                }}
               >
-                {daily.completed}/{daily.required}
+                {daily?.streak.current ?? 0}
               </Text>
-              <Text style={T.small}>done</Text>
             </View>
-          ) : null}
+            <Text style={{ ...T.small, fontFamily: "DMBold", color: C.ink }}>
+              Day streak
+            </Text>
+            <Text style={{ ...T.small, fontSize: 11, color: "#785631" }}>
+              {daily?.streak.securedToday
+                ? "Today secured"
+                : daily?.streak.current
+                  ? "Keep it growing"
+                  : "Start today"}
+            </Text>
+          </View>
         </View>
-        <Text testID="daily-streak-status" style={T.body}>
-          {complete
-            ? "Both done. Come back tomorrow, or keep practising."
-            : `${first}, choose where to start.`}
-        </Text>
+        {daily ? (
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 7,
+              alignItems: "center",
+            }}
+          >
+            <Icon name={complete ? "check-circle" : "circle"} size={17} />
+            <Text
+              testID="daily-progress"
+              style={{ ...T.small, fontFamily: "DMBold" }}
+            >
+              {daily.completed}/{daily.required}
+            </Text>
+            <Text style={T.small}>done today · {daily.xp} XP</Text>
+          </View>
+        ) : null}
       </View>
       <View style={{ flexDirection: wide ? "row" : "column", gap: 16 }}>
         {[
@@ -277,19 +323,6 @@ function ChallengeHub({
           );
         })}
       </View>
-      {daily ? (
-        <View
-          style={{
-            flexDirection: "row",
-            flexWrap: "wrap",
-            gap: 18,
-            alignItems: "center",
-          }}
-        >
-          <Text style={T.small}>{daily.streak.current} day streak</Text>
-          <Text style={T.small}>{daily.xp} XP today</Text>
-        </View>
-      ) : null}
       <View
         style={{
           borderTopWidth: 1,
@@ -302,7 +335,7 @@ function ChallengeHub({
         }}
       >
         <Button
-          label="My garden"
+          label="Homeland"
           icon="sun"
           variant="ghost"
           onPress={() => router.push("/garden" as never)}
@@ -319,50 +352,26 @@ function ChallengeHub({
 }
 
 export function ReadAloud() {
+  const { height } = useWindowDimensions();
   const { state, refresh } = useApp();
   const uid = state!.profile.id;
   const [assignment, setAssignment] = useState<ReadingAssignment | null>(null);
   const [notes, setNotes] = useState("");
-  const [confirmed, setConfirmed] = useState(false);
   const [wordReviews, setWordReviews] = useState<
     Record<string, WordReviewOutcome>
   >({});
   const [recording, setRecording] = useState(false);
-  const [review, setReview] = useState(false);
-  const [audio, setAudio] = useState<{ id: string; uri: string } | null>(null);
-  const [speechLocales, setSpeechLocales] = useState<string[] | null>(null);
-  const [speechLocale, setSpeechLocale] = useState<"en-GB" | "en-US" | null>(
-    null,
-  );
-  const [speechConsent, setSpeechConsent] = useState(false);
-  const [speechRequested, setSpeechRequested] = useState(false);
+  const [playbackUri, setPlaybackUri] = useState("");
+  const [selfReview, setSelfReview] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<ReadAloudAttempt | null>(null);
-  const [attemptAgain, setAttemptAgain] = useState(false);
   const [loadVersion, setLoadVersion] = useState(0);
+  const [provider, setProvider] = useState("AI speech service");
   const requestKey = useRef<string | null>(null);
-  const draftWrites = useRef(Promise.resolve());
+  const audio = useRef<{ id: string; uri: string } | null>(null);
   const controller = useRef<AbortController | null>(null);
-  useEffect(() => {
-    const abort = new AbortController();
-    void api<{ locales: { locale: string; status: string }[] }>(
-      "/read-aloud/speech-capabilities",
-      { signal: abort.signal },
-    )
-      .then((capability) => {
-        if (!abort.signal.aborted && isDraftOwner(uid))
-          setSpeechLocales(
-            capability.locales
-              .filter((item) => item.status === "available")
-              .map((item) => item.locale),
-          );
-      })
-      .catch(() => {
-        if (!abort.signal.aborted && isDraftOwner(uid)) setSpeechLocales([]);
-      });
-    return () => abort.abort();
-  }, [uid]);
+  const lock = useRef(false);
   useEffect(() => {
     const abort = new AbortController();
     controller.current = abort;
@@ -373,69 +382,82 @@ export function ReadAloud() {
         if (abort.signal.aborted || !isDraftOwner(uid)) return;
         setAssignment(next);
         setResult(next.latestAttempt || null);
-        if (!next.latestAttempt) {
-          const draft = await loadDraft(`read-aloud:${next.id}`);
-          if (!abort.signal.aborted && isDraftOwner(uid)) {
-            setNotes(draft);
-            setReview(Boolean(draft));
-          }
-        }
+        const draft = await loadDraft(`read-aloud:${next.id}`);
+        if (!abort.signal.aborted && isDraftOwner(uid)) setNotes(draft);
       })
-      .catch((e) => {
-        if (!abort.signal.aborted) setError(e.message);
+      .catch((cause) => {
+        if (!abort.signal.aborted) setError(cause.message);
       });
+    void api<{ locales: { provider: string; status: string }[] }>(
+      "/read-aloud/speech-capabilities",
+      { signal: abort.signal },
+    )
+      .then((caps) => {
+        const active = caps.locales.find((item) => item.status === "available");
+        if (!abort.signal.aborted && isDraftOwner(uid))
+          setProvider(
+            active?.provider === "openai"
+              ? "OpenAI"
+              : active?.provider === "azure"
+                ? "Microsoft Azure"
+                : "AI speech service",
+          );
+      })
+      .catch(() => {});
     return () => {
       abort.abort();
       controller.current = null;
     };
   }, [uid, loadVersion]);
-  async function allowRecording() {
+
+  async function startRecording() {
     setBusy(true);
     setError("");
     try {
-      await api("/me", {
-        method: "PATCH",
-        body: { consent: { recording: true } },
-        signal: controller.current?.signal,
-      });
-      if (!isDraftOwner(uid)) return;
-      await refresh();
-      setRecording(true);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Please try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function saveRecording(recorded: RecordedAudio) {
-    setBusy(true);
-    setError("");
-    try {
-      if (recorded.duration < 3)
-        throw new Error(
-          "This take is very short. Read a few sentences before saving, or use accessible self-review.",
+      if (!state?.profile.consent?.recording) {
+        await api("/me", {
+          method: "PATCH",
+          body: { consent: { recording: true } },
+          signal: controller.current?.signal,
+        });
+        await refresh();
+      }
+      if (isDraftOwner(uid)) {
+        setSelfReview(false);
+        setRecording(true);
+      }
+    } catch (cause) {
+      if (isDraftOwner(uid))
+        setError(
+          cause instanceof Error ? cause.message : "Microphone unavailable.",
         );
-      const saved = await uploadAudio(recorded.uri, recorded.mime, {
-        signal: controller.current?.signal,
-      });
-      if (!isDraftOwner(uid)) return;
-      setAudio({ id: saved.id, uri: recorded.uri });
-      setRecording(false);
-      requestKey.current = null;
-    } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Could not upload your recording.",
-      );
     } finally {
       setBusy(false);
     }
   }
-  async function submit() {
-    if (!assignment || busy) return;
+
+  async function submit(recorded?: RecordedAudio) {
+    if (!assignment || lock.current) return;
+    lock.current = true;
     setBusy(true);
     setError("");
-    requestKey.current ||= `reading-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     try {
+      if (recorded) {
+        if (recorded.duration < 3)
+          throw new Error(
+            "Read for a few seconds so there’s enough speech to assess.",
+          );
+        if (audio.current?.uri !== recorded.uri) {
+          const saved = await uploadAudio(recorded.uri, recorded.mime, {
+            signal: controller.current?.signal,
+          });
+          if (!isDraftOwner(uid)) return;
+          audio.current = { id: saved.id, uri: recorded.uri };
+          setPlaybackUri(recorded.uri);
+          requestKey.current = null;
+        }
+      }
+      requestKey.current ||= `reading-${Date.now()}-${Math.random().toString(36).slice(2)}`;
       const saved = await api<ReadAloudAttempt>(
         `/read-aloud/assignments/${assignment.id}/submit`,
         {
@@ -443,382 +465,269 @@ export function ReadAloud() {
           signal: controller.current?.signal,
           body: {
             idempotencyKey: requestKey.current,
-            notes,
-            selfReviewConfirmed: confirmed,
-            ...(Object.keys(wordReviews).length
+            ...(recorded
               ? {
-                  wordReviews: Object.entries(wordReviews).map(
-                    ([vocabularyId, outcome]) => ({ vocabularyId, outcome }),
-                  ),
+                  audioId: audio.current!.id,
+                  evaluateRecording: true,
+                  processingConsent: true,
                 }
-              : {}),
-            ...(audio ? { audioId: audio.id } : {}),
+              : { notes: notes.trim(), selfReviewConfirmed: true }),
+            wordReviews: Object.entries(wordReviews).map(
+              ([vocabularyId, outcome]) => ({ vocabularyId, outcome }),
+            ),
           },
         },
       );
-      if (!isDraftOwner(uid)) return;
-      if (
-        audio &&
-        speechConsent &&
-        speechLocale &&
-        speechLocales?.includes(speechLocale)
-      ) {
-        setSpeechRequested(true);
-        try {
-          await api(`/read-aloud/attempts/${saved.id}/speech-assessment`, {
-            method: "POST",
-            body: {
-              locale: speechLocale,
-              prosody: false,
-              processingConsent: true,
-            },
-            signal: controller.current?.signal,
-          });
-        } catch (cause) {
-          if (isDraftOwner(uid))
-            setError(
-              cause instanceof Error
-                ? cause.message
-                : "Your reading is saved. Please retry speech feedback below.",
-            );
-        }
-      }
       if (!isDraftOwner(uid) || controller.current?.signal.aborted) return;
       setResult(saved);
-      setAttemptAgain(false);
-      await draftWrites.current;
-      if (isDraftOwner(uid)) await deleteDraft(`read-aloud:${assignment.id}`);
+      setRecording(false);
+      setSelfReview(false);
+      await deleteDraft(`read-aloud:${assignment.id}`);
       await refresh();
-    } catch (e) {
-      setError(
-        e instanceof Error
-          ? e.message
-          : "Your work is kept here. Please try again.",
-      );
+    } catch (cause) {
+      if (isDraftOwner(uid))
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Your recording is kept here. Please try Done again.",
+        );
     } finally {
+      lock.current = false;
       setBusy(false);
     }
   }
+
+  async function assessmentComplete() {
+    try {
+      const next = await api<ReadingAssignment>("/read-aloud/assignment", {
+        signal: controller.current?.signal,
+      });
+      if (!isDraftOwner(uid) || controller.current?.signal.aborted) return;
+      setAssignment(next);
+      setResult(next.latestAttempt || null);
+      await refresh();
+    } catch {
+      /* The saved job remains recoverable on reload. */
+    }
+  }
+
+  function again() {
+    setResult(null);
+    setRecording(false);
+    setSelfReview(false);
+    setNotes("");
+    setWordReviews({});
+    audio.current = null;
+    setPlaybackUri("");
+    requestKey.current = null;
+    setError("");
+  }
+
   return (
     <View
-      style={{ gap: 20, maxWidth: 820, width: "100%", alignSelf: "center" }}
+      style={{ gap: 20, maxWidth: 680, width: "100%", alignSelf: "center" }}
     >
       <Button
         label="Daily challenge"
         icon="arrow-left"
         variant="ghost"
         onPress={() => router.push("/")}
+        style={{ alignSelf: "flex-start" }}
       />
-      <Text accessibilityRole="header" style={T.title}>
-        Read aloud
-      </Text>
+      <View style={{ gap: 6 }}>
+        <Text accessibilityRole="header" style={T.title}>
+          {result
+            ? result.audioId
+              ? "Your reading feedback"
+              : "Practice saved"
+            : "Read aloud"}
+        </Text>
+        <Text style={T.body}>
+          {result
+            ? "One small step towards clearer speech."
+            : recording
+              ? "Read at your own pace. Tap Done when you finish."
+              : "Find your rhythm, one passage at a time."}
+        </Text>
+      </View>
       <ErrorNote message={error} />
       {!assignment ? (
-        <Card style={{ gap: 12 }}>
-          {!error ? <ActivityIndicator color={C.forest} /> : null}
-          <Text style={T.body}>
-            {error
-              ? "Your reading could not be loaded."
-              : "Preparing your reading…"}
-          </Text>
-          {error ? (
-            <Button
-              label="Reload reading"
-              onPress={() => {
-                setError("");
-                setLoadVersion((value) => value + 1);
-              }}
-            />
-          ) : null}
+        <Card>
+          <ActivityIndicator color={C.forest} />
+          <Button
+            label="Retry"
+            variant="ghost"
+            onPress={() => setLoadVersion((value) => value + 1)}
+          />
         </Card>
+      ) : result ? (
+        <>
+          {result.audioId ? (
+            <>
+              <Card style={{ gap: 8 }}>
+                <Text style={T.h3}>Your recording</Text>
+                {playbackUri ? (
+                  <AudioPlayback uri={playbackUri} />
+                ) : (
+                  <PrivateRecordingPlayback id={result.audioId} autoLoad />
+                )}
+              </Card>
+              <ReadingSpeech
+                key={result.id}
+                attempt={result}
+                feedbackRequested
+                onComplete={assessmentComplete}
+              />
+            </>
+          ) : (
+            <Card style={{ gap: 12 }}>
+              <Tag>Self-review · no AI assessment</Tag>
+              <Text style={T.body}>{result.text}</Text>
+              <Text style={T.small}>{result.evaluation.next_step}</Text>
+            </Card>
+          )}
+          {result.rewards.xp > 0 ? (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: 16,
+                borderRadius: 12,
+                backgroundColor: C.sage,
+              }}
+            >
+              <Text testID="reading-reward" style={T.h3}>
+                +{result.rewards.xp} XP
+              </Text>
+              <Text style={T.small}>Practice complete</Text>
+            </View>
+          ) : null}
+          <Button
+            label="Read again"
+            icon="mic"
+            variant="secondary"
+            onPress={again}
+          />
+          <Button
+            label="Continue"
+            icon="arrow-right"
+            onPress={() => router.push("/")}
+          />
+        </>
       ) : (
         <>
-          {!review && (!result || attemptAgain) ? (
-            <Card style={{ gap: 14 }}>
-              <Tag>Your passage</Tag>
-              <Text style={T.h2}>{assignment.passage.title}</Text>
+          {!recording && !selfReview ? (
+            <Button
+              label="Record the passage"
+              icon="mic"
+              loading={busy}
+              onPress={() => void startRecording()}
+            />
+          ) : null}
+          <Card style={{ gap: 16 }}>
+            <Tag>Your passage</Tag>
+            <Text style={T.h2}>{assignment.passage.title}</Text>
+            <ScrollView
+              nestedScrollEnabled
+              style={
+                recording
+                  ? { maxHeight: Math.min(350, height * 0.3) }
+                  : undefined
+              }
+            >
               <WordBloomPassage
                 text={assignment.passage.text}
                 words={assignment.wordbloom?.words || []}
                 reviews={wordReviews}
-                allowReview={!result || attemptAgain}
+                allowReview
                 onReview={(id, outcome) => {
                   setWordReviews((current) => ({ ...current, [id]: outcome }));
                   requestKey.current = null;
                 }}
               />
-              <Text style={T.small}>
-                Try this: {assignment.passage.target}.
+            </ScrollView>
+            <Text style={T.small}>Try this: {assignment.passage.target}.</Text>
+          </Card>
+          {recording ? (
+            <Card style={{ gap: 12 }}>
+              <AudioInput
+                appearance="reading"
+                reviewActionLabel="Done"
+                onRecorded={submit}
+                onCancel={() => setRecording(false)}
+                busy={busy}
+              />
+              <Text style={[T.small, { textAlign: "center" }]}>
+                Done sends your recording to {provider} for feedback. Your
+                recording stays private.
               </Text>
             </Card>
-          ) : null}
-          {result && !attemptAgain ? (
+          ) : selfReview ? (
             <Card style={{ gap: 14 }}>
-              <Text accessibilityRole="header" style={T.h2}>
-                Your reading feedback
+              <Text style={T.h3}>Practise without recording</Text>
+              <Text style={T.small}>
+                Save your own observation. This won’t evaluate your speech.
               </Text>
-              {result.audioId ? (
-                <PrivateRecordingPlayback id={result.audioId} />
-              ) : null}
-              {result.audioId ? (
-                <ReadingSpeech
-                  key={result.id}
-                  attempt={result}
-                  feedbackRequested={speechRequested}
-                />
-              ) : null}
-              <View style={{ gap: 6 }}>
-                <Text style={T.h3}>Practice tip</Text>
-                <Text style={T.body}>{result.evaluation.next_step}</Text>
-              </View>
-              <View style={{ gap: 6 }}>
-                <Text style={T.h3}>Your observation</Text>
-                <Text selectable style={T.body}>
-                  {result.text}
-                </Text>
-              </View>
-              <Text testID="reading-reward" style={T.h3}>
-                {result.rewards.xp
-                  ? `+${result.rewards.xp} XP`
-                  : "Extra practice saved · no duplicate XP"}
-              </Text>
-              <Text style={T.body}>
-                {state?.dailyWorkout?.completed === 2
-                  ? "2/2 · daily workout complete. Streak secured."
-                  : `${state?.dailyWorkout?.completed || 0}/2 done today.`}
-              </Text>
-              <Button
-                label="Return to daily workout"
-                onPress={() => router.push("/")}
+              <Field
+                label="Your reading observation"
+                value={notes}
+                multiline
+                placeholder="What did you notice about your reading?"
+                onChangeText={(value: string) => {
+                  setNotes(value);
+                  requestKey.current = null;
+                  void saveDraft(`read-aloud:${assignment.id}`, value).catch(
+                    () => {},
+                  );
+                }}
               />
               <Button
-                label="Read again for practice"
-                variant="secondary"
-                onPress={() => {
-                  setAttemptAgain(true);
-                  setReview(false);
-                  setNotes("");
-                  setConfirmed(false);
-                  setWordReviews({});
-                  setAudio(null);
-                  setSpeechConsent(false);
-                  setSpeechLocale(null);
-                  setSpeechRequested(false);
-                  requestKey.current = null;
-                }}
+                label="Done"
+                loading={busy}
+                disabled={notes.trim().length < 20}
+                onPress={() => void submit()}
+              />
+              <Button
+                label="Record instead"
+                icon="mic"
+                variant="ghost"
+                onPress={() => void startRecording()}
               />
             </Card>
           ) : (
             <>
-              {!review ? (
-                recording ? (
-                  <AudioInput
-                    appearance="daily"
-                    onRecorded={saveRecording}
-                    onCancel={() => setRecording(false)}
-                    busy={busy}
-                  />
-                ) : audio ? (
-                  <Card style={{ gap: 12 }}>
-                    <AudioPlayback uri={audio.uri} />
-                    <Button
-                      label="Record another take"
-                      variant="ghost"
-                      onPress={() => setRecording(true)}
-                    />
-                  </Card>
-                ) : (
-                  <Card style={{ gap: 12 }}>
-                    {state?.profile.consent?.recording ? (
-                      <Button
-                        label="Record the passage"
-                        icon="mic"
-                        onPress={() => setRecording(true)}
-                      />
-                    ) : (
-                      <Button
-                        label="Record the passage"
-                        icon="mic"
-                        loading={busy}
-                        onPress={() => void allowRecording()}
-                      />
-                    )}
-                    <Text style={T.small}>
-                      Optional · private recording, stored for up to 30 days.
-                    </Text>
-                  </Card>
-                )
-              ) : null}
-              {review ? (
-                <Card style={{ gap: 16 }}>
-                  <Text style={T.h2}>Notice one small thing</Text>
-                  <Text style={T.small}>
-                    Review your reading, then tap Done.
-                  </Text>
-                  <View
-                    style={{
-                      gap: 8,
-                      padding: 14,
-                      borderRadius: 10,
-                      backgroundColor: C.cream,
-                    }}
-                  >
-                    {audio ? (
-                      <>
-                        <Text style={T.small}>
-                          Listen back before you reflect.
-                        </Text>
-                        <AudioPlayback uri={audio.uri} />
-                      </>
-                    ) : (
-                      <>
-                        <Text style={T.small}>No recording yet.</Text>
-                        <Button
-                          label="Record to listen back"
-                          icon="mic"
-                          variant="secondary"
-                          disabled={busy}
-                          onPress={() => {
-                            setReview(false);
-                            if (state?.profile.consent?.recording)
-                              setRecording(true);
-                            else void allowRecording();
-                          }}
-                        />
-                      </>
-                    )}
-                  </View>
-                  <Field
-                    label="Your reading observation"
-                    value={notes}
-                    onChangeText={(value: string) => {
-                      setNotes(value);
-                      requestKey.current = null;
-                      draftWrites.current = draftWrites.current
-                        .then(async () => {
-                          if (isDraftOwner(uid))
-                            await saveDraft(
-                              `read-aloud:${assignment.id}`,
-                              value,
-                            );
-                        })
-                        .catch(() => {
-                          if (isDraftOwner(uid))
-                            setError(
-                              "Your note could not be saved on this device. Keep this page open and submit when ready.",
-                            );
-                        });
-                    }}
-                    multiline
-                    placeholder="Which phrase did you practise, and what did you notice?"
-                  />
-                  <Pressable
-                    accessibilityRole="checkbox"
-                    accessibilityLabel="I practised this passage and reviewed my reading"
-                    accessibilityState={{ checked: confirmed }}
-                    onPress={() => {
-                      setConfirmed(!confirmed);
-                      requestKey.current = null;
-                    }}
-                    style={{
-                      flexDirection: "row",
-                      gap: 12,
-                      alignItems: "center",
-                      paddingVertical: 12,
-                      minHeight: 48,
-                    }}
-                  >
-                    <Icon name={confirmed ? "check-square" : "square"} />
-                    <Text style={[T.body, { flex: 1 }]}>
-                      I read the passage and reviewed my reading.
-                    </Text>
-                  </Pressable>
-                  {audio && speechLocales?.length ? (
-                    <View style={{ gap: 10 }}>
-                      <Text style={T.h3}>Speech feedback</Text>
-                      <Text style={T.small}>Choose your practice target.</Text>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          flexWrap: "wrap",
-                          gap: 8,
-                        }}
-                      >
-                        {(["en-GB", "en-US"] as const)
-                          .filter((locale) => speechLocales.includes(locale))
-                          .map((locale) => (
-                            <Button
-                              key={locale}
-                              label={
-                                locale === "en-GB" ? "UK English" : "US English"
-                              }
-                              variant="secondary"
-                              selected={speechLocale === locale}
-                              onPress={() => setSpeechLocale(locale)}
-                              disabled={busy}
-                            />
-                          ))}
-                      </View>
-                      <Pressable
-                        accessibilityRole="checkbox"
-                        accessibilityLabel="Include speech feedback from Microsoft Azure"
-                        accessibilityState={{
-                          checked: speechConsent,
-                          disabled: busy,
-                        }}
-                        disabled={busy}
-                        onPress={() => setSpeechConsent(!speechConsent)}
-                        style={{
-                          flexDirection: "row",
-                          gap: 10,
-                          alignItems: "center",
-                          minHeight: 44,
-                        }}
-                      >
-                        <Icon
-                          name={speechConsent ? "check-square" : "square"}
-                        />
-                        <Text style={[T.small, { flex: 1 }]}>
-                          Include speech feedback. Send my recording and passage
-                          to Microsoft Azure for assessment.
-                        </Text>
-                      </Pressable>
+              <Card style={{ gap: 14 }}>
+                <Text style={T.h3}>What we listen for</Text>
+                <View
+                  style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
+                >
+                  {READING_CRITERIA.map((item) => (
+                    <View
+                      key={item.key}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 6,
+                        backgroundColor: C.cream,
+                        borderRadius: 8,
+                        padding: 9,
+                      }}
+                    >
+                      <Icon name={item.icon} size={14} />
+                      <Text style={T.small}>{item.label}</Text>
                     </View>
-                  ) : audio ? (
-                    <Text style={T.small}>
-                      {speechLocales === null
-                        ? "Checking speech feedback…"
-                        : "Speech feedback is unavailable right now. Done will save your review and show a practice tip."}
-                    </Text>
-                  ) : null}
-                  <Button
-                    label="Done"
-                    onPress={() => void submit()}
-                    loading={busy}
-                    disabled={
-                      !confirmed ||
-                      notes.trim().length < 20 ||
-                      Boolean(
-                        audio &&
-                        (speechLocales === null ||
-                          (speechConsent && !speechLocale)),
-                      )
-                    }
-                  />
-                  <Button
-                    label="Back to passage"
-                    variant="ghost"
-                    onPress={() => setReview(false)}
-                  />
-                </Card>
-              ) : (
-                <Button
-                  label="Done reading"
-                  icon="arrow-right"
-                  disabled={recording || busy}
-                  onPress={() => setReview(true)}
-                />
-              )}
+                  ))}
+                </View>
+                <Text style={T.small}>
+                  Clear communication matters. Your accent is welcome.
+                </Text>
+              </Card>
+              <Button
+                label="Practise without recording"
+                variant="ghost"
+                onPress={() => setSelfReview(true)}
+              />
             </>
           )}
         </>

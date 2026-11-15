@@ -233,10 +233,10 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
   await page
     .getByRole("button", { name: "Pause recording", exact: true })
     .click();
-  await expect(page.getByText("Recording paused", { exact: true })).toBeVisible();
-  await page
-    .getByRole("button", { name: "Done", exact: true })
-    .click();
+  await expect(
+    page.getByText("Recording paused", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Done", exact: true }).click();
   await page
     .getByRole("button", { name: "Use recording", exact: true })
     .click();
@@ -247,13 +247,17 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("tab", { name: "Strengths", exact: true }).click();
   await expect(
-    page.getByText("Reasoning: You connect your reason to your view."),
+    page
+      .getByTestId("bridge-criterion-R")
+      .getByText("You connect your reason to your view.", { exact: true }),
   ).toBeVisible();
   await page
     .getByRole("tab", { name: "Areas to Improve", exact: true })
     .click();
   await expect(
-    page.getByText("Reasoning: Explore another perspective."),
+    page
+      .getByTestId("bridge-criterion-R")
+      .getByText("Explore another perspective.", { exact: true }),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "Skip practice", exact: true })

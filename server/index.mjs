@@ -10,7 +10,7 @@ if (!webReady)
   );
 const server = service.app.listen(port, "0.0.0.0", () =>
   console.log(
-    `MindGarden API is ready at http://localhost:${port} (${service.providerStatus.mode === "openai" ? "AI configured; live access not checked" : service.providerStatus.mode === "local" ? "local practice coach" : "AI configuration needs attention; run npm run ai:check"})`,
+    `BridgingMinds API is ready at http://localhost:${port} (${service.providerStatus.mode === "openai" ? "AI configured; live access not checked" : service.providerStatus.mode === "local" ? "local practice coach" : "AI configuration needs attention; run npm run ai:check"})`,
   ),
 );
 let stopping = false;

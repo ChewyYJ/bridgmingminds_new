@@ -222,13 +222,14 @@ export interface ReadAloudAttempt {
   mode: "read_aloud";
   text: string;
   audioId?: string;
+  speechJobId?: string;
   speechAssessment?: SpeechAssessment;
   createdAt: string;
   passage: ReadingAssignment["passage"];
   evaluation: {
     key_takeaway: string;
     next_step: string;
-    speech: { status: "not_assessed"; metrics: null };
+    speech: { status: "not_assessed" | "assessed"; metrics: null };
   };
   rewards: {
     xp: number;
@@ -239,7 +240,8 @@ export interface ReadAloudAttempt {
 }
 export interface SpeechAssessment {
   status: "assessed" | "partial" | "no_speech";
-  provider: "azure";
+  provider: "azure" | "openai";
+  readingEvaluation?: ReadingEvaluationResult;
   sdkVersion: string;
   locale: string;
   validationStatus: "unvalidated";
@@ -258,6 +260,32 @@ export interface SpeechAssessment {
     accuracy: number | null;
     providerErrorType: string;
     sourceSpan: { start: number; end: number; text: string } | null;
+  }[];
+}
+export interface ReadingEvaluationResult {
+  rubricVersion: string;
+  summary: string;
+  nextStep: string;
+  transcript: string;
+  measurements: {
+    durationSeconds: number;
+    estimatedWordsPerMinute: number | null;
+    quietPauses: number;
+    spokenWords: number;
+    referenceWords: number;
+    matchedWords: number;
+    transcriptCoveragePercent: number | null;
+  };
+  criteria: {
+    key: string;
+    status: "strength" | "practice" | "not_assessed";
+    observation: string;
+    nextStep: string;
+    evidence: {
+      startSeconds: number;
+      endSeconds: number;
+      referenceQuote: string;
+    } | null;
   }[];
 }
 export interface Prompt {
@@ -283,8 +311,21 @@ export interface Article {
   image?: string;
 }
 export interface Session {
-  newsSource?: { id: string; title: string; source: string; sourceUrl: string; publishedAt: string; category: string };
-  learningFocus?: { recommendationId: string; dimension: string; label: string; instruction: string; policyVersion: string };
+  newsSource?: {
+    id: string;
+    title: string;
+    source: string;
+    sourceUrl: string;
+    publishedAt: string;
+    category: string;
+  };
+  learningFocus?: {
+    recommendationId: string;
+    dimension: string;
+    label: string;
+    instruction: string;
+    policyVersion: string;
+  };
   assessmentFramework?: "bridge-v1";
   dailySpeakingJourney?: {
     version: "daily-speaking-v1";
@@ -302,10 +343,25 @@ export interface Session {
   status: string;
   summary?: string;
 }
-export interface BrainstormPoint { x: number; y: number }
-export interface BrainstormStroke { id: string; points: BrainstormPoint[] }
-export interface BrainstormNote { id: string; text: string; x: number; y: number }
-export interface BrainstormConnector { id: string; from: string; to: string }
+export interface BrainstormPoint {
+  x: number;
+  y: number;
+}
+export interface BrainstormStroke {
+  id: string;
+  points: BrainstormPoint[];
+}
+export interface BrainstormNote {
+  id: string;
+  text: string;
+  x: number;
+  y: number;
+}
+export interface BrainstormConnector {
+  id: string;
+  from: string;
+  to: string;
+}
 export interface BrainstormBoard {
   version: "daily-whiteboard-v1";
   startedAt: string;

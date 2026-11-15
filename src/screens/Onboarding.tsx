@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, useWindowDimensions } from "react-native";
 import { C, T, Button, Field, ErrorNote } from "../components/ui";
-import { GardenScene, MindGardenMark } from "../components/art";
+import { GardenScene, BridgingMindsMark } from "../components/art";
 import { MotionView } from "../components/Motion";
 import { api, storeToken } from "../lib/api";
 import { AppState } from "../types";
@@ -102,8 +102,8 @@ export function Onboarding({
           }}
         >
           <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
-            <MindGardenMark />
-            <Text style={[T.h2, { fontSize: 22 }]}>MindGarden</Text>
+            <BridgingMindsMark />
+            <Text style={[T.h2, { fontSize: 22 }]}>BridgingMinds</Text>
           </View>
           <MotionView
             distance={10}

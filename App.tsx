@@ -20,7 +20,7 @@ import {
   ErrorNote,
   Card,
 } from "./src/components/ui";
-import { MindGardenMark } from "./src/components/art";
+import { BridgingMindsMark } from "./src/components/art";
 import { useApp } from "./src/lib/state";
 import { Home, Play, Discover } from "./src/screens/Dashboard";
 import { Onboarding } from "./src/screens/Onboarding";
@@ -36,7 +36,7 @@ const nav: [Page, string, string][] = [
   ["home", "Home", "home"],
   ["play", "Play", "grid"],
   ["discover", "Discover", "compass"],
-  ["garden", "Garden", "feather"],
+  ["garden", "Homeland", "feather"],
   ["profile", "Profile", "user"],
 ];
 export default function App() {
@@ -77,7 +77,7 @@ export default function App() {
   if (loading)
     return (
       <View style={s.center}>
-        <MindGardenMark size={60} />
+        <BridgingMindsMark size={60} />
         <Text style={T.h2}>Loading…</Text>
         <ActivityIndicator color={C.forest} />
       </View>
@@ -85,7 +85,7 @@ export default function App() {
   if (error)
     return (
       <View style={s.center}>
-        <MindGardenMark size={60} />
+        <BridgingMindsMark size={60} />
         <Text style={T.h2}>Can’t connect</Text>
         <ErrorNote message={error} />
         <Button label="Try again" onPress={() => void bootstrap()} />
@@ -120,7 +120,7 @@ export default function App() {
           <View style={s.sidebar}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="MindGarden home"
+              accessibilityLabel="BridgingMinds home"
               onPress={() => navigate("home")}
               style={{
                 flexDirection: "row",
@@ -131,10 +131,10 @@ export default function App() {
                 marginBottom: 40,
               }}
             >
-              <MindGardenMark size={36} />
-              <View>
-                <Text style={[T.h2, { fontSize: 22, lineHeight: 26 }]}>
-                  MindGarden
+              <BridgingMindsMark size={36} />
+              <View style={{ flex: 1 }}>
+                <Text style={[T.h2, { fontSize: 20, lineHeight: 26 }]}>
+                  BridgingMinds
                 </Text>
               </View>
             </Pressable>
@@ -194,8 +194,8 @@ export default function App() {
                 <View
                   style={{ flexDirection: "row", gap: 7, alignItems: "center" }}
                 >
-                  <MindGardenMark size={28} />
-                  <Text style={[T.h2, { fontSize: 18 }]}>MindGarden</Text>
+                  <BridgingMindsMark size={28} />
+                  <Text style={[T.h2, { fontSize: 18 }]}>BridgingMinds</Text>
                 </View>
               )}
               {page !== "garden" && (
@@ -404,18 +404,18 @@ function NavItem({
         borderRadius: 11,
         marginVertical: 3,
         backgroundColor: active
-          ? "#E8EDDC"
+          ? C.sage
           : hovered
-            ? "#F0F2E8"
+            ? C.cream
             : "transparent",
       })}
     >
-      <Icon name={icon} size={19} color={active ? C.forest : "#87917E"} />
+      <Icon name={icon} size={19} color={active ? C.forest : C.muted} />
       <Text
         style={{
           fontFamily: active ? "DMBold" : "DMMedium",
           fontSize: 14,
-          color: active ? C.forest : "#77816F",
+          color: active ? C.forest : C.muted,
         }}
       >
         {label}
@@ -426,7 +426,7 @@ function NavItem({
             width: 5,
             height: 5,
             borderRadius: 3,
-            backgroundColor: "#8CA775",
+            backgroundColor: C.forest,
             marginLeft: "auto",
           }}
         />
@@ -533,8 +533,8 @@ const s = StyleSheet.create({
     gap: 25,
   },
   sidebar: {
-    width: 226,
-    backgroundColor: "#F4F5ED",
+    width: 248,
+    backgroundColor: C.paper,
     padding: 16,
     borderRightWidth: 1,
     borderColor: C.border,
@@ -552,7 +552,7 @@ const s = StyleSheet.create({
     height: 37,
     width: 37,
     borderRadius: 25,
-    backgroundColor: "#DEE5CE",
+    backgroundColor: C.sage,
     alignItems: "center",
     justifyContent: "center",
   },

@@ -162,7 +162,7 @@ test("a small daily practice earns its quest, unlocks a plant, and offers a usef
   await capture(page, "returning-home-mobile.png");
   await page
     .getByTestId("home-next-action")
-    .getByRole("button", { name: "Open garden", exact: true })
+    .getByRole("button", { name: "Open Homeland", exact: true })
     .click();
   await expect(page.getByTestId("garden-unlock-progress")).toContainText(
     "30 / 60 XP",
@@ -240,7 +240,7 @@ test("a small daily practice earns its quest, unlocks a plant, and offers a usef
   await expect(
     page
       .getByTestId("home-next-action")
-      .getByRole("button", { name: "Open garden", exact: true }),
+      .getByRole("button", { name: "Open Homeland", exact: true }),
   ).toBeVisible();
   await expect(page.getByTestId("practice-week-progress")).toHaveAttribute(
     "aria-valuenow",

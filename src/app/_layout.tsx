@@ -1,5 +1,7 @@
 import React from "react";
 import { Slot } from "expo-router";
+import Head from "expo-router/head";
+import { C } from "../components/ui";
 import { useFonts } from "expo-font";
 import Feather from "@expo/vector-icons/Feather";
 import { DMSans_400Regular } from "@expo-google-fonts/dm-sans/400Regular";
@@ -26,14 +28,18 @@ export default function Layout() {
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#FAF8F2",
+          backgroundColor: C.cream,
         }}
       >
-        <ActivityIndicator color="#345B48" />
+        <ActivityIndicator color={C.forest} />
       </View>
     );
   return (
     <AppProvider>
+      <Head>
+        <title>BridgingMinds</title>
+        <meta name="application-name" content="BridgingMinds" />
+      </Head>
       <Slot />
     </AppProvider>
   );

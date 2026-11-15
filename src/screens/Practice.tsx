@@ -2084,7 +2084,7 @@ function FeedbackContent({
                   : "Practice saved. Eligible rewards already earned."}
               </Text>
               <Button
-                label="Open garden"
+                label="Open Homeland"
                 icon="feather"
                 variant="ghost"
                 onPress={onGarden}

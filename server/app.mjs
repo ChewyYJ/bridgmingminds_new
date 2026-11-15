@@ -1880,9 +1880,9 @@ export function createApp(options = {}) {
   });
   const { transcribeAudio, cleanupAudio } = audioRoutes;
   const readingSpeech = installReadingSpeech({ app, db, wrap, getAttempt, getUser, wordBloom,
-    audioRoutes, audioStorage, limit, cloud, options });
+    audioRoutes, audioStorage, limit, cloud, options, daily: dailyWorkout });
   installReadAloud({ app, db, wrap, mutate, getUser, daily: dailyWorkout,
-    wordBloom, acousticAvailable: readingSpeech.available, assertOwnAudio: audioRoutes.assertOwnAudio, failure, now: options.dailyNow });
+    wordBloom, enqueueSpeech: readingSpeech.enqueue, acousticAvailable: readingSpeech.available, assertOwnAudio: audioRoutes.assertOwnAudio, failure, now: options.dailyNow });
   friends = installFriends(app, {
     db,
     wrap,

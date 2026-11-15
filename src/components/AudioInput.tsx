@@ -200,13 +200,15 @@ export default function AudioInput({
   busy = false,
   sharing = false,
   appearance = "garden",
+  reviewActionLabel = "Use recording",
 }: {
   onRecorded: (audio: RecordedAudio) => Promise<void>;
   onCancel: () => void;
   onCaptureActive?: (active: boolean) => void;
   busy?: boolean;
   sharing?: boolean;
-  appearance?: "garden" | "daily";
+  appearance?: "garden" | "daily" | "reading";
+  reviewActionLabel?: string;
 }) {
   const recorder = useAudioRecorder({
     ...RecordingPresets.HIGH_QUALITY,
@@ -365,6 +367,92 @@ export default function AudioInput({
     }
   }
 
+  if (appearance === "reading")
+    return (
+      <View style={{ gap: 12 }}>
+        <ErrorNote message={error} />
+        {phase === "review" && recorded ? (
+          <>
+            <AudioPlayback uri={recorded.uri} />
+            <Button
+              label={reviewActionLabel}
+              icon="check"
+              loading={busy}
+              disabled={working}
+              onPress={() => void onRecorded(recorded)}
+            />
+            <Button
+              label="Record again"
+              variant="ghost"
+              disabled={working || busy}
+              onPress={() => void discard(false)}
+            />
+          </>
+        ) : phase === "idle" ? (
+          <Button
+            label="Record my response"
+            icon="mic"
+            loading={working}
+            disabled={busy}
+            onPress={() => void start()}
+          />
+        ) : (
+          <>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+              }}
+            >
+              <Text accessibilityLiveRegion="polite" style={T.small}>
+                {phase === "paused" ? "Recording paused" : "Listening…"}
+              </Text>
+              <Text
+                accessibilityLabel={`${60 - elapsed} seconds remaining`}
+                style={T.h3}
+              >{`${Math.floor((60 - elapsed) / 60)
+                .toString()
+                .padStart(
+                  2,
+                  "0",
+                )}:${String((60 - elapsed) % 60).padStart(2, "0")}`}</Text>
+            </View>
+            <LiveVoiceMeter
+              recorder={recorder}
+              active={phase === "recording"}
+            />
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Button
+                label={
+                  phase === "paused" ? "Resume recording" : "Pause recording"
+                }
+                icon={phase === "paused" ? "play" : "pause"}
+                variant="secondary"
+                disabled={working || busy}
+                onPress={pauseResume}
+                style={{ flex: 1 }}
+              />
+              <Button
+                label="Done"
+                icon="check"
+                loading={working}
+                disabled={busy || elapsed < 1}
+                onPress={() => void finish()}
+                style={{ flex: 1 }}
+              />
+            </View>
+          </>
+        )}
+        <Button
+          label="Cancel recording"
+          variant="ghost"
+          disabled={working || busy}
+          onPress={() => void discard(true)}
+        />
+      </View>
+    );
   if (appearance === "daily")
     return (
       <View style={{ alignItems: "center", gap: 24, width: "100%" }}>
@@ -378,13 +466,13 @@ export default function AudioInput({
             <AudioPlayback uri={recorded.uri} />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Use recording"
+              accessibilityLabel={reviewActionLabel}
               disabled={busy || working}
               onPress={() => void onRecorded(recorded)}
               style={dailyAudio.button}
             >
               <Text style={dailyAudio.buttonText}>
-                {busy ? "Saving…" : "Use recording"}
+                {busy ? "Saving…" : reviewActionLabel}
               </Text>
               <Icon name="chevron-right" color="#fff" />
             </Pressable>
@@ -424,7 +512,12 @@ export default function AudioInput({
             >
               {phase === "idle"
                 ? "01:00"
-                : `00:${String(60 - elapsed).padStart(2, "0")}`}
+                : `${Math.floor((60 - elapsed) / 60)
+                    .toString()
+                    .padStart(
+                      2,
+                      "0",
+                    )}:${String((60 - elapsed) % 60).padStart(2, "0")}`}
             </Text>
             <LiveVoiceMeter
               key={phase}

@@ -122,6 +122,8 @@ export function Button({
         style={{
           fontFamily: "DMBold",
           fontSize: 14,
+          textAlign: "center",
+          flexShrink: 1,
           color: variant === "primary" ? "#FFF" : C.forest,
         }}
       >
@@ -139,7 +141,11 @@ export function Card({
   style?: ViewStyle;
   testID?: string;
 }) {
-  return <View testID={testID} style={[styles.card, style]}>{children}</View>;
+  return (
+    <View testID={testID} style={[styles.card, style]}>
+      {children}
+    </View>
+  );
 }
 export function Tag({
   children,
@@ -155,7 +161,7 @@ export function Tag({
       style={{
         alignSelf: "flex-start",
         backgroundColor: color,
-        borderRadius: 20,
+        borderRadius: 8,
         paddingHorizontal: 11,
         paddingVertical: 6,
       }}
@@ -289,7 +295,7 @@ export function Resource({
 }
 export const styles = StyleSheet.create({
   button: {
-    minHeight: 46,
+    minHeight: 48,
     borderRadius: 10,
     paddingHorizontal: 19,
     paddingVertical: 12,
@@ -297,14 +303,14 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 9,
-    alignSelf: "flex-start",
+    alignSelf: "stretch",
   },
   card: {
     backgroundColor: C.paper,
     borderWidth: 1,
     borderColor: C.border,
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: 14,
+    padding: 20,
   },
   field: {
     minHeight: 48,
