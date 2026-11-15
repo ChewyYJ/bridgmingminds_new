@@ -241,7 +241,7 @@ test("a daily idea becomes a saved revision with a recoverable comparison and de
   const beforeGarden = await state(page);
   expect(beforeGarden.attempts).toHaveLength(2);
   expect(beforeGarden.plots.every((plot) => !plot.plantType)).toBe(true);
-  await page.getByRole("button", { name: "Open garden", exact: true }).click();
+  await page.getByRole("button", { name: "Open Homeland", exact: true }).click();
   await expect(page.getByTestId("garden-canvas")).toBeVisible();
   const afterGarden = await state(page);
   expect(afterGarden.wallet).toEqual(beforeGarden.wallet);

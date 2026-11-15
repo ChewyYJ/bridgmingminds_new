@@ -5,6 +5,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createApp } from "../server/app.mjs";
+import { prompts } from "../server/content.mjs";
 import {
   speechCapabilities,
   normalizeSpeechResult,
@@ -157,13 +158,41 @@ async function fixture(t) {
     guest,
     reading,
     spin: async (token) => {
-      const session = await ok("/sessions", token, { mode: "spin_speak" });
+      const session = await ok("/sessions", token, {
+        mode: "spin_speak",
+        promptId: prompts.find((p) => p.mode === "spin_speak").id,
+      });
+      const upload = await ok(
+        "/audio",
+        token,
+        null,
+        "POST",
+        Buffer.alloc(100, 1),
+      );
       const attempt = await ok("/attempts", token, {
         sessionId: session.id,
+        responseType: "audio",
+        audioId: upload.id,
         text: "We could work together on a shared garden. Each neighbour could suggest a plant.",
       });
       await ok(`/attempts/${attempt.id}/evaluate`, token, {});
       await service.runJobs();
+      // Seed a validated-script fixture, then explicitly select vocabulary using
+      // the current daily flow. Daily feedback no longer auto-adds words.
+      const stored = service.db
+        .prepare("SELECT data FROM attempts WHERE id=?")
+        .get(attempt.id);
+      const completed = JSON.parse(stored.data);
+      completed.dailyScript = {
+        text: "Neighbours can collaborate on a shared garden.",
+        vocabulary: [{ wordId: "collaborate" }],
+      };
+      service.db
+        .prepare("UPDATE attempts SET data=? WHERE id=?")
+        .run(JSON.stringify(completed), attempt.id);
+      await ok(`/attempts/${attempt.id}/vocabulary`, token, {
+        wordIds: ["collaborate"],
+      });
     },
     enqueue,
     get calls() {

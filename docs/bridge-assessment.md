@@ -36,7 +36,7 @@ The `thought-map-v2` graph permits up to 12 nodes and 24 edges. The centre is th
 - **Blue · Planned, left unsaid.** A clear idea anchored in the planning notes with no equivalent in the complete response. Includes a way to bring it into a later response.
 - **Neutral.** Tentative AI interpretations and saved older response nodes whose development was never classified.
 
-The current integration saves optional typed prep notes as `planningNotes` on the attempt before recording or text submission. The AI compares meaning across notes and the saved response while BRIDGE scores use response evidence. Exact response and note excerpts are validated separately. The model may cite both sources for a shared idea. If a response contains a partial version of an idea, the node is yellow. The server checks for an exact normalized match before accepting a blue node. Semantic equivalence and quality remain provisional model judgments. With no notes, the map uses the response alone. Post-response self-reflection and guiding-question notes are separate inputs.
+Daily Spin & Speak saves the whiteboard’s typed notes as `planningNotes` on the recorded attempt. The AI compares meaning across those notes and the saved transcript while BRIDGE scores use response evidence. Exact response and note excerpts are validated separately. The model may cite both sources for a shared idea. If a response contains a partial version of an idea, the node is yellow. The server checks for an exact normalized match before accepting a blue node. Semantic equivalence and quality remain provisional model judgments. With no notes, the map uses the response alone. Post-response self-reflection and guiding-question notes are separate inputs.
 
 Ordinary backend code checks schema bounds, ID uniqueness, existing endpoints, duplicate/self edges, acyclicity, exact spans and status/text consistency. A nonempty graph requires at least one explicit node. Empty maps are allowed for insufficient interpretable evidence. These checks establish integrity, not semantic correctness of a model's classification or inference.
 
@@ -54,7 +54,7 @@ The master prompt's web-specific React Flow/Dagre suggestion was adapted to the 
 
 Without a provider key, all BRIDGE ratings are null and the map is **not assessed**. Local keywords are never turned into claims, semantic ratings or inferred reasoning. A separate original sample demonstrates graph interaction, explicitly labelled as sample content and never saved as learner evidence or credited as progress.
 
-Planning notes are submitted with the response to the configured evaluation provider when AI is enabled. They are stored with the owned attempt and included in account export and deletion. When the shared whiteboard is ready, use its readable text as the planning snapshot. Its layout coordinates and drawings are outside the current evaluator contract.
+Planning notes are submitted with the response to the configured evaluation provider when AI is enabled. They are stored with the owned attempt and included in account export and deletion. The planning snapshot contains up to 2,000 characters of readable whiteboard text. The board’s layout coordinates and drawings are outside the current evaluator contract.
 
 ## Verification and remaining work
 

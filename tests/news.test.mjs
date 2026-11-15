@@ -44,6 +44,13 @@ test('only source publication dates on today in the user timezone are returned',
   assert.ok(calls[0].options.signal instanceof AbortSignal);
 });
 
+test('daily practice may request recent headlines without widening the today-only news feed', async () => {
+  const { service } = setup(rss([item({url:'https://www.npr.org/old',date:YESTERDAY}),item({url:'https://www.npr.org/today'}),item({url:'https://www.npr.org/ancient',date:'Tue, 01 Sep 2026 09:00:00 GMT'})]));
+  assert.equal((await service.getFeed({recentDays:7})).articles.length,2);
+  assert.equal((await service.getFeed()).articles.length,1);
+  assert.equal((await service.getFeed({recentDays:999})).articles.length,2);
+});
+
 test('timezone boundaries change inclusion without changing publisher dates or refetching', async () => {
   const { service, calls } = setup(rss([
     item({ date: 'Mon, 12 Oct 2026 20:00:00 GMT', url: 'https://www.npr.org/news/early' }),

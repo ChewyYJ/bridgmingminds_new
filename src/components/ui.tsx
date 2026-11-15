@@ -14,17 +14,17 @@ import Feather from "@expo/vector-icons/Feather";
 import { usePressMotion } from "./Motion";
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export const C = {
-  cream: "#FAF8F2",
-  paper: "#FFFFFF",
-  forest: "#345B48",
-  ink: "#293C32",
-  muted: "#687261",
-  sage: "#E9EEDD",
-  peach: "#F6E3D2",
-  lilac: "#EBE6F5",
-  border: "#E5E7DE",
-  yellow: "#F6EAC3",
-  orange: "#C48451",
+  cream: "#F5F0E9",
+  paper: "#FFFCF8",
+  forest: "#34312E",
+  ink: "#292623",
+  muted: "#746C63",
+  sage: "#E6DCD1",
+  peach: "#EEE1D4",
+  lilac: "#E8E1DA",
+  border: "#D9CFC4",
+  yellow: "#F0DFAE",
+  orange: "#AE8352",
   red: "#A5453F",
 };
 export const T = StyleSheet.create({
@@ -37,8 +37,8 @@ export const T = StyleSheet.create({
     color: C.muted,
     textTransform: "uppercase",
   },
-  title: { fontFamily: "Lora", fontSize: 34, color: C.ink, lineHeight: 44 },
-  h2: { fontFamily: "Lora", fontSize: 23, color: C.ink, lineHeight: 31 },
+  title: { fontFamily: "DMBold", fontSize: 30, color: C.ink, lineHeight: 38 },
+  h2: { fontFamily: "DMBold", fontSize: 22, color: C.ink, lineHeight: 30 },
   h3: { fontFamily: "DMBold", fontSize: 17, color: C.ink, lineHeight: 24 },
 });
 export function Icon({
@@ -122,6 +122,8 @@ export function Button({
         style={{
           fontFamily: "DMBold",
           fontSize: 14,
+          textAlign: "center",
+          flexShrink: 1,
           color: variant === "primary" ? "#FFF" : C.forest,
         }}
       >
@@ -139,7 +141,11 @@ export function Card({
   style?: ViewStyle;
   testID?: string;
 }) {
-  return <View testID={testID} style={[styles.card, style]}>{children}</View>;
+  return (
+    <View testID={testID} style={[styles.card, style]}>
+      {children}
+    </View>
+  );
 }
 export function Tag({
   children,
@@ -155,7 +161,7 @@ export function Tag({
       style={{
         alignSelf: "flex-start",
         backgroundColor: color,
-        borderRadius: 20,
+        borderRadius: 8,
         paddingHorizontal: 11,
         paddingVertical: 6,
       }}
@@ -292,7 +298,7 @@ export function Resource({
 }
 export const styles = StyleSheet.create({
   button: {
-    minHeight: 46,
+    minHeight: 48,
     borderRadius: 10,
     paddingHorizontal: 19,
     paddingVertical: 12,
@@ -300,14 +306,14 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 9,
-    alignSelf: "flex-start",
+    alignSelf: "stretch",
   },
   card: {
     backgroundColor: C.paper,
     borderWidth: 1,
     borderColor: C.border,
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: 14,
+    padding: 20,
   },
   field: {
     minHeight: 48,

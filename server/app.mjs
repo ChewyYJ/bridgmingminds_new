@@ -15,11 +15,14 @@ import { openDatabase, transaction } from "./database.mjs";
 import { createAudioStorage } from "./audio-storage.mjs";
 import { installAudioRoutes } from "./audio-routes.mjs";
 import { installReadingSpeech } from "./reading-speech-jobs.mjs";
+import { installReadingSample } from "./reading-sample.mjs";
 import { createUsageService } from "./usage.mjs";
 import { createDailyWorkoutService } from "./daily-workout.mjs";
 import { installReadAloud } from "./read-aloud.mjs";
 import { evaluateBridge } from "./bridge-evaluator.mjs";
 import { createWordBloomService } from "./wordbloom.mjs";
+import { evaluateGuidingAnswer } from "./guiding-answer.mjs";
+import { getThoughtGuide } from "../shared/thought-guide.mjs";
 import { createLearnerProfile, LEARNER_POLICY } from "./learner-profile.mjs";
 import {
   evaluate,
@@ -36,6 +39,7 @@ import {
 import { articles, prompts } from "./content.mjs";
 import { installFriends } from "./friends.mjs";
 import { createNewsService } from "./news.mjs";
+import { selectDailyNews, dailyNewsPrompt } from "./daily-news.mjs";
 import {
   createGuidedResponseService,
   parseGuidedResponseInput,
@@ -1022,15 +1026,28 @@ export function createApp(options = {}) {
       let prompt;
       let learningFocus;
       let article;
+      let newsSource;
+      const profile = parse((await getUser(req.userId)).profile);
+      const isDailyNews = data.mode === "spin_speak" && profile.dailyWorkout && !data.promptId && !data.topic;
       if (data.mode === "read_reflect") {
         article = articles.find((a) => a.id === data.articleId);
         if (!article) throw failure(400, "Choose a reading before reflecting.");
+        const dailyHistory = (await db.prepare("SELECT data FROM sessions WHERE user_id=?").all(req.userId)).map((row) => parse(row.data)).filter((session) => session.newsSource);
+        if (!selectDailyNews({ items: [article], history: dailyHistory })) throw failure(409, "This story was already used for your daily speaking. Choose a different reading.");
         prompt = {
           id: `${article.id}-reflect-${data.questionIndex || 0}`,
           question: article.questions[data.questionIndex || 0],
           category: article.category,
           context: article.summary,
         };
+      } else if (isDailyNews) {
+        const feed = await news.getFeed({ timezone: profile.timezone, recentDays: 7 });
+        const history = (await db.prepare("SELECT data FROM sessions WHERE user_id=?").all(req.userId)).map((row) => parse(row.data));
+        newsSource = selectDailyNews({ items: feed.articles, history, reserved: articles, interests: profile.interests || [] });
+        if (!newsSource) throw failure(503, feed.status === "unavailable" ? "News is temporarily unavailable. Please try again shortly." : "There are no new headlines left for your daily question. Check back for a fresh story.");
+        prompt = dailyNewsPrompt(newsSource);
+        const recommendation = (await learner.summary(req.userId)).recommendation;
+        if (recommendation) learningFocus = { recommendationId: recommendation.id, dimension: recommendation.dimension, label: recommendation.label, instruction: recommendation.focus, policyVersion: LEARNER_POLICY };
       } else {
         let pool = prompts.filter((p) => p.mode === data.mode);
         if (data.promptId) pool = pool.filter((p) => p.id === data.promptId);
@@ -1062,6 +1079,7 @@ export function createApp(options = {}) {
         prompt,
         articleId: article?.id,
         articleSnapshot: article,
+        ...(newsSource ? { newsSource } : {}),
         position:
           data.position === "surprise"
             ? Math.random() < 0.5
@@ -1076,6 +1094,14 @@ export function createApp(options = {}) {
         ...(learningFocus ? { learningFocus } : {}),
         ...(data.mode === "spin_speak" && parse((await getUser(req.userId)).profile).dailyWorkout ? { assessmentFramework: "bridge-v1" } : {}),
       };
+      if (data.mode === "spin_speak" && parse((await getUser(req.userId)).profile).dailyWorkout) {
+        const daily = await dailyWorkout.today(req.userId);
+        session.dailySpeakingJourney = {
+          version: "daily-speaking-v1",
+          day: daily.day,
+          timezone: daily.timezone,
+        };
+      }
       await db
         .prepare("INSERT INTO sessions VALUES(?,?,?,?,?)")
         .run(
@@ -1093,6 +1119,29 @@ export function createApp(options = {}) {
     wrap(async (req, res) =>
       res.json(await getSession(req.params.id, req.userId)),
     ),
+  );
+  app.put(
+    "/api/sessions/:id/brainstorm",
+    mutate(async (req, res) => {
+      const point = z.object({ x: z.number().finite().min(-20).max(2000), y: z.number().finite().min(-20).max(2000) }).strict();
+      const board = z.object({
+        version: z.literal("daily-whiteboard-v1"),
+        startedAt: z.string().datetime(), expiresAt: z.string().datetime(), completedAt: z.string().datetime().optional(),
+        strokes: z.array(z.object({ id: z.string().max(80), points: z.array(point).min(2).max(1500) }).strict()).max(120),
+        notes: z.array(z.object({ id: z.string().max(80), text: z.string().max(240), x: z.number().finite().min(-20).max(2000), y: z.number().finite().min(-20).max(2000) }).strict()).max(40),
+        connectors: z.array(z.object({ id: z.string().max(80), from: z.string().max(80), to: z.string().max(80) }).strict()).max(80),
+        snapshot: z.object({ version: z.literal(1), savedAt: z.string().datetime(), elementCount: z.number().int().min(0).max(240) }).strict(),
+      }).strict().parse(req.body);
+      const session = await getSession(req.params.id, req.userId);
+      if (!session.dailySpeakingJourney || session.mode !== "spin_speak")
+        throw failure(400, "This brainstorm board belongs to a daily speaking challenge.");
+      const noteIds = new Set(board.notes.map((note) => note.id));
+      if (board.connectors.some((edge) => !noteIds.has(edge.from) || !noteIds.has(edge.to)))
+        throw failure(400, "A board link refers to a missing idea note.");
+      session.dailySpeakingJourney.brainstorm = board;
+      await saveSession(session);
+      res.json(session);
+    }),
   );
   app.post(
     "/api/attempts",
@@ -1112,6 +1161,8 @@ export function createApp(options = {}) {
       const session = await getSession(data.sessionId, req.userId);
       if (session.mode === "read_aloud")
         throw failure(400, "Submit this reading through its Read Aloud self-review screen.");
+      if (session.dailySpeakingJourney && (data.responseType !== "audio" || !data.audioId))
+        throw failure(400, "Daily Challenge responses are submitted as a recording.");
       if (data.responseType === "text") textSchema.parse(data.text);
       if (data.audioId)
         await audioRoutes.assertOwnAudio(data.audioId, req.userId);
@@ -1125,6 +1176,8 @@ export function createApp(options = {}) {
           throw failure(400, "Retry a completed answer from this challenge.");
         planningNotes ??= original.planningNotes;
       }
+      planningNotes ??= session.dailySpeakingJourney?.brainstorm?.notes
+        .map(({ text }) => text.trim()).filter(Boolean).join("\n").slice(0, 2000);
       if (data.idempotencyKey) {
         const existing = (
           await db
@@ -1203,20 +1256,50 @@ export function createApp(options = {}) {
         );
       const input = parseGuidedResponseInput(req.body);
       const session = await getSession(attempt.sessionId, req.userId);
+      const vocabulary = input.daily ? await wordBloom.context(req.userId) : null;
       const draft = await guidedResponses.generate({
         userId: req.userId,
         attempt,
         session,
         input,
+        vocabulary: vocabulary?.catalogue.filter((word) => !vocabulary.knownWordIds.includes(word.id)) || [],
       });
       // A request may finish after sign-out, session expiry or account deletion.
       // Recheck the actual authentication token, not just the captured user ID.
       if (closed || (await resolveAuth(req)) !== req.userId)
         throw failure(401, "Please sign in again to view this draft.");
       await getAttempt(req.params.id, req.userId);
+      if (input.daily) await transaction(db, async () => {
+        await db.lockUser(req.userId);
+        const current = await getAttempt(attempt.id, req.userId);
+        current.dailyScript = draft;
+        await saveAttempt(current);
+      });
       res.json(draft);
     }),
   );
+  app.post("/api/attempts/:id/vocabulary", mutate(async (req, res) => {
+    const { wordIds } = z.strictObject({ wordIds: z.array(z.string().min(1).max(60)).min(1).max(3) }).parse(req.body);
+    res.json(await wordBloom.saveSelected(req.userId, req.params.id, wordIds));
+  }));
+  app.post("/api/attempts/:id/guiding-answer", wrap(async (req, res) => {
+    const { index, answer } = z.strictObject({ index: z.number().int().min(0).max(2), answer: z.string().trim().min(1).max(2000) }).parse(req.body);
+    const attempt = await getAttempt(req.params.id, req.userId);
+    if (attempt.status !== "completed") throw failure(409, "Finish your first response before practising guiding questions.");
+    const question = getThoughtGuide(attempt.mode, attempt.evaluation)[index].question;
+    const session = await getSession(attempt.sessionId, req.userId);
+    await limit(`guiding-answer:${req.userId}`, 6);
+    await usage.allowRequest(req.userId, { sessionId: session.id });
+    const feedback = await evaluateGuidingAnswer({ question, answer, original: attempt.text, config: providerConfig });
+    if (closed || (await resolveAuth(req)) !== req.userId) throw failure(401, "Please sign in again.");
+    await transaction(db, async () => {
+      await db.lockUser(req.userId);
+      const current = await getAttempt(attempt.id, req.userId);
+      current.guidingPractice = { ...current.guidingPractice, [index]: { question, answer, feedback } };
+      await saveAttempt(current);
+    });
+    res.json(feedback);
+  }));
   app.patch(
     "/api/attempts/:id/transcript",
     mutate(async (req, res) => {
@@ -1436,7 +1519,7 @@ export function createApp(options = {}) {
           await saveAttempt(current);
           await learner.record(job.user_id, current, session, evaluation);
           current.rewards = await grantRewards(job.user_id, current, session);
-          current.wordBloom = await wordBloom.processAttempt(job.user_id, current, evaluation);
+          current.wordBloom = await wordBloom.processAttempt(job.user_id, current, evaluation, { discover: !session.dailySpeakingJourney });
           current.completedAt = now();
           await saveAttempt(current);
           const latestSession = await getSession(session.id, job.user_id);
@@ -1814,10 +1897,11 @@ export function createApp(options = {}) {
       }),
   });
   const { transcribeAudio, cleanupAudio } = audioRoutes;
+  installReadingSample({ app, db, wrap, getAttempt, audioRoutes, audioStorage, limit, failure, options });
   const readingSpeech = installReadingSpeech({ app, db, wrap, getAttempt, getUser, wordBloom,
-    audioRoutes, audioStorage, limit, cloud, options });
+    audioRoutes, audioStorage, limit, cloud, options, daily: dailyWorkout });
   installReadAloud({ app, db, wrap, mutate, getUser, daily: dailyWorkout,
-    wordBloom, acousticAvailable: readingSpeech.available, assertOwnAudio: audioRoutes.assertOwnAudio, failure, now: options.dailyNow });
+    wordBloom, enqueueSpeech: readingSpeech.enqueue, acousticAvailable: readingSpeech.available, assertOwnAudio: audioRoutes.assertOwnAudio, failure, now: options.dailyNow });
   friends = installFriends(app, {
     db,
     wrap,

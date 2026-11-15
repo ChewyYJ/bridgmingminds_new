@@ -1,4 +1,4 @@
-# MindGarden
+# BridgingMinds
 
 The supplied [BridgingMinds master build reference](docs/reference/master-build-prompt.md) is tracked with an [implementation gap and delivery plan](docs/build-alignment.md). An opt-in **daily workout** connects Read Aloud self-review and Spin & Speak to Home and persisted daily rewards. New daily speaking sessions now use [BRIDGE feedback and Thought Maps](docs/bridge-assessment.md). [Integrated WordBloom](docs/wordbloom.md) now schedules vocabulary into reading with optional self-reports. [Optional acoustic assessment](docs/speech-assessment.md) now has a consented job/feedback path verified with real decoding and offline assessment fixtures; live provider/device validation and calibrated adaptive mastery remain outstanding; the broader roadmap is not complete.
 

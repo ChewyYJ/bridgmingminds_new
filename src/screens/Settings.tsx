@@ -107,11 +107,11 @@ export function Settings({
         );
         const a = document.createElement("a");
         a.href = url;
-        a.download = "my-mind-garden.json";
+        a.download = "my-bridgingminds.json";
         a.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       } else {
-        const file = new File(Paths.cache, "my-mind-garden.json");
+        const file = new File(Paths.cache, "my-bridgingminds.json");
         file.create({ overwrite: true });
         file.write(json);
         await Sharing.shareAsync(file.uri, { mimeType: "application/json" });

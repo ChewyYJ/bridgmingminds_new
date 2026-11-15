@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { api, isDraftOwner } from "../lib/api";
 import { useApp } from "../lib/state";
 import type { ReadAloudAttempt, SpeechAssessment } from "../types";
-import { Button, C, ErrorNote, T } from "./ui";
+import { Button, C, Card, ErrorNote, T } from "./ui";
+import { ReadingEvaluation } from "./ReadingEvaluation";
+import { ReadingSample } from "./ReadingSample";
 import { PrivateRecordingPlayback } from "./PrivateRecording";
 
 interface SpeechJob {
@@ -18,15 +20,31 @@ interface SpeechJob {
     words: { wordId: string; observationStatus: string; action: string }[];
   };
 }
-export function ReadingSpeech({ attempt }: { attempt: ReadAloudAttempt }) {
+export function ReadingSpeech({
+  attempt,
+  feedbackRequested = false,
+  onComplete,
+}: {
+  attempt: ReadAloudAttempt;
+  feedbackRequested?: boolean;
+  onComplete?: () => void;
+}) {
   const { state } = useApp();
   const uid = state!.profile.id;
   const [job, setJob] = useState<SpeechJob | null>(null);
   const [locales, setLocales] = useState<string[]>([]);
   const [locale, setLocale] = useState<"en-US" | "en-GB">("en-GB");
-  const [consented, setConsented] = useState(false);
+  const [consented, setConsented] = useState(feedbackRequested);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const notified = useRef(false);
+  useEffect(() => {
+    if (job?.status === "completed" && !notified.current) {
+      notified.current = true;
+      onComplete?.();
+    }
+  }, [job?.status, onComplete]);
   const [selected, setSelected] = useState<number | null>(null);
   const [wordPage, setWordPage] = useState<number | null>(null);
   const abort = useRef<AbortController | null>(null);
@@ -55,6 +73,9 @@ export function ReadingSpeech({ attempt }: { attempt: ReadAloudAttempt }) {
       })
       .catch((e) => {
         if (!controller.signal.aborted) setError(e.message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
       });
     return () => {
       controller.abort();
@@ -149,18 +170,75 @@ export function ReadingSpeech({ attempt }: { attempt: ReadAloudAttempt }) {
     cursor = span.end;
   }
   annotated.push(attempt.passage.text.slice(cursor));
+  if (result?.readingEvaluation)
+    return (
+      <View style={{ gap: 14 }}>
+        <ReadingEvaluation
+          evaluation={result.readingEvaluation}
+          audioId={attempt.audioId}
+        />
+        <ReadingSample
+          key={attempt.id}
+          attemptId={attempt.id}
+          passage={attempt.passage.text}
+        />
+      </View>
+    );
+  if (feedbackRequested && !result)
+    return (
+      <Card style={{ gap: 14 }} testID="reading-speech">
+        {loading || pending ? (
+          <>
+            <ActivityIndicator color={C.forest} />
+            <Text accessibilityLiveRegion="polite" style={T.h3}>
+              Listening to your reading…
+            </Text>
+            <Text style={T.body}>
+              Checking pronunciation, pace, intonation, word stress and
+              completeness.
+            </Text>
+            <Text style={T.small}>
+              Your recording is saved. You can return to this feedback later.
+            </Text>
+          </>
+        ) : (
+          <>
+            <Text style={T.h3}>Let’s try the feedback again</Text>
+            <ErrorNote
+              message={
+                error ||
+                job?.error?.message ||
+                "Your recording is saved, but feedback isn’t ready."
+              }
+            />
+            <Button
+              label="Retry feedback"
+              icon="refresh-cw"
+              loading={busy}
+              disabled={!locales.length || (job?.retries || 0) >= 3}
+              onPress={() => void submit()}
+            />
+          </>
+        )}
+      </Card>
+    );
   return (
     <View testID="reading-speech" style={{ gap: 12 }}>
-      <Text style={T.h3}>Optional acoustic feedback</Text>
+      <Text style={T.h3}>
+        {feedbackRequested || result || pending
+          ? "Speech feedback"
+          : "Optional speech feedback"}
+      </Text>
       <Text style={T.small}>
-        Your self-review is saved. This optional assessment does not change XP,
-        streaks or plant mastery.
+        {feedbackRequested || result || pending
+          ? "Feedback on your recorded reading."
+          : "Assess your recording for pronunciation and fluency feedback."}
       </Text>
       <ErrorNote message={error || job?.error?.message || ""} />
       {!result && !locales.length && !pending ? (
         <Text style={T.body}>
-          Acoustic assessment is not configured. Your self-review remains
-          available with no speech scores.
+          Speech feedback is unavailable right now. Your recording and
+          observation are saved.
         </Text>
       ) : null}
       {!result && locales.length > 0 && !pending ? (
@@ -351,6 +429,13 @@ export function ReadingSpeech({ attempt }: { attempt: ReadAloudAttempt }) {
             </View>
           ) : null}
         </View>
+      ) : null}
+      {result ? (
+        <ReadingSample
+          key={attempt.id}
+          attemptId={attempt.id}
+          passage={attempt.passage.text}
+        />
       ) : null}
     </View>
   );

@@ -65,13 +65,14 @@ async function fixture(t, configured = true) {
     rmSync(directory, { recursive: true, force: true });
   });
   async function request(path, token, body, method = body ? "POST" : "GET") {
+    const audio = Buffer.isBuffer(body);
     const result = await global.fetch(base + path, {
       method,
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(body ? { "Content-Type": "application/json" } : {}),
+        ...(body ? { "Content-Type": audio ? "audio/wav" : "application/json" } : {}),
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: audio ? body : body ? JSON.stringify(body) : undefined,
     });
     return { status: result.status, data: await result.json() };
   }
@@ -80,14 +81,23 @@ async function fixture(t, configured = true) {
     assert.ok(result.status < 300, JSON.stringify(result));
     return result.data;
   };
-  const guest = async () => (await ok("/auth/guest", null, {})).token;
-  const submit = async (token, session, fields = {}) =>
-    ok("/attempts", token, {
+  const guest = async () => {
+    const { token } = await ok("/auth/guest", null, {});
+    await ok("/me", token, { consent: { recording: true } }, "PATCH");
+    return token;
+  };
+  const submit = async (token, session, fields = {}) => {
+    const recording = session.dailySpeakingJourney
+      ? await ok("/audio", token, Buffer.alloc(100, 1))
+      : null;
+    return ok("/attempts", token, {
       sessionId: session.id,
       text: answer,
       selfReflection: "PRIVATE_NOTE_NOT_ASSESSMENT_EVIDENCE",
+      ...(recording && { responseType: "audio", audioId: recording.id }),
       ...fields,
     });
+  };
   const complete = async (token, attempt) => {
     await ok(`/attempts/${attempt.id}/evaluate`, token, {});
     await service.runJobs();
@@ -168,7 +178,7 @@ test("enrollment does not rewrite historical rubrics; new daily sessions use BRI
   const legacy = await f.complete(token, await f.submit(token, legacySession));
   assert.equal(legacy.evaluation.rubric_version, "grow-spin-speak-v2");
   await f.ok("/daily-workout/enroll", token, {});
-  const dailySession = await f.ok("/sessions", token, { mode: "spin_speak" });
+  const dailySession = await f.ok("/sessions", token, { mode: "spin_speak", promptId: "society-shared-space" });
   const daily = await f.complete(token, await f.submit(token, dailySession));
   assert.equal(daily.evaluation.rubric_version, "bridge-v1");
   assert.ok(
@@ -187,9 +197,19 @@ test("planning notes and map evidence persist across retries and restart", async
   f.repair();
   const token = await f.guest();
   await f.ok("/daily-workout/enroll", token, {});
-  const session = await f.ok("/sessions", token, { mode: "spin_speak" });
+  const session = await f.ok("/sessions", token, { mode: "spin_speak", promptId: "society-shared-space" });
   const planningNotes = "Borrow tools from neighbours.";
-  const original = await f.submit(token, session, { planningNotes: "  " + planningNotes });
+  const instant = new Date().toISOString();
+  await f.ok(`/sessions/${session.id}/brainstorm`, token, {
+    version: "daily-whiteboard-v1",
+    startedAt: instant,
+    expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    notes: [{ id: "reason", x: 20, y: 20, text: "  " + planningNotes }],
+    strokes: [],
+    connectors: [],
+    snapshot: { version: 1, savedAt: instant, elementCount: 1 },
+  }, "PUT");
+  const original = await f.submit(token, session);
   const saved = await f.complete(token, original);
   assert.equal(saved.planningNotes, planningNotes);
   const map = saved.evaluation.thought_map;

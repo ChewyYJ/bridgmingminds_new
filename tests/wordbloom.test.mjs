@@ -127,6 +127,14 @@ async function fixture(t) {
   };
 }
 
+test("daily feedback can record usage without automatically saving suggested words", async (t) => {
+  const f = await fixture(t);
+  const attempt = await f.attempt();
+  const result = await f.service.processAttempt(f.uid, attempt, { provider: "openai", wordbloom: { candidates, uses: [] } }, { discover: false });
+  assert.deepEqual(result.discoveredWordIds, []);
+  assert.deepEqual((await f.service.summary(f.uid)).words, []);
+});
+
 test("approved words occur naturally in the matching original passages; local suggestions are optional, bounded enrichment", () => {
   for (const word of wordBloomCatalogue()) {
     const passage = WORDBLOOM_PASSAGES.find(

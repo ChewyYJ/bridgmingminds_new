@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "MindGarden",
+    "name": "BridgingMinds",
     "slug": "mind-garden",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -28,7 +28,7 @@
       [
         "expo-audio",
         {
-          "microphonePermission": "Record a practice response in MindGarden. You can always choose to write instead.",
+          "microphonePermission": "Record a practice response in BridgingMinds. You can always choose to write instead.",
           "enableBackgroundRecording": false
         }
       ],

@@ -509,14 +509,14 @@ export function Garden({
       <View style={s.headingRow}>
         <View style={{ gap: 8, flex: 1 }}>
           <Text accessibilityRole="header" style={T.title}>
-            My garden
+            Homeland
           </Text>
         </View>
         <Tag color="#EDF0DC">
           {planted.length} / {data.plots.length} planted
         </Tag>
       </View>
-      {data.profile.dailyWorkout ? <Text style={T.body}>Your plants stay safe when you take a break. Watering is free and decorative; it does not award skill mastery. Existing decorative growth is preserved.</Text> : null}
+      {data.profile.dailyWorkout ? <Text style={T.body}>A little space to make your own. Your plants stay safe while you take a break.</Text> : null}
       <View
         style={{
           flexDirection: "row",
@@ -556,7 +556,7 @@ export function Garden({
           <Icon name={showArchive ? "chevron-up" : "chevron-down"} size={15} />
         </Pressable>
       </View>
-      <Text style={T.small}>Water every 2 days. Plants die if left dry.</Text>
+      <Text style={T.small}>{data.profile.dailyWorkout ? "Water and decorate whenever you like." : "Water every 2 days to keep your plants healthy."}</Text>
       {showArchive ? actionFeedback : null}
       {showArchive ? (
         <GardenArchive

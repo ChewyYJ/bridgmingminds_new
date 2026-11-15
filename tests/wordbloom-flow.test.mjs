@@ -67,7 +67,11 @@ async function fixture(t) {
     return token;
   };
   const spin = async (token, text = answer) => {
-    const session = await ok("/sessions", token, { mode: "spin_speak" });
+    const session = await ok("/sessions", token, { mode: "spin_speak", promptId: "society-shared-space" });
+    // Model the saved BRIDGE sessions created before the new speaking journey.
+    // Their original automatic vocabulary discovery remains supported.
+    delete session.dailySpeakingJourney;
+    await service.db.prepare("UPDATE sessions SET data=? WHERE id=?").run(JSON.stringify(session), session.id);
     const attempt = await ok("/attempts", token, {
       sessionId: session.id,
       text,

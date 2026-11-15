@@ -12,7 +12,7 @@ const tables = new Set([
   "users", "auth_sessions", "sessions", "attempts", "jobs", "audio", "journal",
   "reward_ledger", "reports", "garden_archives", "garden_operations", "friend_rooms",
   "friend_members", "friend_turns", "named_locks", "rate_limits", "deletion_outbox",
-  "practice_usage", "user_vocabulary", "vocabulary_exposures", "vocabulary_observations", "wordbloom_processed_attempts", "speech_jobs", "vocabulary_pronunciation",
+  "practice_usage", "user_vocabulary", "vocabulary_exposures", "vocabulary_observations", "vocabulary_reviews", "wordbloom_processed_attempts", "speech_jobs", "vocabulary_pronunciation",
   "daily_attempt_receipts", "daily_activity_completions", "daily_workout_days", "skill_observations",
 ]);
 

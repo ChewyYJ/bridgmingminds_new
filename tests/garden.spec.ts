@@ -21,7 +21,7 @@ async function readState(page: Page) {
 }
 async function goToGarden(page: Page) {
   await page
-    .getByRole("button", { name: "Navigate to Garden", exact: true })
+    .getByRole("button", { name: "Navigate to Homeland", exact: true })
     .or(page.getByRole("button", { name: "Garden", exact: true }))
     .or(page.getByRole("link", { name: "Garden", exact: true }))
     .or(page.getByRole("tab", { name: "Garden", exact: true }))

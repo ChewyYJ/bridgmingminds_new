@@ -28,8 +28,10 @@ const submission = z
   .object({
     idempotencyKey: z.string().min(8).max(100),
     audioId: z.string().uuid().optional(),
-    notes: z.string().trim().min(20).max(2000),
-    selfReviewConfirmed: z.literal(true),
+    notes: z.string().trim().max(2000).default(""),
+    selfReviewConfirmed: z.boolean().default(false),
+    evaluateRecording: z.boolean().default(false),
+    processingConsent: z.boolean().default(false),
     wordReviews: z
       .array(
         z
@@ -53,6 +55,7 @@ export function installReadAloud({
   daily,
   wordBloom,
   acousticAvailable = () => false,
+  enqueueSpeech,
   assertOwnAudio,
   failure,
   now = () => new Date(),
@@ -105,9 +108,9 @@ export function installReadAloud({
           status: "assigned",
           createdAt: new Date(now()).toISOString(),
           speech: {
-            status: acousticAvailable() ? "optional_after_save" : "unavailable",
+            status: acousticAvailable() ? "available" : "unavailable",
             message: acousticAvailable()
-              ? "This activity saves your self-review without speech scores. After saving a recording, you may separately opt in to acoustic feedback."
+              ? "Record the passage and tap Done for feedback on pronunciation, fluency, intonation, word stress and completeness."
               : "Acoustic assessment is not connected. Self-review is available without pronunciation, pacing or intonation scores.",
           },
           completionPolicy: "read-aloud-self-review-v1",
@@ -134,6 +137,11 @@ export function installReadAloud({
       await requireDaily(req.userId);
       const data = submission.parse(req.body);
       const session = await assignment(req.params.id, req.userId);
+      if (data.evaluateRecording && (!data.audioId || !data.processingConsent))
+        throw failure(
+          400,
+          "A recording and processing consent are required for AI feedback.",
+        );
       if (
         new Set((data.wordReviews || []).map((review) => review.vocabularyId))
           .size !== (data.wordReviews || []).length ||
@@ -167,8 +175,11 @@ export function installReadAloud({
       }
       const tokens = data.notes.match(/[\p{L}\p{N}]+/gu) || [];
       if (
-        tokens.length < 5 ||
-        new Set(tokens.map((word) => word.toLowerCase())).size < 3
+        (!data.audioId || data.selfReviewConfirmed) &&
+        (!data.selfReviewConfirmed ||
+          data.notes.length < 20 ||
+          tokens.length < 5 ||
+          new Set(tokens.map((word) => word.toLowerCase())).size < 3)
       )
         throw failure(
           400,
@@ -188,18 +199,26 @@ export function installReadAloud({
         idempotencyKey: data.idempotencyKey,
         requestHash,
         completionPolicy: session.completionPolicy,
-        selfReviewConfirmed: true,
+        selfReviewConfirmed: data.selfReviewConfirmed,
         wordReviews: data.wordReviews || [],
         status: "completed",
         createdAt: at,
         completedAt: at,
         evaluation: {
-          kind: "read_aloud_self_review",
-          provider: "self_review",
+          kind:
+            !data.selfReviewConfirmed && data.audioId
+              ? "read_aloud_recording"
+              : "read_aloud_self_review",
+          provider:
+            !data.selfReviewConfirmed && data.audioId
+              ? "pending_audio_assessment"
+              : "self_review",
           rubric_version: "read-aloud-self-review-v1",
           speech: { status: "not_assessed", metrics: null },
           key_takeaway:
-            "Your reading observation is saved as self-review. It does not include acoustic or ability scores.",
+            !data.selfReviewConfirmed && data.audioId
+              ? "Your recording is saved for audio evaluation."
+              : "Your reading observation is saved as self-review. It does not include acoustic or ability scores.",
           next_step:
             "Read the phrase again, letting punctuation guide a comfortable pause.",
         },
@@ -208,13 +227,16 @@ export function installReadAloud({
         .prepare("INSERT INTO attempts VALUES(?,?,?,?,?)")
         .run(attempt.id, req.userId, session.id, JSON.stringify(attempt), at);
       await daily.pinReceipt(req.userId, attempt.id);
-      attempt.rewards = await daily.complete(req.userId, attempt.id);
-      await wordBloom.completeReading(
-        req.userId,
-        session,
-        attempt,
-        data.wordReviews || [],
-      );
+      attempt.rewards = data.selfReviewConfirmed
+        ? await daily.complete(req.userId, attempt.id)
+        : { xp: 0, seeds: 0, completed: 0, streakSecured: false };
+      if (data.selfReviewConfirmed)
+        await wordBloom.completeReading(
+          req.userId,
+          session,
+          attempt,
+          data.wordReviews || [],
+        );
       await db
         .prepare("UPDATE attempts SET data=? WHERE id=?")
         .run(JSON.stringify(attempt), attempt.id);
@@ -223,6 +245,21 @@ export function installReadAloud({
       await db
         .prepare("UPDATE sessions SET data=? WHERE id=?")
         .run(JSON.stringify(session), session.id);
+      if (data.evaluateRecording) {
+        const job = await enqueueSpeech(req.userId, attempt.id, {
+          locale: "en-GB",
+          prosody: false,
+          processingConsent: true,
+        });
+        attempt.speechJobId = job.id;
+        await db
+          .prepare("UPDATE attempts SET data=? WHERE id=?")
+          .run(JSON.stringify(attempt), attempt.id);
+        session.latestAttempt = attempt;
+        await db
+          .prepare("UPDATE sessions SET data=? WHERE id=?")
+          .run(JSON.stringify(session), session.id);
+      }
       res.status(201).json(attempt);
     }),
   );

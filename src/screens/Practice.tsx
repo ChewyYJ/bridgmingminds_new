@@ -29,6 +29,7 @@ import {
   uploadAudio,
 } from "../lib/api";
 import { useApp } from "../lib/state";
+import { DailySpeaking } from "./DailySpeaking";
 import { Article, Attempt, Job, Mode, Prompt, Session } from "../types";
 import {
   Button,
@@ -257,7 +258,14 @@ function PetalWheel({
   );
 }
 
-export function Practice({
+export function Practice(props: React.ComponentProps<typeof ClassicPractice>) {
+  const { state } = useApp();
+  if (props.mode === "spin_speak" && state?.profile.dailyWorkout)
+    return <DailySpeaking onClose={props.onClose} onComplete={props.onComplete} onStepChange={props.onResultShown} retryAttempt={props.retryAttempt} />;
+  return <ClassicPractice {...props} />;
+}
+
+function ClassicPractice({
   mode,
   article,
   retryAttempt,
@@ -2103,7 +2111,7 @@ function FeedbackContent({
                   : "Practice saved. Eligible rewards already earned."}
               </Text>
               <Button
-                label="Open garden"
+                label="Open Homeland"
                 icon="feather"
                 variant="ghost"
                 onPress={onGarden}

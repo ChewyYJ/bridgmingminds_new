@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, Platform, StyleSheet, Text, View } from "react-native";
+import {
+  AppState,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import {
   RecordingPresets,
   requestRecordingPermissionsAsync,
@@ -10,6 +17,7 @@ import {
   useAudioRecorderState,
 } from "expo-audio";
 import { Button, C, ErrorNote, Icon, T } from "./ui";
+import { LiveVoiceMeter } from "./LiveVoiceMeter";
 
 export interface RecordedAudio {
   uri: string;
@@ -20,14 +28,24 @@ export interface RecordedAudio {
 export function AudioPlayback({
   uri,
   startSeconds = 0,
+  playLabel = "Play recording",
 }: {
   uri: string;
   startSeconds?: number;
+  playLabel?: string;
 }) {
   return Platform.OS === "web" ? (
-    <WebAudioPlayback uri={uri} startSeconds={startSeconds} />
+    <WebAudioPlayback
+      uri={uri}
+      startSeconds={startSeconds}
+      playLabel={playLabel}
+    />
   ) : (
-    <NativeAudioPlayback uri={uri} startSeconds={startSeconds} />
+    <NativeAudioPlayback
+      uri={uri}
+      startSeconds={startSeconds}
+      playLabel={playLabel}
+    />
   );
 }
 
@@ -36,9 +54,11 @@ export function AudioPlayback({
 function WebAudioPlayback({
   uri,
   startSeconds,
+  playLabel,
 }: {
   uri: string;
   startSeconds: number;
+  playLabel: string;
 }) {
   const audio = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -103,7 +123,7 @@ function WebAudioPlayback({
     <View style={{ gap: 8 }}>
       <View style={s.row}>
         <Button
-          label={playing ? "Pause playback" : "Play recording"}
+          label={playing ? "Pause playback" : playLabel}
           icon={playing ? "pause" : "play"}
           variant="secondary"
           onPress={() => void toggle()}
@@ -121,9 +141,11 @@ function WebAudioPlayback({
 function NativeAudioPlayback({
   uri,
   startSeconds,
+  playLabel,
 }: {
   uri: string;
   startSeconds: number;
+  playLabel: string;
 }) {
   const player = useAudioPlayer(uri);
   const status = useAudioPlayerStatus(player);
@@ -161,7 +183,7 @@ function NativeAudioPlayback({
     <View style={{ gap: 8 }}>
       <View style={s.row}>
         <Button
-          label={status.playing ? "Pause playback" : "Play recording"}
+          label={status.playing ? "Pause playback" : playLabel}
           icon={status.playing ? "pause" : "play"}
           variant="secondary"
           onPress={() => void toggle()}
@@ -191,12 +213,16 @@ export default function AudioInput({
   onCaptureActive,
   busy = false,
   sharing = false,
+  appearance = "garden",
+  reviewActionLabel = "Use recording",
 }: {
   onRecorded: (audio: RecordedAudio) => Promise<void>;
   onCancel: () => void;
   onCaptureActive?: (active: boolean) => void;
   busy?: boolean;
   sharing?: boolean;
+  appearance?: "garden" | "daily" | "reading";
+  reviewActionLabel?: string;
 }) {
   const recorder = useAudioRecorder({
     ...RecordingPresets.HIGH_QUALITY,
@@ -299,7 +325,7 @@ export default function AudioInput({
       const permission = await requestRecordingPermissionsAsync();
       if (!permission.granted)
         throw new Error(
-          "Microphone access is off. Enable it in your device or browser settings, or choose Write instead.",
+          "Microphone access is off. Enable it in your device or browser settings, then try again.",
         );
       await setAudioModeAsync({
         allowsRecording: true,
@@ -314,7 +340,7 @@ export default function AudioInput({
       setError(
         e instanceof Error
           ? e.message
-          : "Microphone unavailable. You can write your response instead.",
+          : "Microphone unavailable. Check your device settings and try again.",
       );
     } finally {
       setWorking(false);
@@ -355,7 +381,214 @@ export default function AudioInput({
     }
   }
 
-  const level = Math.max(0, Math.min(1, ((state.metering ?? -55) + 60) / 60));
+  if (appearance === "reading")
+    return (
+      <View style={{ gap: 12 }}>
+        <ErrorNote message={error} />
+        {phase === "review" && recorded ? (
+          <>
+            <AudioPlayback uri={recorded.uri} />
+            <Button
+              label={reviewActionLabel}
+              icon="check"
+              loading={busy}
+              disabled={working}
+              onPress={() => void onRecorded(recorded)}
+            />
+            <Button
+              label="Record again"
+              variant="ghost"
+              disabled={working || busy}
+              onPress={() => void discard(false)}
+            />
+          </>
+        ) : phase === "idle" ? (
+          <Button
+            label="Record my response"
+            icon="mic"
+            loading={working}
+            disabled={busy}
+            onPress={() => void start()}
+          />
+        ) : (
+          <>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+              }}
+            >
+              <Text accessibilityLiveRegion="polite" style={T.small}>
+                {phase === "paused" ? "Recording paused" : "Listening…"}
+              </Text>
+              <Text
+                accessibilityLabel={`${60 - elapsed} seconds remaining`}
+                style={T.h3}
+              >{`${Math.floor((60 - elapsed) / 60)
+                .toString()
+                .padStart(
+                  2,
+                  "0",
+                )}:${String((60 - elapsed) % 60).padStart(2, "0")}`}</Text>
+            </View>
+            <LiveVoiceMeter
+              recorder={recorder}
+              active={phase === "recording"}
+            />
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Button
+                label={
+                  phase === "paused" ? "Resume recording" : "Pause recording"
+                }
+                icon={phase === "paused" ? "play" : "pause"}
+                variant="secondary"
+                disabled={working || busy}
+                onPress={pauseResume}
+                style={{ flex: 1 }}
+              />
+              <Button
+                label="Done"
+                icon="check"
+                loading={working}
+                disabled={busy || elapsed < 1}
+                onPress={() => void finish()}
+                style={{ flex: 1 }}
+              />
+            </View>
+          </>
+        )}
+        <Button
+          label="Cancel recording"
+          variant="ghost"
+          disabled={working || busy}
+          onPress={() => void discard(true)}
+        />
+      </View>
+    );
+  if (appearance === "daily")
+    return (
+      <View style={{ alignItems: "center", gap: 24, width: "100%" }}>
+        <ErrorNote message={error} />
+        {phase === "review" && recorded ? (
+          <>
+            <View style={dailyAudio.ring}>
+              <Icon name="check" size={46} color="#555" />
+            </View>
+            <Text style={dailyAudio.hint}>Your recording is ready</Text>
+            <AudioPlayback uri={recorded.uri} />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={reviewActionLabel}
+              disabled={busy || working}
+              onPress={() => void onRecorded(recorded)}
+              style={dailyAudio.button}
+            >
+              <Text style={dailyAudio.buttonText}>
+                {busy ? "Saving…" : reviewActionLabel}
+              </Text>
+              <Icon name="chevron-right" color="#fff" />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => void discard(false)}
+              disabled={busy || working}
+              style={dailyAudio.secondary}
+            >
+              <Text style={dailyAudio.hint}>Record again</Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                phase === "idle" ? "Record my response" : "Finish recording"
+              }
+              disabled={working || busy || (phase !== "idle" && elapsed < 1)}
+              onPress={() => void (phase === "idle" ? start() : finish())}
+              style={dailyAudio.outerRing}
+            >
+              <View style={dailyAudio.middleRing}>
+                <View style={dailyAudio.ring}>
+                  <Icon
+                    name={phase === "idle" ? "mic" : "square"}
+                    size={48}
+                    color="#555"
+                  />
+                </View>
+              </View>
+            </Pressable>
+            <Text
+              accessibilityLabel={`${phase === "idle" ? 60 : 60 - elapsed} seconds remaining`}
+              style={dailyAudio.timer}
+            >
+              {phase === "idle"
+                ? "01:00"
+                : `${Math.floor((60 - elapsed) / 60)
+                    .toString()
+                    .padStart(
+                      2,
+                      "0",
+                    )}:${String((60 - elapsed) % 60).padStart(2, "0")}`}
+            </Text>
+            <LiveVoiceMeter
+              key={phase}
+              recorder={recorder}
+              active={phase === "recording"}
+            />
+            <Text style={dailyAudio.hint}>
+              {working
+                ? phase === "idle"
+                  ? "Preparing microphone…"
+                  : "Finishing recording…"
+                : phase === "idle"
+                  ? "Tap the microphone to begin"
+                  : phase === "paused"
+                    ? "Recording paused"
+                    : "Tap Done when you’re ready"}
+            </Text>
+            {phase !== "idle" ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Done"
+                disabled={working || busy || elapsed < 1}
+                onPress={() => void finish()}
+                style={[
+                  dailyAudio.button,
+                  (working || busy || elapsed < 1) && { opacity: 0.5 },
+                ]}
+              >
+                <Icon name="check" color="#fff" />
+                <Text style={dailyAudio.buttonText}>Done</Text>
+              </Pressable>
+            ) : null}
+            {phase !== "idle" ? (
+              <Pressable
+                accessibilityRole="button"
+                disabled={working || busy}
+                onPress={pauseResume}
+                style={dailyAudio.secondary}
+              >
+                <Text style={dailyAudio.hint}>
+                  {phase === "paused" ? "Resume recording" : "Pause recording"}
+                </Text>
+              </Pressable>
+            ) : null}
+          </>
+        )}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Cancel recording"
+          disabled={working || busy}
+          onPress={() => void discard(true)}
+          style={dailyAudio.secondary}
+        >
+          <Text style={dailyAudio.hint}>Cancel recording</Text>
+        </Pressable>
+      </View>
+    );
   return (
     <View style={[s.container, phase === "review" && s.reviewContainer]}>
       <ErrorNote message={error} />
@@ -423,30 +656,11 @@ export default function AudioInput({
           >
             0:{String(60 - elapsed).padStart(2, "0")}
           </Text>
-          <View
-            accessibilityLabel={
-              phase === "recording"
-                ? "Recording in progress"
-                : "Recording paused"
-            }
-            style={s.wave}
-          >
-            {Array.from({ length: 25 }, (_, i) => (
-              <View
-                key={i}
-                style={{
-                  flex: 1,
-                  borderRadius: 4,
-                  backgroundColor: C.forest,
-                  height:
-                    phase === "recording"
-                      ? 8 + level * (16 + ((i * 13) % 40))
-                      : 8,
-                  opacity: 0.45 + (i % 3) * 0.18,
-                }}
-              />
-            ))}
-          </View>
+          <LiveVoiceMeter
+            key={phase}
+            recorder={recorder}
+            active={phase === "recording"}
+          />
           <View style={s.row}>
             <Button
               label={phase === "paused" ? "Resume" : "Pause"}
@@ -482,6 +696,49 @@ export default function AudioInput({
     </View>
   );
 }
+
+const dailyAudio = StyleSheet.create({
+  outerRing: {
+    width: 192,
+    height: 192,
+    borderRadius: 96,
+    backgroundColor: "#fcfcfc",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 22,
+  },
+  middleRing: {
+    width: 156,
+    height: 156,
+    borderRadius: 78,
+    backgroundColor: C.cream,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ring: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: C.sage,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  timer: { fontFamily: "DMBold", fontSize: 28, color: "#181818" },
+  hint: { fontFamily: "DM", fontSize: 14, color: "#555", textAlign: "center" },
+  button: {
+    borderRadius: 10,
+    minHeight: 50,
+    backgroundColor: C.forest,
+    alignSelf: "stretch",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 10,
+    padding: 12,
+  },
+  buttonText: { color: "#fff", fontFamily: "DMBold", fontSize: 15 },
+  secondary: { padding: 12, minHeight: 44 },
+});
 
 const s = StyleSheet.create({
   container: {
@@ -527,12 +784,4 @@ const s = StyleSheet.create({
     justifyContent: "center",
   },
   timer: { fontFamily: "Lora", fontSize: 60, lineHeight: 76, color: C.forest },
-  wave: {
-    flexDirection: "row",
-    gap: 3,
-    height: 64,
-    width: "100%",
-    maxWidth: 230,
-    alignItems: "center",
-  },
 });

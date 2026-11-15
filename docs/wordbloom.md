@@ -2,7 +2,7 @@
 
 ## My Dictionary and Read & Reflect
 
-Open **Profile → My Dictionary** to revisit words from Spin & Speak. **Read & Reflect** is available from the dictionary and daily Home. It offers one due word at a time using original contexts from the approved catalogue. Contexts alternate on later reviews. First the learner recalls the missing word, then sees the completed example and writes a sentence in a new context.
+Open **Profile → My Dictionary** to revisit words saved from the Spin & Speak sample script. Earlier feedback-based discoveries also appear here. **Read & Reflect** is available from the dictionary and daily Home. It offers one due word at a time using original contexts from the approved catalogue. Contexts alternate on later reviews. First the learner recalls the missing word, then sees the completed example and writes a sentence in a new context.
 
 Correct recall is checked against the target word. Reflections are checked for presence of the target word. Three consecutive correct reviews earn the **Consistent recall** progress label. Correct reviews schedule the next exercise after 1, 7, then 30 days. Missed recall schedules a retry after one day. The recall schedule is stored on the existing dictionary entry and is independent of Read Aloud exposure. A review resumes from the last submitted step.
 

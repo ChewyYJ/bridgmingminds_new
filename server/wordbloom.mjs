@@ -274,7 +274,12 @@ export function createWordBloomService({ db, now = () => new Date() }) {
       goal: user.goal,
     };
   }
-  async function processAttempt(uid, attempt, evaluation) {
+  async function processAttempt(
+    uid,
+    attempt,
+    evaluation,
+    { discover = true } = {},
+  ) {
     return db.transaction(async () => {
       await db.lockUser(uid);
       const user = await profile(uid);
@@ -315,7 +320,7 @@ export function createWordBloomService({ db, now = () => new Date() }) {
           ? localWordBloom(attempt.text)
           : evaluation.wordbloom?.candidates || [];
       const discovered = [];
-      for (const candidate of candidates.slice(0, 3)) {
+      for (const candidate of (discover ? candidates : []).slice(0, 3)) {
         const word = wordBloomWord(candidate.wordId);
         if (
           !word ||
@@ -454,6 +459,68 @@ export function createWordBloomService({ db, now = () => new Date() }) {
         .prepare("INSERT INTO wordbloom_processed_attempts VALUES(?,?,?,?)")
         .run(attempt.id, uid, JSON.stringify(result), at);
       return result;
+    });
+  }
+  async function saveSelected(uid, attemptId, wordIds) {
+    return db.transaction(async () => {
+      await db.lockUser(uid);
+      const user = await profile(uid);
+      const row = await db
+        .prepare("SELECT data FROM attempts WHERE id=? AND user_id=?")
+        .get(attemptId, uid);
+      const attempt = row && JSON.parse(row.data);
+      if (!attempt || attempt.status !== "completed")
+        throw Object.assign(new Error("Completed response not found."), {
+          status: 404,
+        });
+      const offered = attempt.dailyScript?.vocabulary || [];
+      if (
+        wordIds.length > 3 ||
+        new Set(wordIds).size !== wordIds.length ||
+        wordIds.some((id) => !offered.some((word) => word.wordId === id))
+      )
+        throw Object.assign(
+          new Error("Choose words from your sample script."),
+          { status: 400 },
+        );
+      const at = instant(),
+        day = localDay(at, user.timezone || "UTC");
+      for (const wordId of wordIds) {
+        const word = wordBloomWord(wordId);
+        const span = wordSpans(attempt.dailyScript.text, word.word)[0];
+        const data = {
+          ...word,
+          familiaritySource: null,
+          source: {
+            attemptId,
+            receivedAt: attempt.createdAt,
+            span: {
+              ...span,
+              quote: attempt.dailyScript.text.slice(span.start, span.end),
+            },
+            kind: "selected_sample",
+            reason:
+              "You selected this word from your sample script for Read Aloud practice.",
+            confidence: "unassessed",
+          },
+        };
+        await db
+          .prepare(
+            `INSERT INTO user_vocabulary (id,user_id,word_id,source_attempt_id,source_day,status,data,due_at,interval_days,exposure_count,productive_count,created_at,updated_at) VALUES(?,?,?,?,?,'scheduled',?,?,3,0,0,?,?) ON CONFLICT(user_id,word_id) DO NOTHING`,
+          )
+          .run(
+            randomUUID(),
+            uid,
+            wordId,
+            attemptId,
+            day,
+            JSON.stringify(data),
+            at,
+            at,
+            at,
+          );
+      }
+      return summary(uid);
     });
   }
   async function selectPassage(uid, fallback) {
@@ -644,6 +711,7 @@ export function createWordBloomService({ db, now = () => new Date() }) {
   return {
     context,
     processAttempt,
+    saveSelected,
     selectPassage,
     recordAssignment,
     completeReading,

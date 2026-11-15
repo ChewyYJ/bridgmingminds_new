@@ -324,14 +324,14 @@ export function GardenScene({
     </View>
   );
 }
-export function MindGardenMark({ size = 40 }: { size?: number }) {
+export function BridgingMindsMark({ size = 40 }: { size?: number }) {
   return (
     <Svg
       style={{ flexShrink: 0 }}
       width={size}
       height={size}
       viewBox="0 0 64 64"
-      accessibilityLabel="MindGarden"
+      accessibilityLabel="BridgingMinds"
     >
       <Path d={BRAND.stem} fill={BRAND.forest} />
       <Path d={BRAND.leaf} fill={BRAND.sage} />

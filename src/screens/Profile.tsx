@@ -116,7 +116,7 @@ export function ProfileScreen({
             "Ideas revisited",
             "refresh-cw",
           ],
-          [state.xp, "Garden XP", "feather"],
+          [state.xp, "Practice XP", "feather"],
         ].map(([n, l, icon]) => (
           <Card key={String(l)} style={{ flex: 1, minWidth: 140, gap: 12 }}>
             <Icon name={icon} />

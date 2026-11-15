@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { AsyncResource } from "node:async_hooks";
 import { z } from "zod";
 import { createAzureSpeech } from "./azure-speech.mjs";
+import { createOpenAIReading } from "./openai-reading.mjs";
 import { cleanupSpeechScratch, decodeSpeechAudio } from "./speech-audio.mjs";
 import { createUsageService } from "./usage.mjs";
 
@@ -21,6 +22,7 @@ export function installReadingSpeech({
   getAttempt,
   getUser,
   wordBloom,
+  daily,
   audioRoutes,
   audioStorage,
   limit,
@@ -28,7 +30,10 @@ export function installReadingSpeech({
   options = {},
 }) {
   const provider =
-    options.speechProvider || createAzureSpeech(options.azureSpeech);
+    options.speechProvider ||
+    (options.apiKey !== "" && process.env.OPENAI_API_KEY
+      ? createOpenAIReading(options.openaiReading)
+      : createAzureSpeech(options.azureSpeech));
   const decode = options.decodeSpeechAudio || decodeSpeechAudio;
   const usage = createUsageService({
     db,
@@ -86,6 +91,8 @@ export function installReadingSpeech({
       });
       if (!job) return;
       const data = JSON.parse(job.data);
+      if ((data.provider || "azure") !== provider.capabilities(data.locale).provider)
+        throw fail(503, "speech_configuration", "This recording was consented to a different speech provider. Record a new take to use the current service.");
       const attempt = await getAttempt(job.attempt_id, job.user_id);
       if (
         attempt.mode !== "read_aloud" ||
@@ -127,17 +134,56 @@ export function installReadingSpeech({
         await consent(job.user_id);
         await audioRoutes.assertOwnAudio(attempt.audioId, job.user_id);
         const latest = await getAttempt(attempt.id, job.user_id);
-        const wordBloomReview = await wordBloom.recordPronunciation(job.user_id, latest.id, result);
+        const wordBloomReview =
+          result.provider === "azure"
+            ? await wordBloom.recordPronunciation(
+                job.user_id,
+                latest.id,
+                result,
+              )
+            : { policyVersion: "wordbloom-reading-review-v1", words: [] };
         latest.speechAssessment = result;
+        const transcript =
+          result.readingEvaluation?.transcript ||
+          result.utterances.map((item) => item.transcript).join(" ");
+        const assessed =
+          result.status === "assessed" &&
+          (transcript.match(/[\p{L}\p{N}]+/gu) || []).length >= 3;
+        if (!latest.selfReviewConfirmed && assessed) {
+          latest.text = transcript;
+          latest.evaluation = {
+            ...latest.evaluation,
+            provider: result.provider,
+            speech: { status: "assessed", metrics: null },
+            key_takeaway:
+              result.readingEvaluation?.summary || "Your reading was assessed.",
+            next_step:
+              result.readingEvaluation?.nextStep ||
+              "Listen back and practise one phrase.",
+          };
+        }
         await db
           .prepare("UPDATE attempts SET data=? WHERE id=?")
           .run(JSON.stringify(latest), latest.id);
+        if (!latest.selfReviewConfirmed && assessed && daily) {
+          latest.rewards = await daily.complete(job.user_id, latest.id);
+          await db
+            .prepare("UPDATE attempts SET data=? WHERE id=?")
+            .run(JSON.stringify(latest), latest.id);
+        }
         // Keep the reading-session snapshot consistent with the history record.
         const sessionRow = await db
           .prepare("SELECT data FROM sessions WHERE id=? AND user_id=?")
           .get(latest.sessionId, job.user_id);
         if (sessionRow) {
           const session = JSON.parse(sessionRow.data);
+          if (!latest.selfReviewConfirmed && assessed)
+            await wordBloom.completeReading(
+              job.user_id,
+              session,
+              latest,
+              latest.wordReviews || [],
+            );
           if (session.latestAttempt?.id === latest.id) {
             session.latestAttempt = latest;
             await db
@@ -149,7 +195,11 @@ export function installReadingSpeech({
           .prepare(
             "UPDATE speech_jobs SET status='completed',data=?,updated_at=? WHERE id=?",
           )
-          .run(JSON.stringify({ ...data, result, wordBloomReview, error: null }), instant(), id);
+          .run(
+            JSON.stringify({ ...data, result, wordBloomReview, error: null }),
+            instant(),
+            id,
+          );
       });
     } catch (error) {
       if (!closed) {
@@ -251,102 +301,101 @@ export function installReadingSpeech({
       res.json(row ? view(row) : null);
     }),
   );
-  app.post(
-    "/api/read-aloud/attempts/:id/speech-assessment",
-    wrap(async (req, res) => {
-      const settings = input.parse(req.body);
-      const capability = provider.capabilities(settings.locale);
+  async function enqueue(uid, attemptId, request) {
+    const settings = input.parse(request);
+    const capability = provider.capabilities(settings.locale);
+    if (
+      capability.status !== "available" ||
+      (settings.prosody && !capability.prosody)
+    )
+      throw fail(
+        503,
+        "speech_configuration",
+        "Acoustic assessment is unavailable for this practice target. Self-review remains available.",
+      );
+    const result = await db.transaction(async () => {
+      if (!(await db.lockUser(uid)))
+        throw fail(401, "account_missing", "Please sign in again.");
+      await consent(uid);
+      const attempt = await getAttempt(attemptId, uid);
       if (
-        capability.status !== "available" ||
-        (settings.prosody && !capability.prosody)
+        attempt.mode !== "read_aloud" ||
+        !attempt.audioId ||
+        attempt.status !== "completed"
       )
         throw fail(
-          503,
-          "speech_configuration",
-          "Acoustic assessment is unavailable for this practice target. Self-review remains available.",
+          409,
+          "speech_source",
+          "Save a reading with a private recording before assessment.",
         );
-      const result = await db.transaction(async () => {
-        if (!(await db.lockUser(req.userId)))
-          throw fail(401, "account_missing", "Please sign in again.");
-        await consent(req.userId);
-        const attempt = await getAttempt(req.params.id, req.userId);
+      await audioRoutes.assertOwnAudio(attempt.audioId, uid);
+      const existing = await db
+        .prepare("SELECT * FROM speech_jobs WHERE attempt_id=? AND user_id=?")
+        .get(attempt.id, uid);
+      if (existing) {
+        const data = JSON.parse(existing.data);
         if (
-          attempt.mode !== "read_aloud" ||
-          !attempt.audioId ||
-          attempt.status !== "completed"
+          data.locale !== settings.locale ||
+          data.prosody !== settings.prosody ||
+          (data.provider || "azure") !== capability.provider
         )
           throw fail(
             409,
-            "speech_source",
-            "Save a reading with a private recording before assessment.",
+            "speech_settings",
+            "This recording already has a pinned practice target. Make a new reading attempt to change it.",
           );
-        await audioRoutes.assertOwnAudio(attempt.audioId, req.userId);
-        const existing = await db
-          .prepare("SELECT * FROM speech_jobs WHERE attempt_id=? AND user_id=?")
-          .get(attempt.id, req.userId);
-        if (existing) {
-          const data = JSON.parse(existing.data);
-          if (
-            data.locale !== settings.locale ||
-            data.prosody !== settings.prosody
-          )
+        if (existing.status === "failed") {
+          if ((data.retries || 0) >= 3)
             throw fail(
-              409,
-              "speech_settings",
-              "This recording already has a pinned practice target. Make a new reading attempt to change it.",
+              429,
+              "speech_retry_limit",
+              "This assessment reached its retry limit. Please save a new reading take.",
             );
-          if (existing.status === "failed") {
-            if ((data.retries || 0) >= 3)
-              throw fail(
-                429,
-                "speech_retry_limit",
-                "This assessment reached its retry limit. Please save a new reading take.",
-              );
-            await limit(`speech:${req.userId}`, 10, 3600000);
-            existing.status = "queued";
-            existing.data = JSON.stringify({ ...data, error: null });
-            await db
-              .prepare(
-                "UPDATE speech_jobs SET status='queued',data=?,updated_at=? WHERE id=?",
-              )
-              .run(existing.data, instant(), existing.id);
-          }
-          return view(existing);
+          await limit(`speech:${uid}`, 10, 3600000);
+          existing.status = "queued";
+          existing.data = JSON.stringify({ ...data, error: null });
+          await db
+            .prepare(
+              "UPDATE speech_jobs SET status='queued',data=?,updated_at=? WHERE id=?",
+            )
+            .run(existing.data, instant(), existing.id);
         }
-        await limit(`speech:${req.userId}`, 10, 3600000);
-        const id = randomUUID(),
-          at = instant();
-        const data = {
-          locale: settings.locale,
-          prosody: settings.prosody,
-          consentedAt: at,
-          retries: 0,
-          result: null,
-          error: null,
-        };
-        await db
-          .prepare("INSERT INTO speech_jobs VALUES(?,?,?,?,?,?,?)")
-          .run(
-            id,
-            req.userId,
-            attempt.id,
-            "queued",
-            JSON.stringify(data),
-            at,
-            at,
-          );
-        return {
-          id,
-          attemptId: attempt.id,
-          status: "queued",
-          ...data,
-          updatedAt: at,
-        };
-      });
-      schedule(result.id);
+        return view(existing);
+      }
+      await limit(`speech:${uid}`, 10, 3600000);
+      const id = randomUUID(),
+        at = instant();
+      const data = {
+        provider: capability.provider,
+        locale: settings.locale,
+        prosody: settings.prosody,
+        consentedAt: at,
+        retries: 0,
+        result: null,
+        error: null,
+      };
+      await db
+        .prepare("INSERT INTO speech_jobs VALUES(?,?,?,?,?,?,?)")
+        .run(id, uid, attempt.id, "queued", JSON.stringify(data), at, at);
+      return {
+        id,
+        attemptId: attempt.id,
+        status: "queued",
+        ...data,
+        updatedAt: at,
+      };
+    });
+    schedule(result.id);
+    return result;
+  }
+  app.post(
+    "/api/read-aloud/attempts/:id/speech-assessment",
+    wrap(async (req, res) => {
+      const result = await enqueue(req.userId, req.params.id, req.body);
       res.status(result.status === "completed" ? 200 : 202).json(result);
     }),
   );
+
   app.get(
     "/api/read-aloud/speech-jobs/:id",
     wrap(async (req, res) => {
@@ -368,6 +417,7 @@ export function installReadingSpeech({
     }),
   );
   return {
+    enqueue,
     available: () =>
       ["en-US", "en-GB"].some(
         (locale) => provider.capabilities(locale).status === "available",

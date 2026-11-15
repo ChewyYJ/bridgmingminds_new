@@ -93,7 +93,7 @@ async function fixture(t, options = {}) {
   const base = `http://127.0.0.1:${server.address().port}/api`;
   t.after(async () => {
     await new Promise((resolve) => server.close(resolve));
-    service.close();
+    await service.close();
     rmSync(directory, { recursive: true, force: true });
   });
   async function request(
@@ -153,6 +153,64 @@ async function fixture(t, options = {}) {
     },
   };
 }
+
+test("daily sample words require explicit selection, persist once and reach Read Aloud", async (t) => {
+  const f = await fixture(t);
+  const token = await f.guest();
+  const { attempt } = await f.completed(token);
+  await f.request("/daily-workout/enroll", token, {});
+  const sample = "A small trial could provide evidence. We can examine our assumption that it represents everyone.";
+  f.respond(() => response({ text: sample, annotations: [
+    { quote: "A small trial", label: "Position", explanation: "Keeps the original proposal." },
+    { quote: "represents everyone", label: "Limit", explanation: "Keeps the stated limit." },
+  ], vocabulary: ["evidence", "assumption"] }));
+  const result = await f.generate(token, attempt, { ...input("spin_speak", ["", "", ""]), daily: true });
+  assert.equal(result.status, 200);
+  assert.equal(isGuidedResponseDraft(result.data), true);
+  assert.deepEqual(result.data.vocabulary.map((word) => word.wordId), ["evidence", "assumption"]);
+  assert.equal((await f.request("/wordbloom/summary", token)).data.words.length, 0, "viewing a script does not save words");
+  const path = `/attempts/${attempt.id}/vocabulary`;
+  assert.equal((await f.request(path, token, { wordIds: ["collaborate"] })).status, 400);
+  const other = await f.guest();
+  assert.equal((await f.request(path, other, { wordIds: ["evidence"] })).status, 404);
+  for (let i = 0; i < 2; i++) {
+    const saved = await f.request(path, token, { wordIds: ["evidence"] });
+    assert.equal(saved.status, 200);
+    assert.deepEqual(saved.data.words.map((word) => word.wordId), ["evidence"]);
+    assert.equal(saved.data.words[0].source.kind, "selected_sample");
+  }
+  const reading = await f.request("/read-aloud/assignment", token);
+  assert.equal(reading.status, 200);
+  assert.deepEqual(reading.data.wordbloom.words.map((word) => word.wordId), ["evidence"]);
+  const review = await f.request("/wordbloom/reviews", token, {});
+  assert.equal(review.status, 200);
+  assert.equal(review.data.title, "A plant experiment");
+  assert.equal(review.data.word, undefined);
+  const after = (await f.request(`/attempts/${attempt.id}`, token)).data;
+  assert.deepEqual(after.evaluation, attempt.evaluation);
+  assert.deepEqual(after.rewards, attempt.rewards);
+});
+
+test("guiding answers are assessed against their own question and leave first-try feedback intact", async (t) => {
+  const f = await fixture(t);
+  const token = await f.guest();
+  const { attempt } = await f.completed(token);
+  const answer = "A small trial gives us observations before a larger change.";
+  f.respond((request) => {
+    const context = JSON.parse(JSON.parse(request.body).messages[1].content);
+    assert.equal(context.ANSWER, answer);
+    assert.equal(context.QUESTION, getThoughtGuide(attempt.mode, attempt.evaluation)[1].question);
+    return response({ status: "answered", feedback: "You explain why a trial helps.", next_step: "Give one observation you would look for.", evidence_quote: "gives us observations" });
+  });
+  const checked = await f.request(`/attempts/${attempt.id}/guiding-answer`, token, { index: 1, answer });
+  assert.equal(checked.status, 200);
+  assert.equal(checked.data.status, "answered");
+  const after = (await f.request(`/attempts/${attempt.id}`, token)).data;
+  assert.deepEqual(after.evaluation, attempt.evaluation);
+  assert.equal(after.guidingPractice[1].answer, answer);
+  f.respond(() => response({ status: "answered", feedback: "Unsupported", next_step: "Try again", evidence_quote: "invented quote" }));
+  assert.equal((await f.request(`/attempts/${attempt.id}/guiding-answer`, token, { index: 1, answer })).status, 502);
+});
 
 test("explicit notes generate an annotated draft with exact Unicode spans and no saved-state or reward mutation", async (t) => {
   const f = await fixture(t);
