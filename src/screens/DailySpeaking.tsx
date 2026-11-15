@@ -9,6 +9,7 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from "react-native";
 import {
   api,
@@ -78,6 +79,8 @@ export function DailySpeaking({
   retryAttempt?: Attempt;
 }) {
   const { state, refresh } = useApp();
+  const { width } = useWindowDimensions();
+  const wide = width >= 900;
   const [retryAttempt] = useState(requestedAttempt);
   const [step, setStep] = useState<Step>("entry");
   const [session, setSession] = useState<Session | null>(null);
@@ -517,458 +520,534 @@ export function DailySpeaking({
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={s.scroll}
       >
-        <View style={s.phone} testID={`daily-screen-${step}`}>
-          {step !== "entry" ? (
-            <View style={s.header}>
+        <View
+          style={{
+            width: "100%",
+            maxWidth: 1000,
+            flexDirection: wide ? "row" : "column",
+            gap: 32,
+            alignItems: "flex-start",
+          }}
+        >
+          {wide ? (
+            <View style={{ width: 260, paddingTop: 30, gap: 24 }}>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Back"
-                disabled={capturing || busy}
-                onPress={back}
-                style={s.back}
-              >
-                <Icon name="chevron-left" color="#181818" size={24} />
-              </Pressable>
-              {title && !["speak"].includes(step) ? (
-                <Text accessibilityRole="header" style={s.heading}>
-                  {title}
-                </Text>
-              ) : null}
-              <View style={{ width: 38 }} />
-            </View>
-          ) : null}
-          {error ? (
-            <View accessibilityRole="alert" style={s.error}>
-              <Text style={s.small}>{error}</Text>
-            </View>
-          ) : null}
-          {!ready ? (
-            <ActivityIndicator color="#242424" style={{ margin: 80 }} />
-          ) : null}
-          {step === "entry" && (
-            <>
-              <View style={s.profile}>
-                <View style={s.avatar}>
-                  <Icon name="user" color="#242424" size={28} />
-                </View>
-                <View style={{ flex: 1, gap: 6 }}>
-                  <Text style={s.name}>
-                    {state?.profile.displayName}{" "}
-                    <Text style={s.small}> {state?.xp || 0} XP</Text>
-                  </Text>
-                  <View style={s.progress}>
-                    <View
-                      style={[
-                        s.progressFill,
-                        {
-                          width: `${Math.min(100, (state?.dailyWorkout?.completed || 0) * 50)}%`,
-                        },
-                      ]}
-                    />
-                  </View>
-                </View>
-                <View style={s.wallet}>
-                  <Icon name="sun" size={17} color="#a8894c" />
-                  <Text style={s.name}>{state?.wallet.seeds || 0} {state?.wallet.seeds === 1 ? "seed" : "seeds"}</Text>
-                </View>
-              </View>
-              <View style={[s.center, { marginTop: 36 }]}>
-                <Icon name="calendar" color="#181818" size={32} />
-                <Text accessibilityRole="header" style={s.title}>
-                  Daily Challenge
-                </Text>
-                <Text style={s.copy}>
-                  {dailyCompleted
-                    ? "Today’s speaking challenge is complete.\nKeep practising with another response."
-                    : "A new speaking challenge is ready!\nComplete it to earn XP and work\ntowards your daily streak."}
-                </Text>
-              </View>
-              <View style={s.topicCard}>
-                <Icon name="message-circle" color="#242424" size={24} />
-                <Text style={s.small}>Today’s Topic</Text>
-                <Text style={s.topic}>
-                  {session?.prompt.question || "Loading today’s question…"}
-                </Text>
-              </View>
-              <Action
-                label="Speak a Response"
-                icon="mic"
-                disabled={!session || busy}
-                onPress={nextBoard}
-              />
-              <Pressable
-                accessibilityRole="button"
+                disabled={busy || capturing}
                 onPress={() => void leave()}
-                style={s.quiet}
+                style={{
+                  flexDirection: "row",
+                  gap: 8,
+                  alignItems: "center",
+                  minHeight: 44,
+                }}
               >
-                <Text style={s.small}>Back to Home</Text>
+                <Icon name="arrow-left" size={18} />
+                <Text style={s.small}>Daily challenge</Text>
               </Pressable>
-            </>
-          )}
-          {step === "board" && board && (
-            <>
-              <Text style={s.copy}>
-                Jot down and organise your ideas{`\n`}on the whiteboard. (45s)
+              <Text style={{ ...s.title, textAlign: "left", fontSize: 30 }}>
+                A thought worth exploring.
               </Text>
-              <View style={s.timerPill}>
-                <Icon name="clock" color="#242424" size={17} />
-                <Text style={s.name}>
-                  00:{String(seconds).padStart(2, "0")}
-                </Text>
-              </View>
-              <DailyBoard
-                board={board}
-                onChange={setBoard}
-                topic={session?.prompt.question || "My view"}
-                onDone={finishBoard}
-              />
-            </>
-          )}
-          {step === "speak" && (
-            <>
-              <View style={s.center}>
-                <Text accessibilityRole="header" style={s.title}>
-                  Speak Your Response
-                </Text>
-                <Text style={s.copy}>
-                  Share your thoughts clearly and{`\n`}confidently in 1 minute.
-                </Text>
-              </View>
-              <AudioInput
-                appearance="daily"
-                onRecorded={recorded}
-                onCancel={() => setStep("entry")}
-                onCaptureActive={setCapturing}
-                busy={busy || !consent}
-              />
-              {!consent ? (
-                <View style={{ gap: 12 }}>
-                  <Text style={s.small}>
-                    Allow private recording to begin. Audio is stored for up to
-                    30 days and sent for transcription.
+              <Text style={s.body}>{session?.prompt.question}</Text>
+              {["Plan", "Speak", "Reflect"].map((label, i) => (
+                <View
+                  key={label}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 12,
+                  }}
+                >
+                  <View
+                    style={[
+                      s.number,
+                      {
+                        backgroundColor:
+                          (i === 0 && ["entry", "board"].includes(step)) ||
+                          (i === 1 &&
+                            ["speak", "processing", "transcript"].includes(
+                              step,
+                            )) ||
+                          (i === 2 &&
+                            [
+                              "feedback",
+                              "guide",
+                              "script",
+                              "complete",
+                            ].includes(step))
+                            ? "#e2ead7"
+                            : "#f4f4f4",
+                      },
+                    ]}
+                  >
+                    <Text style={s.name}>{i + 1}</Text>
+                  </View>
+                  <Text style={s.body}>{label}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+          <View
+            style={[
+              s.phone,
+              {
+                maxWidth: wide ? 680 : 560,
+                flex: wide ? 1 : undefined,
+                padding: wide ? 32 : 20,
+              },
+            ]}
+            testID={`daily-screen-${step}`}
+          >
+            {step !== "entry" ? (
+              <View style={s.header}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Back"
+                  disabled={capturing || busy}
+                  onPress={back}
+                  style={s.back}
+                >
+                  <Icon name="chevron-left" color="#181818" size={24} />
+                </Pressable>
+                {title && !["speak"].includes(step) ? (
+                  <Text accessibilityRole="header" style={s.heading}>
+                    {title}
                   </Text>
-                  <Action
-                    label="Allow Private Recording"
-                    onPress={() => void allow()}
-                    disabled={busy}
+                ) : null}
+                <View style={{ width: 38 }} />
+              </View>
+            ) : null}
+            {error ? (
+              <View accessibilityRole="alert" style={s.error}>
+                <Text style={s.small}>{error}</Text>
+              </View>
+            ) : null}
+            {!ready ? (
+              <ActivityIndicator color="#242424" style={{ margin: 80 }} />
+            ) : null}
+            {step === "entry" && (
+              <>
+                <View style={s.center}>
+                  <Text style={s.small}>
+                    {session?.prompt.category || "Today’s question"}
+                  </Text>
+                  <Text accessibilityRole="header" style={s.title}>
+                    Spin and reflect
+                  </Text>
+                  <Text style={s.copy}>
+                    {dailyCompleted
+                      ? "Done today. Keep exploring."
+                      : "Plan your ideas. Speak your mind."}
+                  </Text>
+                </View>
+                <View style={s.topicCard}>
+                  <Icon name="message-circle" color="#242424" size={24} />
+                  <Text style={s.small}>Your prompt</Text>
+                  <Text style={s.topic}>
+                    {session?.prompt.question || "Loading today’s question…"}
+                  </Text>
+                </View>
+                <Action
+                  label="Start brainstorming"
+                  icon="mic"
+                  disabled={!session || busy}
+                  onPress={nextBoard}
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => void leave()}
+                  style={s.quiet}
+                >
+                  <Text style={s.small}>Back to Home</Text>
+                </Pressable>
+              </>
+            )}
+            {step === "board" && board && (
+              <>
+                <Text style={s.copy}>
+                  A point, a reason, an example. You have 45 seconds.
+                </Text>
+                <View style={s.timerPill}>
+                  <Icon name="clock" color="#242424" size={17} />
+                  <Text style={s.name}>
+                    00:{String(seconds).padStart(2, "0")}
+                  </Text>
+                </View>
+                <View
+                  style={{ width: "100%", maxWidth: 430, alignSelf: "center" }}
+                >
+                  <DailyBoard
+                    board={board}
+                    onChange={setBoard}
+                    topic={session?.prompt.question || "My view"}
+                    onDone={finishBoard}
                   />
                 </View>
-              ) : null}
-            </>
-          )}
-          {step === "processing" && (
-            <>
-              <View style={[s.center, { marginTop: 34 }]}>
-                <Svg width={44} height={44} viewBox="0 0 44 44"><Path d="M22 3 Q25 19 41 22 Q25 25 22 41 Q19 25 3 22 Q19 19 22 3Z" fill="none" stroke="#181818" strokeWidth={1.8} /></Svg>
-                <Text accessibilityRole="header" style={s.title}>
-                  Analysing Your Response
-                </Text>
+              </>
+            )}
+            {step === "speak" && (
+              <>
+                <View style={s.center}>
+                  <Text accessibilityRole="header" style={s.title}>
+                    Speak Your Response
+                  </Text>
+                  <Text style={s.copy}>One minute. In your own words.</Text>
+                </View>
+                <AudioInput
+                  appearance="daily"
+                  onRecorded={recorded}
+                  onCancel={() => setStep("entry")}
+                  onCaptureActive={setCapturing}
+                  busy={busy || !consent}
+                />
+                {!consent ? (
+                  <View style={{ gap: 12 }}>
+                    <Text style={s.small}>
+                      Allow private recording to begin. Audio is stored for up
+                      to 30 days and sent for transcription.
+                    </Text>
+                    <Action
+                      label="Allow Private Recording"
+                      onPress={() => void allow()}
+                      disabled={busy}
+                    />
+                  </View>
+                ) : null}
+              </>
+            )}
+            {step === "processing" && (
+              <>
+                <View style={[s.center, { marginTop: 34 }]}>
+                  <Svg width={44} height={44} viewBox="0 0 44 44">
+                    <Path
+                      d="M22 3 Q25 19 41 22 Q25 25 22 41 Q19 25 3 22 Q19 19 22 3Z"
+                      fill="none"
+                      stroke="#181818"
+                      strokeWidth={1.8}
+                    />
+                  </Svg>
+                  <Text accessibilityRole="header" style={s.title}>
+                    Analysing Your Response
+                  </Text>
+                  <Text style={s.copy}>
+                    Preparing your speech transcript{`\n`}and personalised
+                    feedback…
+                  </Text>
+                </View>
+                <View style={[s.card, { marginTop: 26 }]}>
+                  <Status
+                    icon="mic"
+                    label="Transcribing your response"
+                    done={processing === "analyse"}
+                  />
+                  <View style={s.divider} />
+                  <Status
+                    icon="bar-chart"
+                    label="Analysing your ideas"
+                    done={false}
+                  />
+                </View>
+                {error ? (
+                  <Action
+                    label="Retry Analysis"
+                    disabled={busy}
+                    onPress={() => void retryProcessing()}
+                  />
+                ) : null}
+              </>
+            )}
+            {step === "transcript" && (
+              <>
                 <Text style={s.copy}>
-                  Preparing your speech transcript{`\n`}and personalised
-                  feedback…
+                  Your recording is saved. Check the words before receiving
+                  feedback.
                 </Text>
-              </View>
-              <View style={[s.card, { marginTop: 26 }]}>
-                <Status
-                  icon="mic"
-                  label="Transcribing your response"
-                  done={processing === "analyse"}
+                <TextInput
+                  accessibilityLabel="Transcript"
+                  value={transcript}
+                  multiline
+                  onChangeText={setTranscript}
+                  style={s.input}
                 />
-                <View style={s.divider} />
-                <Status
-                  icon="bar-chart"
-                  label="Analysing your ideas"
-                  done={false}
-                />
-              </View>
-              {error ? (
                 <Action
-                  label="Retry Analysis"
+                  label="Get Feedback"
+                  disabled={busy || transcript.trim().length < 20}
+                  onPress={() => void submitTranscript()}
+                />
+                <Action
+                  label="Retry Transcription"
+                  secondary
                   disabled={busy}
                   onPress={() => void retryProcessing()}
                 />
-              ) : null}
-            </>
-          )}
-          {step === "transcript" && (
-            <>
-              <Text style={s.copy}>
-                Your recording is saved. Check the words before receiving
-                feedback.
-              </Text>
-              <TextInput
-                accessibilityLabel="Transcript"
-                value={transcript}
-                multiline
-                onChangeText={setTranscript}
-                style={s.input}
-              />
-              <Action
-                label="Get Feedback"
-                disabled={busy || transcript.trim().length < 20}
-                onPress={() => void submitTranscript()}
-              />
-              <Action
-                label="Retry Transcription"
-                secondary
-                disabled={busy}
-                onPress={() => void retryProcessing()}
-              />
-            </>
-          )}
-          {step === "feedback" && evaluation && (
-            <>
-              <View style={s.tabs}>
-                {["Overall", "Strengths", "Areas to Improve"].map((name) => (
-                  <Pressable
-                    key={name}
-                    accessibilityRole="tab"
-                    accessibilityState={{ selected: tab === name }}
-                    onPress={() => setTab(name)}
-                    style={[s.tab, tab === name && s.tabActive]}
-                  >
-                    <Text
-                      style={[s.tabText, tab === name && { color: "#fff" }]}
-                    >
-                      {name}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-              <View
-                style={[
-                  s.card,
-                  { alignItems: "center", gap: 9, paddingVertical: 22 },
-                ]}
-              >
-                {typeof evaluation.overall_score === "number" ? (
-                  <Text style={s.score}>
-                    {evaluation.overall_score}
-                    <Text style={s.copy}> /100</Text>
-                  </Text>
-                ) : (
-                  <>
-                    <Icon name="check-circle" size={32} color="#555" />
-                    <Text style={s.heading}>
-                      {evaluation.provider === "local"
-                        ? "Response saved"
-                        : "Feedback ready"}
-                    </Text>
-                  </>
-                )}
-                <Text style={s.small}>
-                  {evaluation.provider === "local"
-                    ? "Self-review · no scores"
-                    : "Provisional BRIDGE feedback"}
-                </Text>
-              </View>
-              {tab !== "Areas to Improve" ? (
-                <FeedbackLine
-                  icon="star"
-                  text={feedback?.strength || evaluation.key_takeaway}
-                />
-              ) : null}
-              {tab !== "Strengths" ? (
-                <FeedbackLine
-                  icon="target"
-                  text={feedback?.priority_gap || evaluation.retry_prompt}
-                />
-              ) : null}
-              {tab === "Overall" ? (
-                <FeedbackLine
-                  icon="trending-up"
-                  text={feedback?.next_question || evaluation.retry_prompt}
-                />
-              ) : (
-                evaluation.dimensions
-                  .filter((d) =>
-                    tab === "Strengths" ? d.strength : d.improvement,
-                  )
-                  .map((d) => (
-                    <FeedbackLine
-                      key={d.key}
-                      icon="check"
-                      text={`${d.label || d.key}: ${tab === "Strengths" ? d.strength : d.improvement}`}
-                    />
-                  ))
-              )}
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => setShowMap(!showMap)}
-                style={s.disclosure}
-              >
-                <Icon name="git-branch" color="#242424" size={18} />
-                <Text style={s.name}>Your Thought Map</Text>
-                <Icon
-                  name={showMap ? "chevron-up" : "chevron-down"}
-                  color="#242424"
-                  size={18}
-                />
-              </Pressable>
-              {showMap && evaluation.thought_map?.nodes.length ? (
-                <ThoughtMapView
-                  map={evaluation.thought_map}
-                  answer={attempt!.text}
-                />
-              ) : showMap ? (
-                <Text style={s.small}>
-                  A map wasn’t available for this response.
-                </Text>
-              ) : null}
-              <Action label="Continue" onPress={() => setStep("guide")} />
-            </>
-          )}
-          {step === "guide" && (
-            <>
-              <Text style={s.copy}>
-                Practise these questions to strengthen{`\n`}your response.
-              </Text>
-              {guideIndex === null ? (
-                <>
-                  {questions.map((q, i) => (
+              </>
+            )}
+            {step === "feedback" && evaluation && (
+              <>
+                <View style={s.tabs}>
+                  {["Overall", "Strengths", "Areas to Improve"].map((name) => (
                     <Pressable
-                      key={q.question}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Practise question ${i + 1}`}
-                      onPress={() => setGuideIndex(i)}
-                      style={[s.card, s.question]}
+                      key={name}
+                      accessibilityRole="tab"
+                      accessibilityState={{ selected: tab === name }}
+                      onPress={() => setTab(name)}
+                      style={[s.tab, tab === name && s.tabActive]}
                     >
-                      <View style={s.number}>
-                        <Text style={s.name}>{i + 1}</Text>
-                      </View>
-                      <Text style={[s.body, { flex: 1 }]}>{q.question}</Text>
-                      {answers[i] ? (
-                        <Icon name="check" size={17} color="#555" />
-                      ) : null}
+                      <Text
+                        style={[s.tabText, tab === name && { color: "#fff" }]}
+                      >
+                        {name}
+                      </Text>
                     </Pressable>
                   ))}
-                  <Action
-                    label="Practise Guiding Questions"
-                    icon="mic"
-                    onPress={() => setGuideIndex(0)}
-                  />
-                  <Pressable
-                    accessibilityRole="button"
-                    onPress={() => void generateScript()}
-                    style={s.quiet}
-                  >
-                    <Text style={s.body}>
-                      {answers.some(Boolean)
-                        ? "Create My Improved Script"
-                        : "Skip for Now"}
+                </View>
+                <View
+                  style={[
+                    s.card,
+                    { alignItems: "center", gap: 9, paddingVertical: 22 },
+                  ]}
+                >
+                  {typeof evaluation.overall_score === "number" ? (
+                    <Text style={s.score}>
+                      {evaluation.overall_score}
+                      <Text style={s.copy}> /100</Text>
                     </Text>
-                  </Pressable>
-                </>
-              ) : (
-                <>
-                  <Text style={s.topic}>{questions[guideIndex].question}</Text>
-                  <AudioInput
-                    key={guideIndex}
-                    appearance="daily"
-                    onRecorded={guideRecording}
-                    onCancel={() => setGuideIndex(null)}
-                    onCaptureActive={setCapturing}
-                    busy={busy}
-                  />
-                  <Pressable
-                    accessibilityRole="button"
-                    disabled={capturing || busy}
-                    onPress={() => setGuideIndex(null)}
-                    style={s.quiet}
-                  >
-                    <Text style={s.small}>Back to questions</Text>
-                  </Pressable>
-                </>
-              )}
-            </>
-          )}
-          {step === "script" && (
-            <>
-              <Text style={s.copy}>
-                A sample response based on your answer,{`\n`}with your ideas
-                expressed more clearly.
-              </Text>
-              {busy ? (
-                <ActivityIndicator color="#242424" style={{ margin: 50 }} />
-              ) : script ? (
-                <View style={s.card}>
-                  <Text selectable style={[s.body, { lineHeight: 25 }]}>
-                    <ScriptText script={script} />
+                  ) : (
+                    <>
+                      <Icon name="check-circle" size={32} color="#555" />
+                      <Text style={s.heading}>
+                        {evaluation.provider === "local"
+                          ? "Response saved"
+                          : "Feedback ready"}
+                      </Text>
+                    </>
+                  )}
+                  <Text style={s.small}>
+                    {evaluation.provider === "local"
+                      ? "Self-review · no scores"
+                      : "Provisional BRIDGE feedback"}
                   </Text>
                 </View>
-              ) : (
-                <Action
-                  label="Generate My Script"
-                  onPress={() => void generateScript()}
-                />
-              )}
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => setVocab(!vocab)}
-                style={s.disclosure}
-              >
-                <Icon name="book-open" color="#242424" size={20} />
-                <Text style={[s.name, { flex: 1 }]}>
-                  New Vocabulary ({words.length})
-                </Text>
-                <Icon
-                  name={vocab ? "chevron-up" : "chevron-down"}
-                  size={20}
-                  color="#242424"
-                />
-              </Pressable>
-              {vocab ? (
-                words.length ? (
-                  words.map((word) => (
-                    <View key={word.id} style={s.card}>
-                      <Text style={s.name}>{word.word}</Text>
-                      <Text style={s.body}>{word.meaning}</Text>
-                    </View>
-                  ))
+                {tab !== "Areas to Improve" ? (
+                  <FeedbackLine
+                    icon="star"
+                    text={feedback?.strength || evaluation.key_takeaway}
+                  />
+                ) : null}
+                {tab !== "Strengths" ? (
+                  <FeedbackLine
+                    icon="target"
+                    text={feedback?.priority_gap || evaluation.retry_prompt}
+                  />
+                ) : null}
+                {tab === "Overall" ? (
+                  <FeedbackLine
+                    icon="trending-up"
+                    text={feedback?.next_question || evaluation.retry_prompt}
+                  />
                 ) : (
+                  evaluation.dimensions
+                    .filter((d) =>
+                      tab === "Strengths" ? d.strength : d.improvement,
+                    )
+                    .map((d) => (
+                      <FeedbackLine
+                        key={d.key}
+                        icon="check"
+                        text={`${d.label || d.key}: ${tab === "Strengths" ? d.strength : d.improvement}`}
+                      />
+                    ))
+                )}
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setShowMap(!showMap)}
+                  style={s.disclosure}
+                >
+                  <Icon name="git-branch" color="#242424" size={18} />
+                  <Text style={s.name}>Your Thought Map</Text>
+                  <Icon
+                    name={showMap ? "chevron-up" : "chevron-down"}
+                    color="#242424"
+                    size={18}
+                  />
+                </Pressable>
+                {showMap && evaluation.thought_map?.nodes.length ? (
+                  <ThoughtMapView
+                    map={evaluation.thought_map}
+                    answer={attempt!.text}
+                  />
+                ) : showMap ? (
                   <Text style={s.small}>
-                    No new WordBloom words were added for this response.
+                    A map wasn’t available for this response.
                   </Text>
-                )
-              ) : null}
-              <Action
-                label="Continue"
-                disabled={busy}
-                onPress={() => setStep("complete")}
-              />
-            </>
-          )}
-          {step === "complete" && (
-            <>
-              <View style={[s.center, { marginTop: 38 }]}>
-                <Svg width={64} height={64} viewBox="0 0 64 64"><Path d="M19 8H45V23C45 42 19 42 19 23ZM19 13H10V20C10 28 16 30 21 29M45 13H54V20C54 28 48 30 43 29M32 37V49M24 49H40L43 56H21Z" fill="none" stroke="#242424" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /></Svg>
-                <Text accessibilityRole="header" style={s.title}>
-                  Challenge Complete!
+                ) : null}
+                <Action label="Continue" onPress={() => setStep("guide")} />
+              <Action label="Finish practice" secondary onPress={() => setStep("complete")} />
+              </>
+            )}
+            {step === "guide" && (
+              <>
+                <Text style={s.copy}>
+                  Practise these questions to strengthen{`\n`}your response.
                 </Text>
-              </View>
-              <View style={[s.card, s.rewardRow]}>
-                <Reward
-                  icon="sun"
-                  value={`+${rewards?.seeds || 0}`}
-                  label="Seeds"
+                {guideIndex === null ? (
+                  <>
+                    {questions.map((q, i) => (
+                      <Pressable
+                        key={q.question}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Practise question ${i + 1}`}
+                        onPress={() => setGuideIndex(i)}
+                        style={[s.card, s.question]}
+                      >
+                        <View style={s.number}>
+                          <Text style={s.name}>{i + 1}</Text>
+                        </View>
+                        <Text style={[s.body, { flex: 1 }]}>{q.question}</Text>
+                        {answers[i] ? (
+                          <Icon name="check" size={17} color="#555" />
+                        ) : null}
+                      </Pressable>
+                    ))}
+                    <Action
+                      label="Practise Guiding Questions"
+                      icon="mic"
+                      onPress={() => setGuideIndex(0)}
+                    />
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={() => void generateScript()}
+                      style={s.quiet}
+                    >
+                      <Text style={s.body}>
+                        {answers.some(Boolean)
+                          ? "Create My Improved Script"
+                          : "Skip for Now"}
+                      </Text>
+                    </Pressable>
+                  </>
+                ) : (
+                  <>
+                    <Text style={s.topic}>
+                      {questions[guideIndex].question}
+                    </Text>
+                    <AudioInput
+                      key={guideIndex}
+                      appearance="daily"
+                      onRecorded={guideRecording}
+                      onCancel={() => setGuideIndex(null)}
+                      onCaptureActive={setCapturing}
+                      busy={busy}
+                    />
+                    <Pressable
+                      accessibilityRole="button"
+                      disabled={capturing || busy}
+                      onPress={() => setGuideIndex(null)}
+                      style={s.quiet}
+                    >
+                      <Text style={s.small}>Back to questions</Text>
+                    </Pressable>
+                  </>
+                )}
+              </>
+            )}
+            {step === "script" && (
+              <>
+                <Text style={s.copy}>
+                  A sample response based on your answer,{`\n`}with your ideas
+                  expressed more clearly.
+                </Text>
+                {busy ? (
+                  <ActivityIndicator color="#242424" style={{ margin: 50 }} />
+                ) : script ? (
+                  <View style={s.card}>
+                    <Text selectable style={[s.body, { lineHeight: 25 }]}>
+                      <ScriptText script={script} />
+                    </Text>
+                  </View>
+                ) : (
+                  <Action
+                    label="Generate My Script"
+                    onPress={() => void generateScript()}
+                  />
+                )}
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setVocab(!vocab)}
+                  style={s.disclosure}
+                >
+                  <Icon name="book-open" color="#242424" size={20} />
+                  <Text style={[s.name, { flex: 1 }]}>
+                    New Vocabulary ({words.length})
+                  </Text>
+                  <Icon
+                    name={vocab ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color="#242424"
+                  />
+                </Pressable>
+                {vocab ? (
+                  words.length ? (
+                    words.map((word) => (
+                      <View key={word.id} style={s.card}>
+                        <Text style={s.name}>{word.word}</Text>
+                        <Text style={s.body}>{word.meaning}</Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={s.small}>
+                      No new WordBloom words were added for this response.
+                    </Text>
+                  )
+                ) : null}
+                <Action
+                  label="Continue"
+                  disabled={busy}
+                  onPress={() => setStep("complete")}
                 />
-                <Reward
-                  icon="bar-chart"
-                  value={`+${rewards?.xp || 0}`}
-                  label="XP"
-                />
-                <Reward
-                  icon="zap"
-                  value={String(state?.dailyWorkout?.streak.current || 0)}
-                  label="Day Streak"
-                />
-              </View>
-              <Text style={s.small}>
-                {rewards?.reason || "Rewards recognise your participation."}
-              </Text>
-              <Action label="Continue" onPress={() => void leave()} />
-            </>
-          )}
+              </>
+            )}
+            {step === "complete" && (
+              <>
+                <View style={[s.center, { marginTop: 38 }]}>
+                  <Svg width={64} height={64} viewBox="0 0 64 64">
+                    <Path
+                      d="M19 8H45V23C45 42 19 42 19 23ZM19 13H10V20C10 28 16 30 21 29M45 13H54V20C54 28 48 30 43 29M32 37V49M24 49H40L43 56H21Z"
+                      fill="none"
+                      stroke="#242424"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </Svg>
+                  <Text accessibilityRole="header" style={s.title}>
+                    Challenge Complete!
+                  </Text>
+                </View>
+                <View style={[s.card, s.rewardRow]}>
+                  <Reward
+                    icon="sun"
+                    value={`+${rewards?.seeds || 0}`}
+                    label="Seeds"
+                  />
+                  <Reward
+                    icon="bar-chart"
+                    value={`+${rewards?.xp || 0}`}
+                    label="XP"
+                  />
+                  <Reward
+                    icon="zap"
+                    value={String(state?.dailyWorkout?.streak.current || 0)}
+                    label="Day Streak"
+                  />
+                </View>
+                <Text style={s.small}>
+                  {rewards?.reason || "Rewards recognise your participation."}
+                </Text>
+                <Action label="Continue" onPress={() => void leave()} />
+              </>
+            )}
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -980,7 +1059,11 @@ function ScriptText({ script }: { script: GuidedResponseDraft }) {
   const fragments: React.ReactNode[] = [];
   for (const annotation of script.annotations.slice(0, 3)) {
     fragments.push(script.text.slice(cursor, annotation.start));
-    fragments.push(<Text key={annotation.start} style={{ backgroundColor: "#ede6dd" }}>{annotation.quote}</Text>);
+    fragments.push(
+      <Text key={annotation.start} style={{ backgroundColor: "#ede6dd" }}>
+        {annotation.quote}
+      </Text>,
+    );
     cursor = annotation.end;
   }
   fragments.push(script.text.slice(cursor));
@@ -1081,12 +1164,12 @@ const s = StyleSheet.create({
   },
   phone: {
     width: "100%",
-    maxWidth: 390,
-    minHeight: 540,
+    maxWidth: 680,
+    minHeight: 460,
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#e7e7e7",
-    borderRadius: 26,
+    borderColor: "#edf0e9",
+    borderRadius: 20,
     padding: 24,
     gap: 20,
   },

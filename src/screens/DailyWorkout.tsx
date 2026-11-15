@@ -21,12 +21,9 @@ import AudioInput, {
   AudioPlayback,
   RecordedAudio,
 } from "../components/AudioInput";
-import { RecordingConsent } from "../components/RecordingConsent";
 import { PrivateRecordingPlayback } from "../components/PrivateRecording";
 import { WordBloomPassage } from "../components/WordBloom";
 import { ReadingSpeech } from "../components/ReadingSpeech";
-import { GardenPreview } from "../components/GardenPreview";
-import { useGardenClock } from "../hooks/useGardenClock";
 import { useApp } from "../lib/state";
 import {
   api,
@@ -45,46 +42,41 @@ import type {
 } from "../types";
 
 export function DailyPlanIntro({ onStart }: { onStart?: () => void }) {
-  const { refresh } = useApp();
-  const [busy, setBusy] = useState(false);
+  const { state, refresh } = useApp();
+  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
-  async function enroll() {
-    setBusy(true);
+  const entering = useRef(false);
+  async function enter(activity: "read_aloud" | "spin_speak") {
+    if (entering.current) return;
+    entering.current = true;
+    setBusy(activity);
     setError("");
     try {
       await api("/daily-workout/enroll", { method: "POST", body: {} });
       await refresh();
-      onStart?.();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Please try again.");
+      if (activity === "read_aloud") router.push("/read-aloud");
+      else onStart?.();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Please try again.");
     } finally {
-      setBusy(false);
+      entering.current = false;
+      setBusy(null);
     }
   }
   return (
-    <Card style={{ gap: 16, backgroundColor: "#fff", borderColor: "#e7e7e7", alignItems: "center", padding: 28 }}>
-      <Icon name="calendar" size={30} color="#242424" />
-      <Text style={{ ...T.h2, color: "#181818", textAlign: "center" }}>Daily Challenge</Text>
-      <Text style={{ ...T.body, color: "#737373", textAlign: "center" }}>Organise your ideas on a whiteboard, then speak your response.</Text>
-      <Text style={{ ...T.small, color: "#737373" }}>45s brainstorm · 1 min speaking</Text>
-      <Text style={T.body}>
-        Read Aloud + Spin &amp; Speak. Complete both to secure your daily streak
-        and earn 25 XP plus one cosmetic seed. Extra practice stays available.
-      </Text>
-      <Text style={T.small}>
-        Switching replaces future classic quest rewards. Your earned XP, plants
-        and saved responses stay with you. Read Aloud currently uses clearly
-        labelled self-review without speech scores.
-      </Text>
-      <ErrorNote message={error} />
-      <Button
-        label="Start my daily workout"
-        icon="mic"
-        style={{ backgroundColor: "#242424", borderRadius: 28 }}
-        onPress={() => void enroll()}
-        loading={busy}
+    <View style={{ gap: 16 }}>
+      <ChallengeHub
+        state={state!}
+        onRead={() => void enter("read_aloud")}
+        onSpin={() => void enter("spin_speak")}
+        busy={busy}
       />
-    </Card>
+      <ErrorNote message={error} />
+      <Text style={{ ...T.small, textAlign: "center" }}>
+        Starting switches to daily rewards. Your garden and saved work stay with
+        you.
+      </Text>
+    </View>
   );
 }
 
@@ -95,144 +87,237 @@ export function DailyHome({
   state: AppState;
   start: (mode: Mode) => void;
 }) {
-  const { width } = useWindowDimensions();
-  const gardenNow = useGardenClock();
-  const daily = state.dailyWorkout!;
-  const reading = daily.activities.find(
-    (activity) => activity.type === "read_aloud",
-  )!;
-  const spin = daily.activities.find(
-    (activity) => activity.type === "spin_speak",
-  )!;
-  const complete = daily.completed === 2;
-  const next = !reading.completed
-    ? () => router.push("/read-aloud")
-    : !spin.completed
-      ? () => start("spin_speak")
-      : () => router.push("/garden" as never);
   return (
-    <View style={{ gap: 22 }}>
-      <Text accessibilityRole="header" style={T.title}>
-        Hi, {state.profile.displayName.split(" ")[0]}.
-      </Text>
-      <Card style={{ backgroundColor: "#fff", borderColor: "#e7e7e7", gap: 16, alignItems: "center", padding: 28 }}>
-        <Icon name="calendar" size={30} color="#242424" />
-        <Text style={{ ...T.h2, color: "#181818" }}>Daily Challenge</Text>
-        <Text style={{ ...T.body, color: "#737373", textAlign: "center" }}>Organise your thoughts, then share your point of view.</Text>
-        <Text style={{ ...T.small, color: "#737373" }}>45s whiteboard · 1 min speaking</Text>
-        {spin.completed ? <Text style={T.small}>Today’s speaking challenge is complete. Extra practice is available.</Text> : null}
-        <Button label="Open Daily Challenge" icon="mic" onPress={() => start("spin_speak")} style={{ backgroundColor: "#242424", borderRadius: 28 }} />
-      </Card>
-      <Card style={{ backgroundColor: C.sage, gap: 16 }}>
-        <Text style={T.label}>Today’s Mind Workout</Text>
+    <ChallengeHub
+      state={state}
+      onRead={() => router.push("/read-aloud")}
+      onSpin={() => start("spin_speak")}
+    />
+  );
+}
+
+function ChallengeHub({
+  state,
+  onRead,
+  onSpin,
+  busy,
+}: {
+  state: AppState;
+  onRead: () => void;
+  onSpin: () => void;
+  busy?: string | null;
+}) {
+  const { width } = useWindowDimensions();
+  const wide = width >= 900;
+  const [focusedActivity, setFocusedActivity] = useState<string | null>(null);
+  const daily = state.dailyWorkout;
+  const complete = Boolean(daily && daily.completed === daily.required);
+  const first = state.profile.displayName.split(" ")[0];
+  return (
+    <View
+      style={{
+        width: "100%",
+        maxWidth: 1040,
+        alignSelf: "center",
+        gap: wide ? 32 : 22,
+      }}
+      testID="daily-hub"
+    >
+      <View style={{ gap: 9 }}>
         <Text
-          accessibilityLiveRegion="polite"
-          testID="daily-progress"
-          style={T.title}
+          style={{ ...T.small, letterSpacing: 1.4, textTransform: "uppercase" }}
         >
-          {daily.completed}/2
+          A little practice, every day
         </Text>
-        <Text style={T.h2}>
-          {complete
-            ? "Your daily workout is complete"
-            : "A little practice, in your own words"}
-        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 14,
+          }}
+        >
+          <Text
+            accessibilityRole="header"
+            style={{
+              fontFamily: "DMBold",
+              fontSize: wide ? 38 : 29,
+              color: C.ink,
+            }}
+          >
+            Daily challenge
+          </Text>
+          {daily ? (
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 7,
+                alignItems: "center",
+                backgroundColor: "#eef2e8",
+                paddingVertical: 8,
+                paddingHorizontal: 13,
+                borderRadius: 24,
+              }}
+            >
+              <Icon name={complete ? "check-circle" : "circle"} size={17} />
+              <Text
+                testID="daily-progress"
+                style={{ ...T.small, fontFamily: "DMBold" }}
+              >
+                {daily.completed}/{daily.required}
+              </Text>
+              <Text style={T.small}>done</Text>
+            </View>
+          ) : null}
+        </View>
         <Text testID="daily-streak-status" style={T.body}>
           {complete
-            ? "Streak secured · one cosmetic seed earned. Your skill growth is a separate journey."
-            : daily.completed === 1
-              ? "One activity done. Complete the other to secure today’s streak."
-              : "Read Aloud and Spin & Speak are both required to secure today’s streak."}
+            ? "Both done. Come back tomorrow, or keep practising."
+            : `${first}, choose where to start.`}
         </Text>
-        <Text style={T.small}>
-          {daily.xp}/25 daily XP · {daily.streak.current} day streak ·{" "}
-          {daily.timezone}
-        </Text>
-        <View testID="home-next-action">
-          <Button
-            label={
-              complete
-                ? "Enjoy my garden"
-                : !reading.completed
-                  ? "Continue Read Aloud"
-                  : "Continue Spin & Speak"
-            }
-            icon="arrow-right"
-            onPress={next}
-          />
-        </View>
-      </Card>
-      <View style={{ flexDirection: width > 750 ? "row" : "column", gap: 16 }}>
+      </View>
+      <View style={{ flexDirection: wide ? "row" : "column", gap: 16 }}>
         {[
           {
-            title: "Read Aloud",
+            id: "read_aloud",
+            title: "Read aloud",
+            caption: "Find your rhythm.",
+            copy: "A short passage. A little more confidence.",
             icon: "book-open",
-            activity: reading,
-            copy: "Read a short passage, notice one phrase and practise it again.",
-            action: () => router.push("/read-aloud"),
+            color: "#edf2e6",
+            action: onRead,
           },
           {
-            title: "Spin & Speak",
-            icon: "mic",
-            activity: spin,
-            copy: "Explore a fresh question and put your own ideas into words.",
-            action: () => start("spin_speak"),
+            id: "spin_speak",
+            title: "Spin and reflect",
+            caption: "Find your point of view.",
+            copy: "One question. Your ideas, in your own words.",
+            icon: "shuffle",
+            color: "#efeaf6",
+            action: onSpin,
           },
-        ].map((item) => (
-          <Card
-            key={item.title}
-            style={{ flex: width > 750 ? 1 : undefined, gap: 12 }}
-          >
-            <Icon name={item.icon} size={26} />
-            <Text style={T.h2}>{item.title}</Text>
-            <Tag>
-              {item.activity.completed
-                ? "Completed today"
-                : `${item.activity.xp} XP · first completion`}
-            </Tag>
-            <Text style={T.body}>{item.copy}</Text>
-            <Button
-              label={item.title}
-              variant="secondary"
+        ].map((item) => {
+          const activity = daily?.activities.find((a) => a.type === item.id);
+          return (
+            <Pressable
+              key={item.id}
+              accessibilityRole="button"
+              accessibilityLabel={item.title}
+              accessibilityState={{
+                disabled: Boolean(busy),
+                busy: busy === item.id,
+              }}
+              disabled={Boolean(busy)}
+              onFocus={() => setFocusedActivity(item.id)}
+              onBlur={() => setFocusedActivity(null)}
               onPress={item.action}
-            />
-          </Card>
-        ))}
+              style={({ pressed }) => ({
+                flex: wide ? 1 : undefined,
+                minHeight: wide ? 290 : 190,
+                padding: wide ? 28 : 22,
+                borderRadius: 25,
+                backgroundColor: item.color,
+                borderWidth: 2,
+                borderColor:
+                  focusedActivity === item.id ? C.forest : "transparent",
+                opacity: pressed || (busy && busy !== item.id) ? 0.65 : 1,
+                gap: 18,
+              })}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 16,
+                    backgroundColor: "#ffffffb0",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name={item.icon} size={24} />
+                </View>
+                {activity?.completed ? (
+                  <Tag>Done today</Tag>
+                ) : activity ? (
+                  <Text style={T.small}>+{activity.xp} XP</Text>
+                ) : null}
+              </View>
+              <View style={{ gap: 5, flex: 1 }}>
+                <Text
+                  style={{ ...T.h3, fontSize: wide ? 26 : 22, lineHeight: 32 }}
+                >
+                  {item.title}
+                </Text>
+                <Text style={T.body}>{wide ? item.copy : item.caption}</Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text style={{ ...T.small, fontFamily: "DMBold" }}>
+                  {busy === item.id
+                    ? "Opening…"
+                    : activity?.completed
+                      ? "Practise again"
+                      : "Let’s begin"}
+                </Text>
+                {busy === item.id ? (
+                  <ActivityIndicator color={C.forest} />
+                ) : (
+                  <Icon name="arrow-up-right" size={23} />
+                )}
+              </View>
+            </Pressable>
+          );
+        })}
       </View>
-      <Card style={{ gap: 12 }}>
-        <Text style={T.h2}>Your growing space</Text>
-        <View style={{ maxWidth: 520, width: "100%" }}>
-          <GardenPreview
-            plots={state.plots}
-            decorations={state.decorations}
-            now={gardenNow}
-          />
+      {daily ? (
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 18,
+            alignItems: "center",
+          }}
+        >
+          <Text style={T.small}>{daily.streak.current} day streak</Text>
+          <Text style={T.small}>{daily.xp} XP today</Text>
+          <Text style={T.small}>{daily.timezone}</Text>
         </View>
-        <Text style={T.small}>
-          XP recognises participation. AI feedback is provisional and does not
-          establish skill mastery.
-        </Text>
+      ) : null}
+      <View
+        style={{
+          borderTopWidth: 1,
+          borderColor: C.border,
+          paddingTop: 16,
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: 12,
+          justifyContent: "space-between",
+        }}
+      >
         <Button
-          label="Visit my garden"
-          variant="secondary"
+          label="My garden"
+          icon="sun"
+          variant="ghost"
           onPress={() => router.push("/garden" as never)}
         />
-      </Card>
-      <Text style={T.h2}>Explore · optional practice</Text>
-      <Text style={T.body}>
-        Debate and Read &amp; Reflect are here when you want them. They do not
-        replace either daily activity.
-      </Text>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
         <Button
-          label="Explore practice"
-          variant="secondary"
-          onPress={() => router.push("/play" as never)}
-        />
-        <Button
-          label="Read & Reflect"
+          label="More practice"
+          icon="arrow-right"
           variant="ghost"
-          onPress={() => router.push("/discover" as never)}
+          onPress={() => router.push("/play" as never)}
         />
       </View>
     </View>
@@ -249,6 +334,7 @@ export function ReadAloud() {
     Record<string, WordReviewOutcome>
   >({});
   const [recording, setRecording] = useState(false);
+  const [review, setReview] = useState(false);
   const [audio, setAudio] = useState<{ id: string; uri: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -270,7 +356,7 @@ export function ReadAloud() {
         setResult(next.latestAttempt || null);
         if (!next.latestAttempt) {
           const draft = await loadDraft(`read-aloud:${next.id}`);
-          if (!abort.signal.aborted && isDraftOwner(uid)) setNotes(draft);
+          if (!abort.signal.aborted && isDraftOwner(uid)) { setNotes(draft); setReview(Boolean(draft)); }
         }
       })
       .catch((e) => {
@@ -365,14 +451,17 @@ export function ReadAloud() {
     }
   }
   return (
-    <View style={{ gap: 20 }}>
+    <View
+      style={{ gap: 20, maxWidth: 820, width: "100%", alignSelf: "center" }}
+    >
       <Button
-        label="Back to daily workout"
+        label="Daily challenge"
+        icon="arrow-left"
         variant="ghost"
         onPress={() => router.push("/")}
       />
       <Text accessibilityRole="header" style={T.title}>
-        Read Aloud
+        Read aloud
       </Text>
       <ErrorNote message={error} />
       {!assignment ? (
@@ -395,42 +484,29 @@ export function ReadAloud() {
         </Card>
       ) : (
         <>
-          <Card style={{ gap: 14 }}>
-            <Tag>About 2 minutes · your assigned passage</Tag>
-            <Text style={T.h2}>{assignment.passage.title}</Text>
-            <WordBloomPassage
-              text={assignment.passage.text}
-              words={assignment.wordbloom?.words || []}
-              reviews={wordReviews}
-              allowReview={!result || attemptAgain}
-              onReview={(id, outcome) => {
-                setWordReviews((current) => ({ ...current, [id]: outcome }));
-                requestKey.current = null;
-              }}
-            />
-            <Text style={T.small}>
-              Focus: {assignment.passage.target}. Original editorial passage ·{" "}
-              {assignment.passage.id}
-            </Text>
-          </Card>
-          <Card style={{ gap: 12, backgroundColor: C.yellow }}>
-            <Text style={T.h3}>Self-review · no speech scores</Text>
-            <Text style={T.body}>{assignment.speech.message}</Text>
-            <Text style={T.small}>
-              Read aloud at a comfortable pace. You can record and replay
-              privately, or use accessible self-review without a microphone.
-              This fallback recognises participation; it cannot judge your
-              pronunciation or prove skill improvement.
-            </Text>
-          </Card>
+          {!review && (!result || attemptAgain) ? (
+            <Card style={{ gap: 14 }}>
+              <Tag>Your passage</Tag>
+              <Text style={T.h2}>{assignment.passage.title}</Text>
+              <WordBloomPassage
+                text={assignment.passage.text}
+                words={assignment.wordbloom?.words || []}
+                reviews={wordReviews}
+                allowReview={!result || attemptAgain}
+                onReview={(id, outcome) => {
+                  setWordReviews((current) => ({ ...current, [id]: outcome }));
+                  requestKey.current = null;
+                }}
+              />
+              <Text style={T.small}>
+                Try this: {assignment.passage.target}.
+              </Text>
+            </Card>
+          ) : null}
           {result && !attemptAgain ? (
             <Card style={{ gap: 14 }}>
               <Text accessibilityRole="header" style={T.h2}>
                 Reading practice saved
-              </Text>
-              <Text style={T.body}>
-                Your reading observation is saved as self-review. It does not
-                include acoustic or ability scores.
               </Text>
               <Text selectable style={T.body}>
                 {result.text}
@@ -450,7 +526,7 @@ export function ReadAloud() {
               <Text style={T.body}>
                 {state?.dailyWorkout?.completed === 2
                   ? "2/2 · daily workout complete. Streak secured."
-                  : `${state?.dailyWorkout?.completed || 0}/2 today · both daily activities are needed to secure today’s streak.`}
+                  : `${state?.dailyWorkout?.completed || 0}/2 done today.`}
               </Text>
               <Button
                 label="Return to daily workout"
@@ -461,6 +537,7 @@ export function ReadAloud() {
                 variant="secondary"
                 onPress={() => {
                   setAttemptAgain(true);
+                  setReview(false);
                   setNotes("");
                   setConfirmed(false);
                   setWordReviews({});
@@ -471,94 +548,114 @@ export function ReadAloud() {
             </Card>
           ) : (
             <>
-              {recording ? (
-                <AudioInput
-                  onRecorded={saveRecording}
-                  onCancel={() => setRecording(false)}
-                  busy={busy}
-                />
-              ) : audio ? (
-                <Card style={{ gap: 12 }}>
-                  <AudioPlayback uri={audio.uri} />
+              {!review ? (
+                recording ? (
+                  <AudioInput
+                    appearance="daily"
+                    onRecorded={saveRecording}
+                    onCancel={() => setRecording(false)}
+                    busy={busy}
+                  />
+                ) : audio ? (
+                  <Card style={{ gap: 12 }}>
+                    <AudioPlayback uri={audio.uri} />
+                    <Button
+                      label="Record another take"
+                      variant="ghost"
+                      onPress={() => setRecording(true)}
+                    />
+                  </Card>
+                ) : (
+                  <Card style={{ gap: 12 }}>
+                    {state?.profile.consent?.recording ? (
+                      <Button
+                        label="Record the passage"
+                        icon="mic"
+                        onPress={() => setRecording(true)}
+                      />
+                    ) : (
+                      <Button
+                        label="Record the passage"
+                        icon="mic"
+                        loading={busy}
+                        onPress={() => void allowRecording()}
+                      />
+                    )}
+                    <Text style={T.small}>
+                      Optional · private recording, stored for up to 30 days.
+                    </Text>
+                  </Card>
+                )
+              ) : null}
+              {review ? (
+                <Card style={{ gap: 16 }}>
+                  <Text style={T.h2}>Notice one small thing</Text>
+                  <Text style={T.small}>Self-review · no speech scores</Text>
+                  <Field
+                    label="Your reading observation"
+                    value={notes}
+                    onChangeText={(value: string) => {
+                      setNotes(value);
+                      requestKey.current = null;
+                      draftWrites.current = draftWrites.current
+                        .then(async () => {
+                          if (isDraftOwner(uid))
+                            await saveDraft(
+                              `read-aloud:${assignment.id}`,
+                              value,
+                            );
+                        })
+                        .catch(() => {
+                          if (isDraftOwner(uid))
+                            setError(
+                              "Your note could not be saved on this device. Keep this page open and submit when ready.",
+                            );
+                        });
+                    }}
+                    multiline
+                    placeholder="Which phrase did you practise, and what did you notice?"
+                  />
+                  <Pressable
+                    accessibilityRole="checkbox"
+                    accessibilityLabel="I practised this passage and reviewed my reading"
+                    accessibilityState={{ checked: confirmed }}
+                    onPress={() => {
+                      setConfirmed(!confirmed);
+                      requestKey.current = null;
+                    }}
+                    style={{
+                      flexDirection: "row",
+                      gap: 12,
+                      alignItems: "center",
+                      paddingVertical: 12,
+                      minHeight: 48,
+                    }}
+                  >
+                    <Icon name={confirmed ? "check-square" : "square"} />
+                    <Text style={[T.body, { flex: 1 }]}>
+                      I read the passage and reviewed my reading.
+                    </Text>
+                  </Pressable>
                   <Button
-                    label="Record another take"
+                    label="Save reading self-review"
+                    onPress={() => void submit()}
+                    loading={busy}
+                    disabled={!confirmed || notes.trim().length < 20}
+                  />
+                  <Button
+                    label="Back to passage"
                     variant="ghost"
-                    onPress={() => setRecording(true)}
+                    onPress={() => setReview(false)}
                   />
                 </Card>
               ) : (
-                <Card style={{ gap: 12 }}>
-                  {state?.profile.consent?.recording ? (
-                    <Button
-                      label="Record the passage"
-                      icon="mic"
-                      onPress={() => setRecording(true)}
-                    />
-                  ) : (
-                    <RecordingConsent
-                      busy={busy}
-                      onAllow={() => void allowRecording()}
-                      onWrite={() => setRecording(false)}
-                    />
-                  )}
-                  <Text style={T.small}>
-                    Accessible self-review is available below if you cannot or
-                    prefer not to record.
-                  </Text>
-                </Card>
-              )}
-              <Card style={{ gap: 16 }}>
-                <Text style={T.h2}>Notice one small thing</Text>
-                <Field
-                  label="Your reading observation"
-                  value={notes}
-                  onChangeText={(value: string) => {
-                    setNotes(value);
-                    requestKey.current = null;
-                    draftWrites.current = draftWrites.current
-                      .then(async () => {
-                        if (isDraftOwner(uid))
-                          await saveDraft(`read-aloud:${assignment.id}`, value);
-                      })
-                      .catch(() => {
-                        if (isDraftOwner(uid))
-                          setError(
-                            "Your note could not be saved on this device. Keep this page open and submit when ready.",
-                          );
-                      });
-                  }}
-                  multiline
-                  placeholder="Which phrase did you practise, and what did you notice?"
-                />
-                <Pressable
-                  accessibilityRole="checkbox"
-                  accessibilityLabel="I practised this passage and reviewed my reading"
-                  accessibilityState={{ checked: confirmed }}
-                  onPress={() => {
-                    setConfirmed(!confirmed);
-                    requestKey.current = null;
-                  }}
-                  style={{
-                    flexDirection: "row",
-                    gap: 12,
-                    alignItems: "center",
-                    paddingVertical: 12,
-                    minHeight: 48,
-                  }}
-                >
-                  <Icon name={confirmed ? "check-square" : "square"} />
-                  <Text style={[T.body, { flex: 1 }]}>
-                    I practised this passage and reviewed my reading. I
-                    understand this is self-review, with no acoustic assessment.
-                  </Text>
-                </Pressable>
                 <Button
-                  label="Save reading self-review"
-                  onPress={() => void submit()}
-                  loading={busy}
-                  disabled={!confirmed || notes.trim().length < 20}
+                  label="Done reading"
+                  icon="arrow-right"
+                  disabled={recording || busy}
+                  onPress={() => setReview(true)}
                 />
-              </Card>
+              )}
             </>
           )}
         </>

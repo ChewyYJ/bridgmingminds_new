@@ -462,6 +462,7 @@ export default function AudioInput({
             ) : null}
           </>
         )}
+        <Pressable accessibilityRole="button" accessibilityLabel="Cancel recording" disabled={working || busy} onPress={() => void discard(true)} style={dailyAudio.secondary}><Text style={dailyAudio.hint}>Cancel recording</Text></Pressable>
       </View>
     );
   return (

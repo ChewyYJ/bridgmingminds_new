@@ -1,7 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { continueWithoutReflection } from "./helpers/self-reflection";
 
 test.use({
   channel: process.env.PLAYWRIGHT_CHANNEL || "chrome",
@@ -38,13 +37,15 @@ async function onboard(page: Page) {
     .getByRole("button", { name: "Grow my garden", exact: true })
     .click();
   await page
-    .getByRole("button", { name: "Start my daily workout", exact: true })
+    .getByRole("button", { name: "Read aloud", exact: true })
     .click();
+  await page.getByRole("button", { name: "Daily challenge", exact: true }).click();
   await expect(page.getByTestId("daily-progress")).toHaveText("0/2");
 }
 async function read(page: Page) {
-  await page.getByRole("button", { name: "Read Aloud", exact: true }).click();
+  await page.getByRole("button", { name: "Read aloud", exact: true }).click();
   await expect(page.getByTestId("reading-passage")).toBeVisible();
+  await page.getByRole("button", { name: "Done reading", exact: true }).click();
   await expect(
     page.getByText("Self-review · no speech scores", { exact: true }),
   ).toBeVisible();
@@ -72,20 +73,21 @@ async function read(page: Page) {
     .click();
 }
 async function speak(page: Page) {
-  await page.getByRole("button", { name: "Spin & Speak", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Spin a prompt", exact: true })
-    .click();
-  await page.getByRole("button", { name: "Skip prep", exact: true }).click();
-  await page
-    .getByRole("textbox", { name: "Your response", exact: true })
-    .fill(answer);
-  await continueWithoutReflection(page);
-  await expect(
-    page.getByText("Practice complete", { exact: true }),
-  ).toBeVisible({ timeout: 25000 });
-  await expect(page.getByTestId("feedback-reward-xp")).toContainText("+15 XP");
-  await page.getByRole("button", { name: "Done", exact: true }).click();
+  await page.getByRole("button", { name: "Spin and reflect", exact: true }).click();
+  await page.getByRole("button", { name: "Start brainstorming", exact: true }).click();
+  await page.getByRole("button", { name: "Done brainstorming", exact: true }).click();
+  const consent = page.getByRole("button", { name: "Allow Private Recording", exact: true });
+  if (await consent.count()) await consent.click();
+  await page.getByRole("button", { name: "Record my response", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Finish recording", exact: true })).toBeEnabled();
+  await page.getByRole("button", { name: "Finish recording", exact: true }).click();
+  await page.getByRole("button", { name: "Use recording", exact: true }).click();
+  await page.getByRole("textbox", { name: "Transcript", exact: true }).fill(answer);
+  await page.getByRole("button", { name: "Get Feedback", exact: true }).click();
+  await expect(page.getByTestId("daily-screen-feedback")).toBeVisible();
+  await page.getByRole("button", { name: "Finish practice", exact: true }).click();
+  await expect(page.getByText("+15", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
 }
 async function screenshot(page: Page, file: string) {
   const directory = join(process.cwd(), "docs/screenshots/daily-workout");
@@ -106,7 +108,7 @@ for (const order of ["reading-first", "speaking-first"])
     else await speak(page);
     await expect(page.getByTestId("daily-progress")).toHaveText("1/2");
     await expect(page.getByTestId("daily-streak-status")).toContainText(
-      "Complete the other",
+      "choose where to start",
     );
     let saved = await state(page);
     expect(saved.dailyWorkout.streak.securedToday).toBe(false);
@@ -118,7 +120,7 @@ for (const order of ["reading-first", "speaking-first"])
     else await read(page);
     await expect(page.getByTestId("daily-progress")).toHaveText("2/2");
     await expect(page.getByTestId("daily-streak-status")).toContainText(
-      "Streak secured",
+      "Both done",
     );
     saved = await state(page);
     expect(saved.xp).toBe(25);
@@ -130,7 +132,7 @@ for (const order of ["reading-first", "speaking-first"])
     await screenshot(page, `${order}-2-of-2-mobile.png`);
     await page.setViewportSize({ width: 1440, height: 1000 });
     await screenshot(page, `${order}-2-of-2-desktop.png`);
-    await page.getByRole("button", { name: "Read Aloud", exact: true }).click();
+    await page.getByRole("button", { name: "Read aloud", exact: true }).click();
     await expect(
       page.getByRole("heading", {
         name: "Reading practice saved",
@@ -141,6 +143,7 @@ for (const order of ["reading-first", "speaking-first"])
     await page
       .getByRole("button", { name: "Read again for practice", exact: true })
       .click();
+    await page.getByRole("button", { name: "Done reading", exact: true }).click();
     await page
       .getByRole("textbox", { name: "Your reading observation", exact: true })
       .fill("I practised a second phrase and tried a shorter pause this time.");
@@ -169,17 +172,18 @@ test("reading handles a lost submission response, draft reload and denied microp
     };
   });
   await onboard(page);
-  await page.getByRole("button", { name: "Read Aloud", exact: true }).click();
+  await page.getByRole("button", { name: "Read aloud", exact: true }).click();
   await page
-    .getByRole("button", { name: "Allow private recording", exact: true })
+    .getByRole("button", { name: "Record the passage", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Record my response", exact: true })
     .click();
   await expect(page.getByRole("alert").first()).toBeVisible();
   await page
-    .getByRole("button", { name: "Write instead", exact: true })
+    .getByRole("button", { name: "Cancel recording", exact: true })
     .click();
+  await page.getByRole("button", { name: "Done reading", exact: true }).click();
   await page
     .getByRole("textbox", { name: "Your reading observation", exact: true })
     .fill(notes);
@@ -224,14 +228,14 @@ test("Read Aloud records, uploads privately, replays and restores a saved take",
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await onboard(page);
-  await page.getByRole("button", { name: "Read Aloud", exact: true }).click();
+  await page.getByRole("button", { name: "Read aloud", exact: true }).click();
   await page
-    .getByRole("button", { name: "Allow private recording", exact: true })
+    .getByRole("button", { name: "Record the passage", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Record my response", exact: true })
     .click();
-  await expect(page.getByText(/^0:5[0-6]$/, { exact: false })).toBeVisible({
+  await expect(page.getByText(/^00:5[0-6]$/, { exact: false })).toBeVisible({
     timeout: 15000,
   });
   await page
@@ -246,6 +250,7 @@ test("Read Aloud records, uploads privately, replays and restores a saved take",
   await expect(
     page.getByRole("button", { name: "Record another take", exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Done reading", exact: true }).click();
   await page
     .getByRole("textbox", { name: "Your reading observation", exact: true })
     .fill(notes);

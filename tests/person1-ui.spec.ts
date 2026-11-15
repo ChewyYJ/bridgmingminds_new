@@ -111,13 +111,13 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
     .getByRole("button", { name: "Grow my garden", exact: true })
     .click();
   await page
-    .getByRole("button", { name: "Start my daily workout", exact: true })
+    .getByRole("button", { name: "Spin and reflect", exact: true })
     .click();
   await expect(page.getByTestId("daily-screen-entry")).toBeVisible();
   await expect(page.getByText("Loading today’s question…")).toHaveCount(0);
   await page.screenshot({ path: info.outputPath("01-entry.png") });
   await page
-    .getByRole("button", { name: "Speak a Response", exact: true })
+    .getByRole("button", { name: "Start brainstorming", exact: true })
     .click();
   await page
     .getByRole("textbox", { name: "Benefits note", exact: true })
