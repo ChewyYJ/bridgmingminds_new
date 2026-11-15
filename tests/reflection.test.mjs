@@ -40,7 +40,7 @@ async function fixture(t, options = {}) {
   await start();
   t.after(async () => {
     await new Promise((resolve) => server.close(resolve));
-    service.close();
+    await service.close();
     rmSync(dir, { recursive: true, force: true });
   });
   async function request(
@@ -91,7 +91,7 @@ async function fixture(t, options = {}) {
       Number(service.db.prepare("SELECT count(*) AS n FROM jobs").get().n),
     restart: async () => {
       await new Promise((resolve) => server.close(resolve));
-      service.close();
+      await service.close();
       await start();
     },
   };

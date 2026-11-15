@@ -7,6 +7,7 @@ import {
   THOUGHT_MAP_SAMPLE_NOTES,
 } from "../../shared/thought-map-sample.mjs";
 import { api } from "../lib/api";
+import { ConfirmedUnlocks } from "../role3/ConfirmedUnlocks";
 import type { Attempt } from "../types";
 import { AssessmentCriteria } from "./AssessmentCriteria";
 import { PrivateRecordingPlayback } from "./PrivateRecording";
@@ -235,18 +236,19 @@ export function BridgeFeedback({
       ) : null}
       <Card style={{ gap: 12 }}>
         <Text style={T.label}>Participation rewards</Text>
-        {(["xp", "seeds", "water", "sunlight"] as const)
+        {(["coins", "xp"] as const)
           .filter((key) => (attempt.rewards?.[key] || 0) > 0)
           .map((key) => (
             <Text key={key} testID={`feedback-reward-${key}`} style={T.h3}>
-              +{attempt.rewards![key]} {key === "xp" ? "XP" : key}
+              +{attempt.rewards![key]} {key === "xp" ? "XP" : "Coins"}
             </Text>
           ))}
         <Text style={T.small}>
           {attempt.rewards?.reason ||
             "Your response is saved. Rewards recognise participation, not ratings or mastery."}
         </Text>
-        <Button label="Open garden" variant="secondary" onPress={onGarden} />
+        <ConfirmedUnlocks receipt={attempt.rewards?.reward} />
+        <Button label="View my avatar" variant="secondary" onPress={onGarden} />
       </Card>
       {attempt.retryOf ? (
         previous ? (

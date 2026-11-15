@@ -1,0 +1,1694 @@
+[
+  {
+    "collection": "girl",
+    "animation": "idle",
+    "frame": 0,
+    "index": 0,
+    "name": "Wide Trousers",
+    "width": 47,
+    "centre": 128,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 42,
+        "centre": 127.5
+      },
+      {
+        "y": 195,
+        "width": 44,
+        "centre": 127.5
+      },
+      {
+        "y": 196,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 197,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 199,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 200,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 201,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 202,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 203,
+        "width": 48,
+        "centre": 127.5
+      },
+      {
+        "y": 204,
+        "width": 50,
+        "centre": 127.5
+      },
+      {
+        "y": 205,
+        "width": 50,
+        "centre": 127.5
+      },
+      {
+        "y": 206,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 207,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 208,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 209,
+        "width": 52,
+        "centre": 127.5
+      }
+    ],
+    "jeansWidth": 47,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "girl",
+    "animation": "idle",
+    "frame": 0,
+    "index": 1,
+    "name": "Blue Jeans",
+    "width": 47,
+    "centre": 128,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 195,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 196,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 197,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 199,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 200,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 203,
+        "width": 49,
+        "centre": 128
+      },
+      {
+        "y": 204,
+        "width": 49,
+        "centre": 128
+      },
+      {
+        "y": 205,
+        "width": 50,
+        "centre": 127.5
+      },
+      {
+        "y": 206,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 207,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 208,
+        "width": 52,
+        "centre": 127.5
+      },
+      {
+        "y": 209,
+        "width": 52,
+        "centre": 127.5
+      }
+    ],
+    "jeansWidth": 47,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "girl",
+    "animation": "idle",
+    "frame": 0,
+    "index": 2,
+    "name": "Pleated Skirt",
+    "width": 47,
+    "centre": 128,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 195,
+        "width": 46,
+        "centre": 127.5
+      },
+      {
+        "y": 196,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 197,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 200,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 203,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 204,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 205,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 127.5
+      },
+      {
+        "y": 207,
+        "width": 48,
+        "centre": 127.5
+      },
+      {
+        "y": 208,
+        "width": 48,
+        "centre": 127.5
+      },
+      {
+        "y": 209,
+        "width": 48,
+        "centre": 127.5
+      }
+    ],
+    "jeansWidth": 47,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "girl",
+    "animation": "walk",
+    "frame": 2,
+    "index": 0,
+    "name": "Wide Trousers",
+    "width": 47,
+    "centre": 128,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 42,
+        "centre": 127.5
+      },
+      {
+        "y": 195,
+        "width": 44,
+        "centre": 127.5
+      },
+      {
+        "y": 196,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 197,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 199,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 200,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 201,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 202,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 203,
+        "width": 48,
+        "centre": 127.5
+      },
+      {
+        "y": 204,
+        "width": 50,
+        "centre": 127.5
+      },
+      {
+        "y": 205,
+        "width": 50,
+        "centre": 127.5
+      },
+      {
+        "y": 206,
+        "width": 50,
+        "centre": 128.5
+      },
+      {
+        "y": 207,
+        "width": 50,
+        "centre": 127.5
+      },
+      {
+        "y": 208,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 209,
+        "width": 52,
+        "centre": 127.5
+      }
+    ],
+    "jeansWidth": 47,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "girl",
+    "animation": "walk",
+    "frame": 2,
+    "index": 1,
+    "name": "Blue Jeans",
+    "width": 47,
+    "centre": 128,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 195,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 196,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 197,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 199,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 200,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 203,
+        "width": 49,
+        "centre": 128
+      },
+      {
+        "y": 204,
+        "width": 49,
+        "centre": 128
+      },
+      {
+        "y": 205,
+        "width": 50,
+        "centre": 127.5
+      },
+      {
+        "y": 206,
+        "width": 50,
+        "centre": 127.5
+      },
+      {
+        "y": 207,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 208,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 209,
+        "width": 52,
+        "centre": 127.5
+      }
+    ],
+    "jeansWidth": 47,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "girl",
+    "animation": "walk",
+    "frame": 2,
+    "index": 2,
+    "name": "Pleated Skirt",
+    "width": 47,
+    "centre": 128,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 195,
+        "width": 46,
+        "centre": 127.5
+      },
+      {
+        "y": 196,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 197,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 200,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 203,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 204,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 205,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 127.5
+      },
+      {
+        "y": 207,
+        "width": 48,
+        "centre": 127.5
+      },
+      {
+        "y": 208,
+        "width": 48,
+        "centre": 127.5
+      },
+      {
+        "y": 209,
+        "width": 48,
+        "centre": 127.5
+      }
+    ],
+    "jeansWidth": 47,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "girl",
+    "animation": "walk",
+    "frame": 6,
+    "index": 0,
+    "name": "Wide Trousers",
+    "width": 47,
+    "centre": 128,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 42,
+        "centre": 127.5
+      },
+      {
+        "y": 195,
+        "width": 44,
+        "centre": 127.5
+      },
+      {
+        "y": 196,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 197,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 199,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 200,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 201,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 202,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 203,
+        "width": 49,
+        "centre": 128
+      },
+      {
+        "y": 204,
+        "width": 50,
+        "centre": 127.5
+      },
+      {
+        "y": 205,
+        "width": 50,
+        "centre": 127.5
+      },
+      {
+        "y": 206,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 207,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 208,
+        "width": 53,
+        "centre": 128
+      },
+      {
+        "y": 209,
+        "width": 52,
+        "centre": 127.5
+      }
+    ],
+    "jeansWidth": 47,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "girl",
+    "animation": "walk",
+    "frame": 6,
+    "index": 1,
+    "name": "Blue Jeans",
+    "width": 47,
+    "centre": 128,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 195,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 196,
+        "width": 43,
+        "centre": 128
+      },
+      {
+        "y": 197,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 199,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 200,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 203,
+        "width": 49,
+        "centre": 128
+      },
+      {
+        "y": 204,
+        "width": 49,
+        "centre": 128
+      },
+      {
+        "y": 205,
+        "width": 50,
+        "centre": 127.5
+      },
+      {
+        "y": 206,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 207,
+        "width": 51,
+        "centre": 128
+      },
+      {
+        "y": 208,
+        "width": 52,
+        "centre": 127.5
+      },
+      {
+        "y": 209,
+        "width": 53,
+        "centre": 128
+      }
+    ],
+    "jeansWidth": 47,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "girl",
+    "animation": "walk",
+    "frame": 6,
+    "index": 2,
+    "name": "Pleated Skirt",
+    "width": 47,
+    "centre": 128,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 195,
+        "width": 46,
+        "centre": 127.5
+      },
+      {
+        "y": 196,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 197,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 200,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 203,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 204,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 205,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 127.5
+      },
+      {
+        "y": 207,
+        "width": 48,
+        "centre": 127.5
+      },
+      {
+        "y": 208,
+        "width": 48,
+        "centre": 127.5
+      },
+      {
+        "y": 209,
+        "width": 48,
+        "centre": 127.5
+      }
+    ],
+    "jeansWidth": 47,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "boy",
+    "animation": "idle",
+    "frame": 0,
+    "index": 0,
+    "name": "School Trousers",
+    "width": 48,
+    "centre": 128.5,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 195,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 196,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 197,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 200,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 203,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 204,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 205,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 207,
+        "width": 49,
+        "centre": 128
+      },
+      {
+        "y": 208,
+        "width": 50,
+        "centre": 128.5
+      },
+      {
+        "y": 209,
+        "width": 50,
+        "centre": 128.5
+      }
+    ],
+    "jeansWidth": 48,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "boy",
+    "animation": "idle",
+    "frame": 0,
+    "index": 1,
+    "name": "Cargo Pants",
+    "width": 47,
+    "centre": 128.5,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 195,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 196,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 197,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 200,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 203,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 204,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 205,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 207,
+        "width": 49,
+        "centre": 128
+      },
+      {
+        "y": 208,
+        "width": 50,
+        "centre": 128.5
+      },
+      {
+        "y": 209,
+        "width": 50,
+        "centre": 128.5
+      }
+    ],
+    "jeansWidth": 48,
+    "ratioToJeans": 0.9791666666666666
+  },
+  {
+    "collection": "boy",
+    "animation": "idle",
+    "frame": 0,
+    "index": 2,
+    "name": "Blue Jeans",
+    "width": 48,
+    "centre": 128.5,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 195,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 196,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 197,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 200,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 203,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 204,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 205,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 207,
+        "width": 49,
+        "centre": 129
+      },
+      {
+        "y": 208,
+        "width": 50,
+        "centre": 128.5
+      },
+      {
+        "y": 209,
+        "width": 50,
+        "centre": 128.5
+      }
+    ],
+    "jeansWidth": 48,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "boy",
+    "animation": "walk",
+    "frame": 2,
+    "index": 0,
+    "name": "School Trousers",
+    "width": 48,
+    "centre": 128.5,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 195,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 196,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 197,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 200,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 203,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 204,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 205,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 207,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 208,
+        "width": 50,
+        "centre": 128.5
+      },
+      {
+        "y": 209,
+        "width": 49,
+        "centre": 128
+      }
+    ],
+    "jeansWidth": 48,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "boy",
+    "animation": "walk",
+    "frame": 2,
+    "index": 1,
+    "name": "Cargo Pants",
+    "width": 47,
+    "centre": 128.5,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 195,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 196,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 197,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 200,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 203,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 204,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 205,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 207,
+        "width": 49,
+        "centre": 128
+      },
+      {
+        "y": 208,
+        "width": 49,
+        "centre": 129
+      },
+      {
+        "y": 209,
+        "width": 50,
+        "centre": 128.5
+      }
+    ],
+    "jeansWidth": 48,
+    "ratioToJeans": 0.9791666666666666
+  },
+  {
+    "collection": "boy",
+    "animation": "walk",
+    "frame": 2,
+    "index": 2,
+    "name": "Blue Jeans",
+    "width": 48,
+    "centre": 128.5,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 195,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 196,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 197,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 200,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 203,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 204,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 205,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 207,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 208,
+        "width": 50,
+        "centre": 128.5
+      },
+      {
+        "y": 209,
+        "width": 50,
+        "centre": 128.5
+      }
+    ],
+    "jeansWidth": 48,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "boy",
+    "animation": "walk",
+    "frame": 6,
+    "index": 0,
+    "name": "School Trousers",
+    "width": 48,
+    "centre": 128.5,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 195,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 196,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 197,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 200,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 203,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 204,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 205,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 207,
+        "width": 49,
+        "centre": 128
+      },
+      {
+        "y": 208,
+        "width": 50,
+        "centre": 128.5
+      },
+      {
+        "y": 209,
+        "width": 50,
+        "centre": 128.5
+      }
+    ],
+    "jeansWidth": 48,
+    "ratioToJeans": 1
+  },
+  {
+    "collection": "boy",
+    "animation": "walk",
+    "frame": 6,
+    "index": 1,
+    "name": "Cargo Pants",
+    "width": 47,
+    "centre": 128.5,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 195,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 196,
+        "width": 45,
+        "centre": 128
+      },
+      {
+        "y": 197,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 200,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 203,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 204,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 205,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 207,
+        "width": 50,
+        "centre": 128.5
+      },
+      {
+        "y": 208,
+        "width": 50,
+        "centre": 128.5
+      },
+      {
+        "y": 209,
+        "width": 50,
+        "centre": 128.5
+      }
+    ],
+    "jeansWidth": 48,
+    "ratioToJeans": 0.9791666666666666
+  },
+  {
+    "collection": "boy",
+    "animation": "walk",
+    "frame": 6,
+    "index": 2,
+    "name": "Blue Jeans",
+    "width": 48,
+    "centre": 128.5,
+    "top": 191,
+    "rows": [
+      {
+        "y": 194,
+        "width": 44,
+        "centre": 128.5
+      },
+      {
+        "y": 195,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 196,
+        "width": 45,
+        "centre": 129
+      },
+      {
+        "y": 197,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 198,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 199,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 200,
+        "width": 46,
+        "centre": 128.5
+      },
+      {
+        "y": 201,
+        "width": 47,
+        "centre": 128
+      },
+      {
+        "y": 202,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 203,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 204,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 205,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 206,
+        "width": 48,
+        "centre": 128.5
+      },
+      {
+        "y": 207,
+        "width": 50,
+        "centre": 128.5
+      },
+      {
+        "y": 208,
+        "width": 50,
+        "centre": 128.5
+      },
+      {
+        "y": 209,
+        "width": 50,
+        "centre": 128.5
+      }
+    ],
+    "jeansWidth": 48,
+    "ratioToJeans": 1
+  }
+]

@@ -70,7 +70,7 @@ async function setup(t) {
   }
   async function stop() {
     await new Promise((resolve) => server.close(resolve));
-    service.close();
+    await service.close();
   }
   t.after(async () => {
     await stop();
@@ -173,9 +173,7 @@ test("two real users join a private room, alternate all rounds and keep a shared
   assert.ok(forA.turns.every((turn) => [a.id, b.id].includes(turn.userId)));
   assert.equal((await f.request("/state", a)).data.attempts.length, 0);
   assert.deepEqual((await f.request("/state", a)).data.wallet, {
-    seeds: 1,
-    water: 2,
-    sunlight: 0,
+    coins: 0,
   });
   assert.equal((await f.request("/export", a)).data.friendRooms[0].id, room.id);
 });

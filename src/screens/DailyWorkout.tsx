@@ -151,7 +151,7 @@ function ChallengeHub({
           <View
             testID="home-streak"
             accessible
-            accessibilityLabel={`${daily?.streak.current ?? 0} day streak. ${daily?.streak.securedToday ? "Today secured." : "Complete both daily activities to build your streak."}`}
+            accessibilityLabel={`${daily?.streak.current ?? 0} day streak. ${daily?.streak.securedToday ? "Today secured." : "Complete an eligible activity to build your streak."}`}
             style={{
               minWidth: wide ? 156 : 112,
               paddingHorizontal: wide ? 22 : 14,
@@ -283,7 +283,7 @@ function ChallengeHub({
                 {activity?.completed ? (
                   <Tag>Done today</Tag>
                 ) : activity ? (
-                  <Text style={T.small}>+{activity.xp} XP</Text>
+                  <Text style={T.small}>+{activity.coins || 0} Coins{activity.xp ? ` · +${activity.xp} XP` : ""}</Text>
                 ) : null}
               </View>
               <View style={{ gap: 5, flex: 1 }}>
@@ -335,10 +335,10 @@ function ChallengeHub({
         }}
       >
         <Button
-          label="Homeland"
-          icon="sun"
+          label="My avatar"
+          icon="user"
           variant="ghost"
-          onPress={() => router.push("/garden" as never)}
+          onPress={() => router.push("/avatar" as never)}
         />
         <Button
           label="More practice"
@@ -592,7 +592,7 @@ export function ReadAloud() {
               <Text style={T.small}>{result.evaluation.next_step}</Text>
             </Card>
           )}
-          {result.rewards.xp > 0 ? (
+          {result.rewards.coins > 0 || result.rewards.xp > 0 ? (
             <View
               style={{
                 flexDirection: "row",
@@ -604,7 +604,7 @@ export function ReadAloud() {
               }}
             >
               <Text testID="reading-reward" style={T.h3}>
-                +{result.rewards.xp} XP
+                +{result.rewards.coins || 0} Coins{result.rewards.xp ? ` · +${result.rewards.xp} XP` : ""}
               </Text>
               <Text style={T.small}>Practice complete</Text>
             </View>

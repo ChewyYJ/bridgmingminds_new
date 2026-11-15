@@ -93,7 +93,7 @@ async function fixture(t, config = {}) {
   await start();
   t.after(async () => {
     await new Promise((resolve) => server.close(resolve));
-    service.close();
+    await service.close();
     rmSync(dir, { recursive: true, force: true });
     assert.deepEqual(
       unexpected,
@@ -175,7 +175,7 @@ async function fixture(t, config = {}) {
     runJobs: () => service.runJobs(),
     restart: async (overrides = {}) => {
       await new Promise((resolve) => server.close(resolve));
-      service.close();
+      await service.close();
       configuration = { ...configuration, ...overrides };
       await start();
     },
@@ -490,7 +490,10 @@ for (const [name, invalidResponse, message] of [
   test(`configured evaluation rejects ${name}, retains the answer, and recovers without duplicate rewards`, async (t) => {
     const f = await fixture(t);
     const token = await f.guest();
-    const session = await f.session(token);
+    // Read & Reflect remains reward-eligible. Classic free practice is now
+    // deliberately unrewarded, so it cannot exercise this recovery invariant.
+    const article = (await f.request('/articles', { token })).data[0];
+    const session = await f.session(token, 'read_reflect', { articleId: article.id });
     const attempt = await f.attempt(token, session);
     const before = (await f.request("/state", { token })).data;
     f.respond(invalidResponse);
@@ -519,7 +522,8 @@ for (const [name, invalidResponse, message] of [
     assert.equal(recovered.attempt.error, undefined);
     assert.equal(recovered.attempt.evaluation.provider, "openai");
     const after = (await f.request("/state", { token })).data;
-    assert.equal(after.wallet.seeds, before.wallet.seeds + 1);
+    assert.equal(after.wallet.coins, before.wallet.coins + 3);
+    assert.equal(after.xp, before.xp + 15);
     assert.equal(after.attempts.length, 1);
     assert.equal(f.requests.length, 2);
     await f.evaluate(token, attempt);
@@ -528,6 +532,7 @@ for (const [name, invalidResponse, message] of [
       (await f.request("/state", { token })).data.wallet,
       after.wallet,
     );
+    assert.equal(f.database().prepare("SELECT COUNT(*) n FROM coin_ledger WHERE activity_type='read_reflect' AND coins_delta>0").get().n, 1);
   });
 }
 
@@ -923,7 +928,8 @@ test("historical raw schema failures are safely projected without rewriting data
 test("quote-only feedback derives exact spans, logs only safe failure reasons, and retries once without duplicate rewards", async (t) => {
   const f = await fixture(t);
   const token = await f.guest();
-  const session = await f.session(token);
+  const article = (await f.request('/articles', { token })).data[0];
+  const session = await f.session(token, 'read_reflect', { articleId: article.id });
   const text =
     "🌱 My opening.\r\nA small trial can help 🌿 when its limits are clear. Shared phrase. Shared phrase.";
   const quote = "A small trial can help 🌿 when its limits are clear.";
@@ -975,8 +981,9 @@ test("quote-only feedback derives exact spans, logs only safe failure reasons, a
     ]);
   }
   const after = (await f.request("/state", { token })).data.wallet;
-  assert.equal(after.seeds, before.seeds + 1);
+  assert.equal(after.coins, before.coins + 3);
   await f.evaluate(token, attempt);
   assert.equal(f.requests.length, 2);
   assert.deepEqual((await f.request("/state", { token })).data.wallet, after);
+  assert.equal(f.database().prepare("SELECT COUNT(*) n FROM coin_ledger WHERE activity_type='read_reflect' AND coins_delta>0").get().n, 1);
 });

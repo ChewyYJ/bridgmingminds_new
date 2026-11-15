@@ -21,7 +21,8 @@ import { GardenArchive } from "../components/GardenArchive";
 import { PlantStudio } from "../components/PlantStudio";
 import { GardenDrag, DragPoint } from "../components/GardenDrag";
 import {
-  AppState,
+  AppState as CurrentAppState,
+  LegacyWallet,
   ArchivedPlant,
   Doodle,
   GardenPosition,
@@ -36,6 +37,8 @@ import {
   hasPlantSpace,
 } from "../../shared/garden-layout.mjs";
 
+// Retained solely for historical source compatibility. Active routes use avatars.
+type AppState = Omit<CurrentAppState, "wallet"> & { wallet: LegacyWallet };
 type PlantType = NonNullable<Plot["plantType"]>;
 type Cargo = {
   kind: "seed" | "plant";

@@ -8,7 +8,7 @@ if (process.argv.length > 2) {
   process.exitCode = 1;
 } else {
   console.log(
-    "Offline AI smoke: temporary databases, fake credentials, mocked provider transport. No external requests or changes to your garden.",
+    "Offline AI smoke: temporary databases, fake credentials, mocked provider transport. No external requests or changes to your account data.",
   );
   const result = spawnSync(
     process.execPath,

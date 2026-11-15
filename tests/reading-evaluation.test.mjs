@@ -223,11 +223,17 @@ test("Done atomically saves audio and queues evaluation without self-review; com
   assert.equal(job.result.readingEvaluation.criteria.length, 5);
   assert.equal(calls, 1);
   const restored = await ok("/read-aloud/assignment", token);
-  assert.equal(restored.latestAttempt.rewards.xp, 10);
+  assert.equal(restored.latestAttempt.rewards.xp, 0);
+  assert.equal(restored.latestAttempt.rewards.coins, 3);
   assert.equal(restored.latestAttempt.evaluation.speech.status, "assessed");
   assert.equal(restored.latestAttempt.speechAssessment.provider, "openai");
   await service.runJobs();
-  assert.equal((await ok("/state", token)).xp, 10);
+  assert.equal((await ok("/state", token)).xp, 0);
+  const readingLedger = (await ok("/export", token)).gamificationData.ledger
+    .filter(item => item.activity_type === "read_aloud");
+  assert.equal(readingLedger.length, 1);
+  assert.equal(readingLedger[0].coins_delta, 3);
+  assert.equal(readingLedger[0].xp_delta, 0);
   const other = await guest();
   assert.equal(
     (await request(`/read-aloud/speech-jobs/${saved.speechJobId}`, other))
@@ -249,4 +255,7 @@ test("Done atomically saves audio and queues evaluation without self-review; com
     "no_speech",
   );
   assert.equal((await ok("/state", other)).xp, 0);
+  const silentLedger = (await ok("/export", other)).gamificationData.ledger
+    .filter(item => item.activity_type === "read_aloud");
+  assert.equal(silentLedger.length, 0);
 });

@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { openDatabase } from "../server/database.mjs";
 import { createDailyWorkoutService, localDay, workoutStreak } from "../server/daily-workout.mjs";
+import { createGamificationService } from "../server/gamification.mjs";
 
 async function fixture(t) {
   const directory = mkdtempSync(join(tmpdir(), "daily-workout-"));
@@ -17,7 +18,11 @@ async function fixture(t) {
     uid, JSON.stringify({ timezone: "Asia/Singapore" }),
     JSON.stringify({ seeds: 4, water: 2, sunlight: 3 }), "[]", time,
   );
-  const service = () => createDailyWorkoutService({ db, now: () => new Date(time) });
+  const economy = () => createGamificationService({ db, now: () => new Date(time) });
+  const service = () => createDailyWorkoutService({ db, now: () => new Date(time),
+    awardCompletion: (owner, completion) => economy().awardValidatedCompletion(owner, completion),
+    getProgression: owner => economy().summary(owner),
+  });
   t.after(async () => { await db.close(); rmSync(directory, { recursive: true, force: true }); });
   return {
     uid,
@@ -45,35 +50,37 @@ async function fixture(t) {
       await db.prepare("UPDATE users SET profile=? WHERE id=?").run(JSON.stringify({ timezone }), uid);
     },
     async balance() {
-      const row = await db.prepare("SELECT xp,wallet FROM users WHERE id=?").get(uid);
-      return { xp: row.xp, ...JSON.parse(row.wallet) };
+      const state = await economy().summary(uid);
+      return { xp: state.xp, coins: state.coins };
     },
   };
 }
 
 for (const order of [["read_aloud", "spin_speak"], ["spin_speak", "read_aloud"]]) {
-  test(`daily activities in order ${order.join(" → ")} award exactly 25 XP and one cosmetic`, async (t) => {
+  test(`daily activities in order ${order.join(" → ")} award exactly 15 XP and 5 Coins`, async (t) => {
     const f = await fixture(t);
     assert.equal((await f.daily.today(f.uid)).completed, 0);
     const first = await f.finish(order[0]);
-    assert.equal(first.xp, order[0] === "read_aloud" ? 10 : 15);
+    assert.equal(first.xp, order[0] === "read_aloud" ? 0 : 15);
+    assert.equal(first.coins, order[0] === "read_aloud" ? 3 : 2);
     let state = await f.daily.today(f.uid);
     assert.equal(state.completed, 1);
-    assert.equal(state.streak.securedToday, false);
-    assert.equal(state.streak.current, 0);
-    assert.equal((await f.balance()).seeds, 4);
+    assert.equal(state.streak.securedToday, true);
+    assert.equal(state.streak.current, 1);
+    assert.equal((await f.balance()).coins, 4 + first.coins);
     await f.finish(order[1]);
     state = await f.daily.today(f.uid);
     assert.equal(state.completed, 2);
-    assert.equal(state.xp, 25);
+    assert.equal(state.xp, 15);
     assert.deepEqual(state.streak, { current: 1, longest: 1, securedToday: true });
-    assert.deepEqual(await f.balance(), { xp: 25, seeds: 5, water: 2, sunlight: 3 });
+    assert.deepEqual(await f.balance(), { xp: 15, coins: 9 });
+    assert.deepEqual(JSON.parse((await f.db.prepare('SELECT wallet FROM users WHERE id=?').get(f.uid)).wallet), { seeds: 4, water: 2, sunlight: 3 });
     await f.restart();
     assert.equal((await f.daily.today(f.uid)).completed, 2);
     await f.finish(order[0]);
     await f.finish(order[1]);
-    assert.equal((await f.balance()).xp, 25);
-    assert.equal((await f.balance()).seeds, 5);
+    assert.equal((await f.balance()).xp, 15);
+    assert.equal((await f.balance()).coins, 9);
   });
 }
 
@@ -82,9 +89,10 @@ test("concurrent submissions and duplicate completions cannot mint extra rewards
   const ids = await Promise.all([f.attempt("spin_speak"), f.attempt("read_aloud"), f.attempt("spin_speak")]);
   await Promise.all(ids.map((id) => f.daily.pinReceipt(f.uid, id)));
   const outcomes = await Promise.all([...ids, ...ids].map((id) => f.daily.complete(f.uid, id)));
-  assert.equal(outcomes.reduce((sum, item) => sum + item.xp, 0), 25);
-  assert.equal(outcomes.reduce((sum, item) => sum + item.seeds, 0), 1);
-  assert.equal((await f.db.prepare("SELECT COUNT(*) count FROM reward_ledger").get()).count, 3);
+  assert.equal(outcomes.reduce((sum, item) => sum + item.xp, 0), 15);
+  assert.equal(outcomes.reduce((sum, item) => sum + item.coins, 0), 5);
+  assert.equal((await f.db.prepare("SELECT COUNT(*) count FROM coin_ledger").get()).count, 3);
+  assert.equal((await f.db.prepare("SELECT COUNT(*) count FROM reward_ledger").get()).count, 0);
 });
 
 test("midnight, provider delay, receipt retries and timezone edits preserve the submission day", async (t) => {
@@ -117,7 +125,7 @@ test("a day's timezone snapshot is shared, and another account cannot claim its 
   assert.equal((await f.daily.today(other)).completed, 0);
 });
 
-test("consecutive days extend streak; missed days preserve XP and cosmetics", async (t) => {
+test("consecutive days extend streak; missed days preserve XP and Coins", async (t) => {
   const f = await fixture(t);
   for (const day of [11, 12]) {
     f.setTime(`2026-11-${day}T12:00:00Z`);
@@ -128,7 +136,7 @@ test("consecutive days extend streak; missed days preserve XP and cosmetics", as
   assert.deepEqual((await f.daily.today(f.uid)).streak, { current: 2, longest: 2, securedToday: false });
   f.setTime("2026-11-14T12:00:00Z");
   assert.equal((await f.daily.today(f.uid)).streak.current, 0);
-  assert.deepEqual(await f.balance(), { xp: 50, seeds: 6, water: 2, sunlight: 3 });
+  assert.deepEqual(await f.balance(), { xp: 30, coins: 14 });
 });
 
 test("calendar dates handle DST and month/year boundaries", () => {
@@ -174,15 +182,16 @@ test("a failed reward write rolls back completion, XP and secured day", async (t
   await f.finish("spin_speak");
   const id = await f.attempt("read_aloud");
   await f.daily.pinReceipt(f.uid, id);
-  await f.db.exec(`CREATE TRIGGER fail_cosmetic BEFORE INSERT ON reward_ledger
-    WHEN NEW.kind='daily_cosmetic' BEGIN SELECT RAISE(ABORT, 'simulated storage failure'); END`);
+  await f.db.exec(`CREATE TRIGGER fail_coins BEFORE INSERT ON coin_ledger
+    WHEN NEW.activity_type='read_aloud' BEGIN SELECT RAISE(ABORT, 'simulated storage failure'); END`);
   await assert.rejects(f.daily.complete(f.uid, id), /simulated storage failure/);
   assert.equal((await f.daily.today(f.uid)).completed, 1);
   assert.equal((await f.balance()).xp, 15);
-  assert.equal((await f.balance()).seeds, 4);
-  await f.db.exec("DROP TRIGGER fail_cosmetic");
-  assert.equal((await f.daily.complete(f.uid, id)).seeds, 1);
-  assert.equal((await f.balance()).xp, 25);
+  assert.equal((await f.balance()).coins, 6);
+  await f.db.exec("DROP TRIGGER fail_coins");
+  assert.equal((await f.daily.complete(f.uid, id)).coins, 3);
+  assert.equal((await f.balance()).xp, 15);
+  assert.equal((await f.balance()).coins, 9);
 });
 
 test("account deletion cascades private daily records", async (t) => {

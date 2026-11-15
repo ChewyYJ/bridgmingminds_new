@@ -1,0 +1,98 @@
+{
+  "reviewer": "/root/learning_repo_read",
+  "scope": "All 12 food frame and clothing sheets at natural canvas resolution",
+  "sourceHashes": {
+    "scripts/avatar/illustrated/rig.mjs": "c3e08701d0c681052b53b8517d35ae691c49e1fa64911cf1db1fe124606a2a46",
+    "scripts/avatar/illustrated/raster.mjs": "4927aafbc24cf48e0bc69ae90095d70d26febe70bc9084df279ce92d5686aa76",
+    "scripts/avatar/illustrated/meals.mjs": "584d3063c776c7fd85801f1fe069f4f2ba708fcff129533462bd838753b35ea9",
+    "shared/avatar-customization.mjs": "743a273b8a41408b7f817fe70d86872646e4258cb25be7cc4ab121aae59b3dd3",
+    "scripts/avatar/qa-pairwise.mjs": "22ad9769ca9c77369d68c64a39f9b73079b7f7cb94bde9a533db7dd33b8e4752",
+    "scripts/avatar/qa-head-food.mjs": "79860e69455cad4c193e19384dfd1e82671f383ca5c592e5f5e7ffe744ab38fc",
+    "scripts/avatar/lib/render.mjs": "ad32922a3245d0b2ef92012de0d10d021b5e18df619052f3846ea1a1c5a36552",
+    "assets/avatar/illustrated-v2/source/girl-kit.png": "086d583df99d87c25150a856d456d2004653b4aeaf56e48b7a05098988fe0213",
+    "assets/avatar/illustrated-v2/source/boy-kit.png": "6ffb98397361baae16d50720d4208f3718c2d274ade5c68e581569d81c021297",
+    "assets/avatar/illustrated-v2/source/details-kit.png": "c33028d7dacef7f99d1991ca85d707aa3a4b8a0d227589656d01de1ec9664e2a",
+    "assets/avatar/illustrated-v2/source/pixel-faces-v3.png": "600199940cb045fac8a7409bb5164fd1fd2626d240155a398a410e020e54ed0b",
+    "assets/avatar/food-v1/ramen.png": "01e50208b0d98f314d76db33fb453b59a00d94579642ccee0137bf6aa57b4c2a",
+    "assets/avatar/food-v1/ramen-held.png": "a4f954ce84dd0d3b5e3f85fd10a9737562a168dfe3f26195059304d07808c681",
+    "assets/avatar/food-v1/onigiri.png": "9a82a3d0ffbd3913074ef04774de798fb941fc89110b3a54bd264d29402b0bc2",
+    "assets/avatar/food-v1/bento.png": "2f53cf584d14abf298f1fe775a6f155c382966287a9918a31d68949c958831c7"
+  },
+  "sheets": [
+    {
+      "file": "girl-eat-frames.png",
+      "sha256": "4619eb9c8dd870a82560f8fc07e36e46a15be49000cf087d744dd0088917736f",
+      "tiles": 8
+    },
+    {
+      "file": "girl-eat-clothing.png",
+      "sha256": "8038e53e1d38c6229cec2db520f08da3c177729343f2dc471044642e34441ca3",
+      "tiles": 12
+    },
+    {
+      "file": "girl-eatOnigiri-frames.png",
+      "sha256": "54b2b11131e8a3c742ca60b07d67fd851ced110fc3e7116add9cf33cf5c5607d",
+      "tiles": 8
+    },
+    {
+      "file": "girl-eatOnigiri-clothing.png",
+      "sha256": "9495bf1a3804f88655318f22fa757f94c908756f262e7ee36efc399ab84bb5c6",
+      "tiles": 12
+    },
+    {
+      "file": "girl-eatBento-frames.png",
+      "sha256": "81da91377fd1e9fcb792ce715dd4104406fda84667ceb77773e3eb37524a6f8f",
+      "tiles": 8
+    },
+    {
+      "file": "girl-eatBento-clothing.png",
+      "sha256": "4ddf9b0a237610017d2d5342aead0785f21292d0a37cdb7eff509d5a9a97d336",
+      "tiles": 12
+    },
+    {
+      "file": "boy-eat-frames.png",
+      "sha256": "f8966b8acd6954f66f9237998be35f55b6f20840fb02d21ae92f8ac00e78dfe4",
+      "tiles": 8
+    },
+    {
+      "file": "boy-eat-clothing.png",
+      "sha256": "88ad1ce00933d656f376e5ff9b84c59967172fc918de6fa89fdfa4aade953445",
+      "tiles": 12
+    },
+    {
+      "file": "boy-eatOnigiri-frames.png",
+      "sha256": "e0c611d2a0e76332e87911ffb2e91424db3ebdd2fe4a69f2c44e18b729db5a82",
+      "tiles": 8
+    },
+    {
+      "file": "boy-eatOnigiri-clothing.png",
+      "sha256": "28463589bab0bfa30ec8b5158b05a80ca32c19bcb7826cb24dbc5fbcc3c65d5b",
+      "tiles": 12
+    },
+    {
+      "file": "boy-eatBento-frames.png",
+      "sha256": "cc1af0333a6024324ca2e3afc0192a935c9b618b123089f263522159d81264a1",
+      "tiles": 8
+    },
+    {
+      "file": "boy-eatBento-clothing.png",
+      "sha256": "4d446712489d9db6fd06dc38843c5bb6193962f0882e8a39971beddfa6e22d53",
+      "tiles": 12
+    }
+  ],
+  "reviewedSheets": 12,
+  "reviewedTiles": 120,
+  "findings": [
+    {
+      "issue": "Bare far arm protruded past a long sleeve during the onigiri bite",
+      "status": "resolved",
+      "verification": "Reviewed both collections, all 8 meal frames and all 3 top × 4 jacket bite poses; no skin elbow stub remains."
+    }
+  ],
+  "unresolved": [],
+  "limits": [
+    "Animated GIFs are generated but not claimed visually played by this reviewer.",
+    "Review covers the fixed peach/espresso/hazel palette and selected haircuts, not all possible outfits or palettes."
+  ],
+  "preservedApproval": "All 12 food PNG hashes are unchanged after the final head freeze"
+}

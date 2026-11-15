@@ -1,0 +1,249 @@
+{
+  "version": 1,
+  "packVersion": "bridgingminds-illustrated-v5-meals",
+  "reviewedAt": "2026-11-15T15:21:37.301Z",
+  "status": "approved within recorded scope",
+  "coverage": "coverage.json",
+  "sourceHashes": {
+    "scripts/avatar/illustrated/rig.mjs": "c3e08701d0c681052b53b8517d35ae691c49e1fa64911cf1db1fe124606a2a46",
+    "scripts/avatar/illustrated/raster.mjs": "4927aafbc24cf48e0bc69ae90095d70d26febe70bc9084df279ce92d5686aa76",
+    "scripts/avatar/illustrated/meals.mjs": "584d3063c776c7fd85801f1fe069f4f2ba708fcff129533462bd838753b35ea9",
+    "shared/avatar-customization.mjs": "743a273b8a41408b7f817fe70d86872646e4258cb25be7cc4ab121aae59b3dd3",
+    "scripts/avatar/qa-pairwise.mjs": "22ad9769ca9c77369d68c64a39f9b73079b7f7cb94bde9a533db7dd33b8e4752",
+    "scripts/avatar/qa-head-food.mjs": "79860e69455cad4c193e19384dfd1e82671f383ca5c592e5f5e7ffe744ab38fc",
+    "scripts/avatar/lib/render.mjs": "ad32922a3245d0b2ef92012de0d10d021b5e18df619052f3846ea1a1c5a36552",
+    "assets/avatar/illustrated-v2/source/girl-kit.png": "086d583df99d87c25150a856d456d2004653b4aeaf56e48b7a05098988fe0213",
+    "assets/avatar/illustrated-v2/source/boy-kit.png": "6ffb98397361baae16d50720d4208f3718c2d274ade5c68e581569d81c021297",
+    "assets/avatar/illustrated-v2/source/details-kit.png": "c33028d7dacef7f99d1991ca85d707aa3a4b8a0d227589656d01de1ec9664e2a",
+    "assets/avatar/illustrated-v2/source/pixel-faces-v3.png": "600199940cb045fac8a7409bb5164fd1fd2626d240155a398a410e020e54ed0b",
+    "assets/avatar/food-v1/ramen.png": "01e50208b0d98f314d76db33fb453b59a00d94579642ccee0137bf6aa57b4c2a",
+    "assets/avatar/food-v1/ramen-held.png": "a4f954ce84dd0d3b5e3f85fd10a9737562a168dfe3f26195059304d07808c681",
+    "assets/avatar/food-v1/onigiri.png": "9a82a3d0ffbd3913074ef04774de798fb941fc89110b3a54bd264d29402b0bc2",
+    "assets/avatar/food-v1/bento.png": "2f53cf584d14abf298f1fe775a6f155c382966287a9918a31d68949c958831c7"
+  },
+  "reviews": [
+    "artifacts/avatar-head-v5-review.json",
+    "artifacts/avatar-meals-v5-review.json"
+  ],
+  "reviewedSheets": 28,
+  "reviewedTiles": 264,
+  "sheets": [
+    {
+      "file": "girl-big-head-idle-0.png",
+      "sha256": "a1a36a05396981d9c7d107d3699823210b34f70c7780275fbdec7cab99152785",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "girl-big-head-walk-2.png",
+      "sha256": "60dfdc0a3b9ca60f33c0feebe2129d05ffe5589772e3f45b5d674cdfa8f4f2c4",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "girl-chibi-head-idle-0.png",
+      "sha256": "47e6e59f02f092316933f3ca6b695525c71624dd1991bc84f14a8a103dd20677",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "girl-chibi-head-greet-2.png",
+      "sha256": "908999c96eabca123b4227d2f3d3760f9c7f8ab0ef9a7f1339f1bc39614c55f4",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "girl-chibi-head-celebrate-2.png",
+      "sha256": "39351c5e532bc92c86b8da35141e3e0c211a7229a7fdb7df4abdaecdd22706bd",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "girl-chibi-head-eat-3.png",
+      "sha256": "ada8a5f9710209e622ce29d7c5be35ee31334b347ed2ca0d61e218374fa22db3",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "girl-chibi-head-eatOnigiri-3.png",
+      "sha256": "d0e412bb1be970980260488c249e0b8b73abbaa6b346cb37ea60c180e45ff96b",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "girl-chibi-head-eatBento-3.png",
+      "sha256": "db1220c658d3e989c1c0d0d137587425cbddeb5608502a931380ab0983d34d76",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "boy-big-head-idle-0.png",
+      "sha256": "17e461427e2a26cf2bc6686ec3617642c74d29540ecc7166734931d2a0142ce3",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "boy-big-head-walk-2.png",
+      "sha256": "10d4efc0a766bcc03db477379b43968d32b922de626b5cbd72220e46aa68eff2",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "boy-chibi-head-idle-0.png",
+      "sha256": "7395f4685a1a3c5fe318976214c426b7ea2da8f149446f3e4659b1bf11bd3e99",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "boy-chibi-head-greet-2.png",
+      "sha256": "1430573a9a21caa58c682b639e1305a795c1d0d25e169586617fbd5642dd677f",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "boy-chibi-head-celebrate-2.png",
+      "sha256": "76b73f1dba56993a9158048452bdf90656eb60498280ea5a87af2aab8c7bc5b4",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "boy-chibi-head-eat-3.png",
+      "sha256": "62ed40a4802f19e7efbe300d867b99abb68ba957507c81557d4af74875cff34d",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "boy-chibi-head-eatOnigiri-3.png",
+      "sha256": "be7a185a32a0ae28a70e8827829cf9d88f3a169ded9379263615f70dc5634f7a",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "boy-chibi-head-eatBento-3.png",
+      "sha256": "7e10f80b11c04558ced55e8ffc8bbaf236db469a14b6e205bed728e5045488ae",
+      "tiles": 9,
+      "reviewer": "avatar_ui",
+      "status": "approved"
+    },
+    {
+      "file": "girl-eat-frames.png",
+      "sha256": "4619eb9c8dd870a82560f8fc07e36e46a15be49000cf087d744dd0088917736f",
+      "tiles": 8,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    },
+    {
+      "file": "girl-eat-clothing.png",
+      "sha256": "8038e53e1d38c6229cec2db520f08da3c177729343f2dc471044642e34441ca3",
+      "tiles": 12,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    },
+    {
+      "file": "girl-eatOnigiri-frames.png",
+      "sha256": "54b2b11131e8a3c742ca60b07d67fd851ced110fc3e7116add9cf33cf5c5607d",
+      "tiles": 8,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    },
+    {
+      "file": "girl-eatOnigiri-clothing.png",
+      "sha256": "9495bf1a3804f88655318f22fa757f94c908756f262e7ee36efc399ab84bb5c6",
+      "tiles": 12,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    },
+    {
+      "file": "girl-eatBento-frames.png",
+      "sha256": "81da91377fd1e9fcb792ce715dd4104406fda84667ceb77773e3eb37524a6f8f",
+      "tiles": 8,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    },
+    {
+      "file": "girl-eatBento-clothing.png",
+      "sha256": "4ddf9b0a237610017d2d5342aead0785f21292d0a37cdb7eff509d5a9a97d336",
+      "tiles": 12,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    },
+    {
+      "file": "boy-eat-frames.png",
+      "sha256": "f8966b8acd6954f66f9237998be35f55b6f20840fb02d21ae92f8ac00e78dfe4",
+      "tiles": 8,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    },
+    {
+      "file": "boy-eat-clothing.png",
+      "sha256": "88ad1ce00933d656f376e5ff9b84c59967172fc918de6fa89fdfa4aade953445",
+      "tiles": 12,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    },
+    {
+      "file": "boy-eatOnigiri-frames.png",
+      "sha256": "e0c611d2a0e76332e87911ffb2e91424db3ebdd2fe4a69f2c44e18b729db5a82",
+      "tiles": 8,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    },
+    {
+      "file": "boy-eatOnigiri-clothing.png",
+      "sha256": "28463589bab0bfa30ec8b5158b05a80ca32c19bcb7826cb24dbc5fbcc3c65d5b",
+      "tiles": 12,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    },
+    {
+      "file": "boy-eatBento-frames.png",
+      "sha256": "cc1af0333a6024324ca2e3afc0192a935c9b618b123089f263522159d81264a1",
+      "tiles": 8,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    },
+    {
+      "file": "boy-eatBento-clothing.png",
+      "sha256": "4d446712489d9db6fd06dc38843c5bb6193962f0882e8a39971beddfa6e22d53",
+      "tiles": 12,
+      "reviewer": "/root/learning_repo_read",
+      "status": "approved"
+    }
+  ],
+  "observations": [
+    "Girl bob and ponytail hair contours remain connected to their head silhouettes in idle, walk, greeting, celebration and the three eating samples.",
+    "Glasses frames align with open and closed eyes in both collections; no opaque lens fill obscures the expressions.",
+    "Headphone bands follow the crown and cups sit at the ear area in both sizes; raised hands and food gestures overlap them plausibly.",
+    "Ramen, onigiri and bento samples preserve the head/accessory fit and show distinct eating props. Chibi previews remain upper-body busts."
+  ],
+  "resolvedFindings": [
+    {
+      "issue": "Bare far arm protruded past a long sleeve during the onigiri bite",
+      "status": "resolved",
+      "verification": "Reviewed both collections, all 8 meal frames and all 3 top × 4 jacket bite poses; no skin elbow stub remains."
+    }
+  ],
+  "unresolved": [],
+  "limits": [
+    "Only the listed 28 sheet hashes and 264 tiles are visually approved.",
+    "All eight frames of three meal actions and every top/jacket bite combination were inspected for both collections. Head fit is sampled at the recorded poses.",
+    "Fixed peach skin, espresso hair and hazel eyes; hats, bags, alternative palettes and complete outfit permutations are outside this focused pass.",
+    "Six GIFs are generated from the reviewed meal frames; interactive animation playback is covered separately by browser checks.",
+    "No physical-device validation. Earlier v4 audit approvals remain historical and do not apply to this revision."
+  ]
+}

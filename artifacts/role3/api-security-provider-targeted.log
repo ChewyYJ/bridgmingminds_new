@@ -1,0 +1,224 @@
+TAP version 13
+# Subtest: two real users join a private room, alternate all rounds and keep a shared conversation
+ok 1 - two real users join a private room, alternate all rounds and keep a shared conversation
+  ---
+  duration_ms: 299.9585
+  type: 'test'
+  ...
+# Subtest: concurrent joins choose one participant and duplicated/stale turns cannot skip the turn order
+ok 2 - concurrent joins choose one participant and duplicated/stale turns cannot skip the turn order
+  ---
+  duration_ms: 232.1922
+  type: 'test'
+  ...
+# Subtest: only explicitly shared recordings become playable by the other participant
+ok 3 - only explicitly shared recordings become playable by the other participant
+  ---
+  duration_ms: 242.9293
+  type: 'test'
+  ...
+# Subtest: deleting an account erases its shared contributions, closes rooms and preserves the friend’s own text
+ok 4 - deleting an account erases its shared contributions, closes rooms and preserves the friend’s own text
+  ---
+  duration_ms: 204.7162
+  type: 'test'
+  ...
+# Subtest: rooms survive restart, either participant can close, and waiting/active invitations expire
+ok 5 - rooms survive restart, either participant can close, and waiting/active invitations expire
+  ---
+  duration_ms: 254.4181
+  type: 'test'
+  ...
+# Subtest: invite guesses are bounded and bad input never creates rooms or turns
+ok 6 - invite guesses are bounded and bad input never creates rooms or turns
+  ---
+  duration_ms: 213.9236
+  type: 'test'
+  ...
+# Subtest: malformed invite bodies are rejected without a server error or membership changes
+ok 7 - malformed invite bodies are rejected without a server error or membership changes
+  ---
+  duration_ms: 182.2329
+  type: 'test'
+  ...
+# Subtest: turn text uses the same Unicode character boundaries as the editor and rejects malformed Unicode
+ok 8 - turn text uses the same Unicode character boundaries as the editor and rejects malformed Unicode
+  ---
+  duration_ms: 182.1181
+  type: 'test'
+  ...
+# Subtest: distinct simultaneous turn keys and closing cannot create extra turns
+ok 9 - distinct simultaneous turn keys and closing cannot create extra turns
+  ---
+  duration_ms: 187.4281
+  type: 'test'
+  ...
+# Subtest: shared audio capabilities are narrow, expire and can be refreshed after restart without losing text
+ok 10 - shared audio capabilities are narrow, expire and can be refreshed after restart without losing text
+  ---
+  duration_ms: 190.0019
+  type: 'test'
+  ...
+# Subtest: guest upgrade and a new login retain friend access while creator deletion closes and anonymizes the room
+ok 11 - guest upgrade and a new login retain friend access while creator deletion closes and anonymizes the room
+  ---
+  duration_ms: 250.5889
+  type: 'test'
+  ...
+# Subtest: configured evaluation sends saved context, validates evidence, and keeps provider secrets off client data
+ok 12 - configured evaluation sends saved context, validates evidence, and keeps provider secrets off client data
+  ---
+  duration_ms: 279.4543
+  type: 'test'
+  ...
+# Subtest: health reports configuration separately from live verification without a provider call
+ok 13 - health reports configuration separately from live verification without a provider call
+  ---
+  duration_ms: 172.841
+  type: 'test'
+  ...
+# Subtest: whitespace-only key keeps local feedback and configuration errors cannot spend provider requests
+ok 14 - whitespace-only key keeps local feedback and configuration errors cannot spend provider requests
+  ---
+  duration_ms: 181.5463
+  type: 'test'
+  ...
+# Subtest: invalid configuration cannot exhaust retries; fixing settings recovers the same saved answer
+ok 15 - invalid configuration cannot exhaust retries; fixing settings recovers the same saved answer
+  ---
+  duration_ms: 214.0049
+  type: 'test'
+  ...
+# Subtest: a durable queued job blocked by changed configuration preserves its provider retry budget
+ok 16 - a durable queued job blocked by changed configuration preserves its provider retry budget
+  ---
+  duration_ms: 230.4378
+  type: 'test'
+  ...
+# Subtest: five actual provider failures still cap paid requests across restarts and model changes
+ok 17 - five actual provider failures still cap paid requests across restarts and model changes
+  ---
+  duration_ms: 277.444
+  type: 'test'
+  ...
+# Subtest: legacy model override evaluates without unsupported reasoning parameters
+ok 18 - legacy model override evaluates without unsupported reasoning parameters
+  ---
+  duration_ms: 170.1782
+  type: 'test'
+  ...
+# Subtest: bad provider credentials retain work with actionable errors instead of silently falling back
+ok 19 - bad provider credentials retain work with actionable errors instead of silently falling back
+  ---
+  duration_ms: 184.2943
+  type: 'test'
+  ...
+# [assessment-failed] 420ff87a-7fb8-4010-b106-c47dc25d8422 quote_missing
+# Subtest: configured evaluation rejects invented evidence, retains the answer, and recovers without duplicate rewards
+ok 20 - configured evaluation rejects invented evidence, retains the answer, and recovers without duplicate rewards
+  ---
+  duration_ms: 187.2761
+  type: 'test'
+  ...
+# [assessment-failed] f33f6d6f-b093-47a6-80ea-88e31c717f77 invalid_shape
+# Subtest: configured evaluation rejects missing dimensions, retains the answer, and recovers without duplicate rewards
+ok 21 - configured evaluation rejects missing dimensions, retains the answer, and recovers without duplicate rewards
+  ---
+  duration_ms: 194.93
+  type: 'test'
+  ...
+# [assessment-failed] 87723b17-72be-431f-a531-b97ccff4b5ec invalid_json
+# Subtest: configured evaluation rejects malformed JSON, retains the answer, and recovers without duplicate rewards
+ok 22 - configured evaluation rejects malformed JSON, retains the answer, and recovers without duplicate rewards
+  ---
+  duration_ms: 182.6138
+  type: 'test'
+  ...
+# Subtest: configured evaluation rejects provider HTTP failure, retains the answer, and recovers without duplicate rewards
+ok 23 - configured evaluation rejects provider HTTP failure, retains the answer, and recovers without duplicate rewards
+  ---
+  duration_ms: 162.052
+  type: 'test'
+  ...
+# Subtest: configured debate preserves rejected turns, retries once, and sends proposition and conversation context
+ok 24 - configured debate preserves rejected turns, retries once, and sends proposition and conversation context
+  ---
+  duration_ms: 122.1398
+  type: 'test'
+  ...
+# Subtest: configured transcription sends only an owned recording and preserves it through failures and correction
+ok 25 - configured transcription sends only an owned recording and preserves it through failures and correction
+  ---
+  duration_ms: 127.8205
+  type: 'test'
+  ...
+# Subtest: late transcription cannot overwrite a corrected transcript saved by another request
+ok 26 - late transcription cannot overwrite a corrected transcript saved by another request
+  ---
+  duration_ms: 113.0511
+  type: 'test'
+  ...
+# Subtest: late transcription cannot overwrite a completed evaluation saved by another request
+ok 27 - late transcription cannot overwrite a completed evaluation saved by another request
+  ---
+  duration_ms: 115.328
+  type: 'test'
+  ...
+# [assessment-failed] 6f6d59ad-7a13-4fba-b9d8-b849ad083d31 invalid_shape
+# Subtest: historical raw schema failures are safely projected without rewriting data or retry counts
+ok 28 - historical raw schema failures are safely projected without rewriting data or retry counts
+  ---
+  duration_ms: 133.1892
+  type: 'test'
+  ...
+# Subtest: quote-only feedback derives exact spans, logs only safe failure reasons, and retries once without duplicate rewards
+ok 29 - quote-only feedback derives exact spans, logs only safe failure reasons, and retries once without duplicate rewards
+  ---
+  duration_ms: 127.2323
+  type: 'test'
+  ...
+# Subtest: reflection is optional, separate, editable before feedback and persisted/exported with its owner
+ok 30 - reflection is optional, separate, editable before feedback and persisted/exported with its owner
+  ---
+  duration_ms: 295.5552
+  type: 'test'
+  ...
+# Subtest: reflection validates its own 2000-character limit and cannot mutate response text
+ok 31 - reflection validates its own 2000-character limit and cannot mutate response text
+  ---
+  duration_ms: 215.127
+  type: 'test'
+  ...
+# Subtest: reflection freezes when queued/processing/completed but can be revised after failed evaluation
+ok 32 - reflection freezes when queued/processing/completed but can be revised after failed evaluation
+  ---
+  duration_ms: 220.5488
+  type: 'test'
+  ...
+# Subtest: deferred debate persists one draft through duplicate/restart recovery and evaluates only explicitly
+ok 33 - deferred debate persists one draft through duplicate/restart recovery and evaluates only explicitly
+  ---
+  duration_ms: 256.5444
+  type: 'test'
+  ...
+# Subtest: reflection never reaches configured evaluation prompts or evidence in any mode
+ok 34 - reflection never reaches configured evaluation prompts or evidence in any mode
+  ---
+  duration_ms: 236.3132
+  type: 'test'
+  ...
+# Subtest: a failed final debate turn retains its defer choice when retried without the optional flag
+ok 35 - a failed final debate turn retains its defer choice when retried without the optional flag
+  ---
+  duration_ms: 218.6838
+  type: 'test'
+  ...
+1..35
+# tests 35
+# suites 0
+# pass 35
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3394.5303

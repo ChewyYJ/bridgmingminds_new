@@ -14,6 +14,8 @@ const tables = new Set([
   "friend_members", "friend_turns", "named_locks", "rate_limits", "deletion_outbox",
   "practice_usage", "user_vocabulary", "vocabulary_exposures", "vocabulary_observations", "vocabulary_reviews", "wordbloom_processed_attempts", "speech_jobs", "vocabulary_pronunciation",
   "daily_attempt_receipts", "daily_activity_completions", "daily_workout_days", "skill_observations",
+  "economy_accounts", "legacy_currency_archives", "coin_ledger", "economy_streak_days",
+  "avatar_item_catalog", "avatar_profiles", "avatar_inventory", "achievement_grants", "food_transactions",
 ]);
 
 /** Convert only SQL code, never quoted values or comments, to the cloud dialect. */

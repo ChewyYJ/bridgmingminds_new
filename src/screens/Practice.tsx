@@ -30,6 +30,7 @@ import {
 } from "../lib/api";
 import { useApp } from "../lib/state";
 import { DailySpeaking } from "./DailySpeaking";
+import { ConfirmedUnlocks } from "../role3/ConfirmedUnlocks";
 import { Article, Attempt, Job, Mode, Prompt, Session } from "../types";
 import {
   Button,
@@ -58,7 +59,7 @@ import AudioInput, {
 
 const names: Record<Mode, string> = {
   spin_speak: "Spin & Speak",
-  debate: "Debate Garden",
+  debate: "AI Debate",
   read_reflect: "Read & Reflect",
 };
 const categories = [
@@ -2064,10 +2065,10 @@ function FeedbackContent({
           </ThoughtGuide>
           {attempt.rewards && (
             <View style={s.rewardStrip}>
-              <Text style={T.label}>GARDEN REWARDS</Text>
+              <Text style={T.label}>LEARNING REWARDS</Text>
               <View style={s.chips}>
                 {Object.entries(attempt.rewards)
-                  .filter(([, value]) => typeof value === "number" && value > 0)
+                  .filter((entry): entry is [string, number] => ["coins", "xp"].includes(entry[0]) && typeof entry[1] === "number" && entry[1] > 0)
                   .map(([key, value]) => (
                     <MotionPulse
                       key={key}
@@ -2079,9 +2080,7 @@ function FeedbackContent({
                       <Icon
                         name={
                           {
-                            seeds: "feather",
-                            water: "droplet",
-                            sunlight: "sun",
+                            coins: "circle",
                             xp: "zap",
                           }[key] || "gift"
                         }
@@ -2096,8 +2095,8 @@ function FeedbackContent({
                         +{value}{" "}
                         {key === "xp"
                           ? "XP"
-                          : key === "seeds" && value === 1
-                            ? "seed"
+                          : key === "coins"
+                            ? "Coins"
                             : key}
                       </Text>
                     </MotionPulse>
@@ -2110,9 +2109,10 @@ function FeedbackContent({
                   ? "Earned for practice, regardless of ratings."
                   : "Practice saved. Eligible rewards already earned."}
               </Text>
+              <ConfirmedUnlocks receipt={attempt.rewards.reward} />
               <Button
-                label="Open Homeland"
-                icon="feather"
+                label="View my avatar"
+                icon="user"
                 variant="ghost"
                 onPress={onGarden}
               />

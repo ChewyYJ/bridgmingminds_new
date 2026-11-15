@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, useWindowDimensions } from "react-native";
+import { View, Text, ImageBackground, ScrollView, useWindowDimensions } from "react-native";
 import { C, T, Button, Field, ErrorNote } from "../components/ui";
-import { GardenScene, BridgingMindsMark } from "../components/art";
+import { BridgingMindsMark } from "../components/art";
+import { LayeredAvatar } from "../avatar/LayeredAvatar";
+import { defaultSelection } from "../avatar/pack";
 import { MotionView } from "../components/Motion";
 import { api, storeToken } from "../lib/api";
 import { AppState } from "../types";
@@ -95,7 +97,7 @@ export function Onboarding({
         <View
           style={{
             flex: 1,
-            backgroundColor: "#E9EEDC",
+            backgroundColor: C.sage,
             padding: width > 800 ? 55 : 26,
             justifyContent: "center",
             gap: 20,
@@ -108,9 +110,12 @@ export function Onboarding({
           <MotionView
             distance={10}
             duration={500}
-            testID="welcome-garden-motion"
+            testID="welcome-avatar-motion"
           >
-            <GardenScene variant="welcome" height={width > 800 ? 340 : 210} />
+            <ImageBackground source={require("../../assets/role3/debate-street.png")} resizeMode="cover"
+              style={{ height: width > 800 ? 340 : 210, justifyContent: "flex-end", alignItems: "center", overflow: "hidden", borderRadius: 16 }}>
+              <LayeredAvatar selection={defaultSelection("girl")} variant="big" animation="idle" scale={width > 800 ? 0.72 : 0.48} />
+            </ImageBackground>
           </MotionView>
         </View>
         <View
@@ -131,7 +136,7 @@ export function Onboarding({
                 Explore an idea. Find your words. Try a new perspective.
               </Text>
               <Text style={[T.small, { color: C.forest }]}>
-                Every practice grows your garden.
+                Build your voice, earn Coins and make your avatar your own.
               </Text>
               <Button
                 label="Try as guest"
@@ -264,7 +269,7 @@ export function Onboarding({
                 )}
               </View>
               <Button
-                label="Grow my garden"
+                label="Start learning"
                 icon="arrow-right"
                 loading={busy}
                 disabled={interests.length < 2 || interests.length > 5}

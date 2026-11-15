@@ -86,7 +86,7 @@ async function fixture(t, options = {}) {
   }
   t.after(async () => {
     await new Promise((r) => server.close(r));
-    service.close();
+    await service.close();
     rmSync(dir, { recursive: true, force: true });
   });
   return {
@@ -104,7 +104,7 @@ async function fixture(t, options = {}) {
     dir,
     async restart(opts = {}) {
       await new Promise((r) => server.close(r));
-      service.close();
+      await service.close();
       service = createApp({
         dbPath: join(dir, "garden.sqlite"),
         storageDir: join(dir, "audio"),
@@ -120,7 +120,7 @@ async function fixture(t, options = {}) {
   };
 }
 
-test("new learner completes onboarding, all modes, journal, growth, and synchronized login", async (t) => {
+test("new learner completes onboarding, all modes, journal, Coins, and synchronized login", async (t) => {
   const f = await fixture(t);
   const token = await f.guest();
   assert.equal(
@@ -233,27 +233,17 @@ test("new learner completes onboarding, all modes, journal, growth, and synchron
         body: { plotId: "plot-1", plantType: "daisy" },
       })
     ).status,
-    200,
+    410,
   );
-  for (let i = 0; i < 3; i++)
-    assert.equal(
-      (
-        await f.request("/garden/water", {
-          token,
-          method: "POST",
-          body: { plotId: "plot-1", idempotencyKey: `watering-${i}` },
-        })
-      ).status,
-      200,
-    );
   const state = (await f.request("/state", { token })).data;
-  assert.equal(state.plots[0].growth, 3);
+  assert.equal(state.wallet.coins, 3);
+  assert.equal(state.gamification.avatar.ownedItemIds.length > 0, true);
   assert.equal(
     state.attempts.filter((a) => a.status === "completed").length,
     3,
   );
   assert.equal(state.streak, 1);
-  assert.equal(state.quests.filter((q) => q.completed).length, 3);
+  assert.deepEqual(state.quests, []);
   const signup = await f.request("/auth/register", {
     token,
     method: "POST",
@@ -267,8 +257,8 @@ test("new learner completes onboarding, all modes, journal, growth, and synchron
   });
   assert.equal(login.status, 200);
   assert.deepEqual(
-    (await f.request("/state", { token: login.data.token })).data.plots,
-    state.plots,
+    (await f.request("/state", { token: login.data.token })).data.gamification.avatar,
+    state.gamification.avatar,
   );
   assert.equal(
     (
@@ -281,7 +271,7 @@ test("new learner completes onboarding, all modes, journal, growth, and synchron
   );
 });
 
-test("idempotent concurrent evaluation, retries, duplicate content and garden transactions cannot mint resources", async (t) => {
+test("idempotent concurrent evaluation, retries, duplicate content and retired garden cannot mint Coins", async (t) => {
   const f = await fixture(t);
   const token = await f.guest();
   const session = await f.session(token);
@@ -298,8 +288,7 @@ test("idempotent concurrent evaluation, retries, duplicate content and garden tr
   assert.equal(new Set(jobs.map((j) => j.data.id)).size, 1);
   await Promise.all([f.service.runJobs(), f.service.runJobs()]);
   const before = (await f.request("/state", { token })).data;
-  assert.equal(before.wallet.seeds, 2);
-  assert.equal(before.wallet.water, 5);
+  assert.deepEqual(before.wallet, { coins: 0 });
   await f.complete(token, answer);
   assert.deepEqual(
     (await f.request("/state", { token })).data.wallet,
@@ -322,8 +311,8 @@ test("idempotent concurrent evaluation, retries, duplicate content and garden tr
       { retryOf: answer.id },
     ),
   );
-  assert.equal(retry.rewards.sunlight, 3);
-  assert.equal(retry.rewards.seeds, 0);
+  assert.equal(retry.rewards.coins, 0);
+  assert.equal(retry.rewards.xp, 0);
   const beforeSecond = (await f.request("/state", { token })).data.wallet;
   await f.complete(
     token,
@@ -342,9 +331,8 @@ test("idempotent concurrent evaluation, retries, duplicate content and garden tr
       }),
     ),
   );
-  assert.equal(plants.filter((r) => r.status === 200).length, 1);
-  const waterBefore = (await f.request("/state", { token })).data.wallet.water;
-  await Promise.all(
+  assert.ok(plants.every(r => r.status === 410));
+  const waterResults = await Promise.all(
     Array.from({ length: 4 }, () =>
       f.request("/garden/water", {
         token,
@@ -354,8 +342,9 @@ test("idempotent concurrent evaluation, retries, duplicate content and garden tr
     ),
   );
   const after = (await f.request("/state", { token })).data;
-  assert.equal(after.plots[0].growth, 1);
-  assert.equal(after.wallet.water, waterBefore - 1);
+  assert.ok(waterResults.every(r => r.status === 410));
+  assert.equal(after.plots[0].growth, 0);
+  assert.deepEqual(after.wallet, before.wallet);
 });
 
 test("authentication, cross-user isolation, secure audio, reports, export and cascading deletion", async (t) => {
@@ -531,7 +520,7 @@ test("evaluation failures retain the answer, reject invented quotes, and recover
   const failed = await f.complete(token, answer);
   assert.equal(failed.status, "failed");
   assert.equal(failed.text, answer.text);
-  assert.equal((await f.request("/state", { token })).data.wallet.seeds, 1);
+  assert.equal((await f.request("/state", { token })).data.wallet.coins, 0);
   await f.restart({
     evaluator: (a, s) => {
       const result = localEvaluation(a, s);
@@ -563,7 +552,7 @@ test("evaluation failures retain the answer, reject invented quotes, and recover
   const completed = (await f.request(`/attempts/${answer.id}`, { token })).data;
   assert.equal(completed.status, "completed");
   assert.equal(completed.text, answer.text);
-  assert.equal((await f.request("/state", { token })).data.wallet.seeds, 2);
+  assert.equal((await f.request("/state", { token })).data.wallet.coins, 0);
 });
 
 test("debate duplicate turns are idempotent and completed session cannot acquire extra rounds", async (t) => {
@@ -625,7 +614,7 @@ test("debate duplicate turns are idempotent and completed session cannot acquire
   assert.equal((await f.request("/state", { token })).data.attempts.length, 1);
 });
 
-test("daily resource caps leave practice available and reward spending never changes assessments", async (t) => {
+test("classic practice and retries remain available without farming; retired spending cannot change assessments", async (t) => {
   const f = await fixture(t);
   const token = await f.guest();
   const catalogue = (await f.request("/prompts?mode=spin_speak", { token }))
@@ -642,9 +631,9 @@ test("daily resource caps leave practice available and reward spending never cha
   }
   const state = (await f.request("/state", { token })).data;
   assert.equal(state.attempts.length, 11);
-  assert.equal(state.wallet.seeds, 11); // starter seed + first ten different challenges
-  assert.equal(completed[10].attempt.rewards.seeds, 0);
-  const before = state.wallet.sunlight;
+  assert.equal(state.wallet.coins, 0); // Rewards belong to validated daily and Role 3 activities.
+  assert.equal(completed[10].attempt.rewards.coins, 0);
+  const before = state.wallet.coins;
   for (const { session, attempt } of completed.slice(0, 4)) {
     await f.complete(
       token,
@@ -652,7 +641,7 @@ test("daily resource caps leave practice available and reward spending never cha
     );
   }
   const after = (await f.request("/state", { token })).data;
-  assert.equal(after.wallet.sunlight, before + 7); // three retries * 2 and first daily retry quest
+  assert.equal(after.wallet.coins, before);
   const evaluation = completed[0].attempt.evaluation;
   await f.request("/garden/plant", {
     token,
@@ -777,13 +766,8 @@ test("practice rhythm includes rewarded and unrewarded retries, uses local Monda
     days: ["2026-11-01"],
     target: 3,
   });
-  assert.equal(sunday.streak, 1);
-  assert.deepEqual(sunday.quests.find((q) => q.mode === "retry").reward, {
-    seeds: 0,
-    water: 1,
-    sunlight: 1,
-    xp: 10,
-  });
+  assert.equal(sunday.streak, 0); // Classic practice counts in practiceWeek, not the eligible reward streak.
+  assert.deepEqual(sunday.quests, []);
   // Monday UTC is still Sunday locally; the week must not reset prematurely.
   t.mock.timers.setTime(new Date("2026-11-02T04:30:00Z").getTime());
   assert.deepEqual(
@@ -796,11 +780,10 @@ test("practice rhythm includes rewarded and unrewarded retries, uses local Monda
     await f.attempt(token, session, undefined, { retryOf: firstRetry.id }),
   );
   const monday = (await f.request("/state", { token })).data;
-  assert.equal(mondayRetry.rewards.seeds, 0);
-  assert.equal(mondayRetry.rewards.sunlight, 1); // Existing first daily quest only.
-  assert.equal(mondayRetry.rewards.xp, 10);
+  assert.equal(mondayRetry.rewards.coins, 0);
+  assert.equal(mondayRetry.rewards.xp, 0);
   assert.deepEqual(monday.practiceWeek.days, ["2026-11-02"]);
-  assert.equal(monday.streak, 2);
+  assert.equal(monday.streak, 0);
   t.mock.timers.setTime(new Date("2026-11-03T05:15:00Z").getTime());
   await f.complete(
     token,
@@ -813,7 +796,7 @@ test("practice rhythm includes rewarded and unrewarded retries, uses local Monda
   assert.equal(duplicate.rewards.xp, 0);
   const tuesday = (await f.request("/state", { token })).data;
   assert.deepEqual(tuesday.practiceWeek.days, ["2026-11-02", "2026-11-03"]);
-  assert.equal(tuesday.streak, 3);
+  assert.equal(tuesday.streak, 0);
   // Persist a future completion, then verify it cannot inflate today's count.
   t.mock.timers.setTime(new Date("2026-11-04T05:15:00Z").getTime());
   await f.complete(
@@ -825,7 +808,7 @@ test("practice rhythm includes rewarded and unrewarded retries, uses local Monda
     (await f.request("/state", { token })).data.practiceWeek,
     tuesday.practiceWeek,
   );
-  assert.equal((await f.request("/state", { token })).data.streak, 3);
+  assert.equal((await f.request("/state", { token })).data.streak, 0);
   await f.restart();
   assert.deepEqual(
     (await f.request("/export", { token })).data.practiceWeek,
@@ -1176,5 +1159,6 @@ test("local background worker completes a queued practice without manual polling
   } while (Date.now() < deadline);
   assert.equal(saved.data.status, "completed");
   assert.ok(saved.data.evaluation);
-  assert.equal(saved.data.rewards.xp, 30);
+  assert.equal(saved.data.rewards.xp, 0);
+  assert.equal(saved.data.rewards.coins, 0);
 });

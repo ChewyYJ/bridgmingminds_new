@@ -1,4 +1,6 @@
-# MindGarden practice and garden loop
+# Historical: MindGarden practice and garden loop
+
+This document describes the retired garden design. The active app now uses Coins, avatar care and Debate Street. See [the current economy](gamification-economy-v1.md) and [Role 3 implementation](role3-implementation.md) for current behavior. Garden transactions return HTTP 410; legacy balances and history are retained for migration and export.
 
 This is a small, testable product design, not evidence that gamification improves learning or retention. The garden makes participation visible. GROW feedback supplies a specific idea to revisit. Neither garden rewards nor the weekly intention claims to measure ability.
 

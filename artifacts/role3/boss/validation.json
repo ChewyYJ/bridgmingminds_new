@@ -1,0 +1,63 @@
+{
+  "exportId": "443bed74aebbdfe2acf96ac688f523fb",
+  "checkedAt": "2026-11-15T17:00:20.9846367Z",
+  "browserGate": {
+    "externalRequests": 0,
+    "port": 3026,
+    "failed": 0,
+    "config": "tests/role3-boss.config.ts",
+    "provider": "Explicit test-only mocked transport; real backend schema/evidence validation and deterministic outcomes",
+    "durationSeconds": 4.2,
+    "passed": 1
+  },
+  "coverage": [
+    "All 9 learner turns through the UI across 3 tournament matches",
+    "Chair Lin final boss, quote-anchored evidence, persisted win and completed cup",
+    "History reopen and idempotent completion reward retry",
+    "Mobile and desktop layouts, decoded sprite assets and no horizontal overflow"
+  ],
+  "visualFindings": [
+    "Short housing motion fits three lines in mobile match card",
+    "Portrait bars align; Turn 1/3 and Final - Match 3 distinguish progress",
+    "Laurel icons and reward cards render cleanly",
+    "Zero-reward receipt explicitly states daily reward limit reached"
+  ],
+  "unresolvedIssues": [],
+  "screenshots": [
+    {
+      "file": "tournament-lobby-mobile.png",
+      "sha256": "76b5e88e1f7eec324a88555da506624af2af08cd0590815312a6dfaf7d5f2932",
+      "visuallyReviewed": true
+    },
+    {
+      "file": "tournament-lobby-desktop.png",
+      "sha256": "7082e4cc83268d9dd7dee1b470dc55093414512a3e9eb72504ae8d7b36e3efa5",
+      "visuallyReviewed": true
+    },
+    {
+      "file": "victory-mobile.png",
+      "sha256": "641aed2981e7e51ffa0507daa24f95ab6a0534e62ac40e474e470cbecaf6d30b",
+      "visuallyReviewed": true
+    },
+    {
+      "file": "boss-preparation-mobile.png",
+      "sha256": "57a74530918cf5cc8aff057f6dab41edeccaca918c0ce2b10e5220196e706451",
+      "visuallyReviewed": true
+    },
+    {
+      "file": "boss-match-mobile.png",
+      "sha256": "127d37366c196efb93a3379f0949fc2eb4beff969ad5c1dc233b7a531fe955b5",
+      "visuallyReviewed": true
+    },
+    {
+      "file": "boss-victory-mobile.png",
+      "sha256": "d8a11dba119b249354c36105c4c26a30c1bee66a8010853cfdcd5fb5e3f5f8db",
+      "visuallyReviewed": true
+    },
+    {
+      "file": "boss-victory-desktop.png",
+      "sha256": "09a888c173e1e9aa910a308e6e4c8b8124f472305b77980cb726262658dad7bf",
+      "visuallyReviewed": true
+    }
+  ]
+}

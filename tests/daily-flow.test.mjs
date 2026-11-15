@@ -5,16 +5,23 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createApp } from "../server/app.mjs";
-import { plantCareStatus } from "../shared/garden-care.mjs";
+import { silentWav } from "./helpers/silent-wav.mjs";
 
 async function fixture(t, overrides = {}) {
   const directory = mkdtempSync(join(tmpdir(), "daily-flow-"));
   let clock = "2026-11-11T15:59:00Z";
+  // Keep persisted completion timestamps and the injected calendar clock aligned.
+  t.mock.timers.enable({ apis: ["Date"], now: Date.parse(clock) });
   const options = {
     dbPath: join(directory, "test.sqlite"),
     storageDir: join(directory, "audio"),
     apiKey: "",
     disableWorker: true,
+    // Isolate completion/recovery from live RSS and from curated story reuse.
+    newsService: { getFeed: async () => ({ status: 'ok', articles: Array.from({ length: 12 }, (_, index) => ({
+      id: `daily-fixture-${index}`, title: `Community research update ${index}`, source: 'Fixture editorial',
+      sourceUrl: `https://example.test/daily-${index}`, publishedAt: '2026-11-10T00:00:00Z', category: 'Science',
+    })) }) },
     dailyNow: () => new Date(clock),
     gardenNow: () => Date.parse(clock),
     ...overrides,
@@ -56,7 +63,7 @@ async function fixture(t, overrides = {}) {
     await ok(
       "/me",
       token,
-      { timezone: "Asia/Singapore", onboardingComplete: true },
+      { timezone: "Asia/Singapore", onboardingComplete: true, consent: { recording: true } },
       "PATCH",
     );
     if (enroll) await ok("/daily-workout/enroll", token, {});
@@ -64,8 +71,14 @@ async function fixture(t, overrides = {}) {
   }
   async function spin(token) {
     const session = await ok("/sessions", token, { mode: "spin_speak" });
+    const uploaded = await fetch(base + '/audio', { method: 'POST', headers: {
+      Authorization: `Bearer ${token}`, 'Content-Type': 'audio/wav',
+    }, body: silentWav() });
+    assert.equal(uploaded.status, 201);
+    const audio = await uploaded.json();
     const attempt = await ok("/attempts", token, {
       sessionId: session.id,
+      responseType: 'audio', audioId: audio.id,
       text: "Parks are useful because neighbours have a shared place to meet and exchange ideas.",
       idempotencyKey: randomUUID(),
     });
@@ -101,6 +114,7 @@ async function fixture(t, overrides = {}) {
     },
     setTime(value) {
       clock = value;
+      t.mock.timers.setTime(Date.parse(value));
     },
     async restart() {
       await new Promise((resolve) => server.close(resolve));
@@ -125,17 +139,17 @@ for (const order of ["reading-first", "speaking-first"])
     }
     let state = await f.ok("/state", token);
     assert.equal(state.dailyWorkout.completed, 1);
-    assert.equal(state.dailyWorkout.streak.securedToday, false);
-    assert.equal(state.streak, 0);
-    assert.equal(state.xp, order === "reading-first" ? 10 : 15);
+    assert.equal(state.dailyWorkout.streak.securedToday, true);
+    assert.equal(state.streak, 1);
+    assert.equal(state.xp, order === "reading-first" ? 0 : 15);
     if (order === "reading-first") {
       await f.spin(token);
       await f.service.runJobs();
     } else reading = await f.reading(token);
     state = await f.ok("/state", token);
     assert.equal(state.dailyWorkout.completed, 2);
-    assert.equal(state.xp, 25);
-    assert.equal(state.wallet.seeds, initial.wallet.seeds + 1);
+    assert.equal(state.xp, 15);
+    assert.equal(state.wallet.coins, initial.wallet.coins + 5);
     assert.equal(state.streak, 1);
     assert.equal(reading.result.evaluation.speech.status, "not_assessed");
     assert.equal(reading.result.evaluation.speech.metrics, null);
@@ -147,7 +161,7 @@ for (const order of ["reading-first", "speaking-first"])
       f.ok(path, token, reading.body),
     ]);
     assert.equal(duplicates[0].id, reading.result.id);
-    assert.equal((await f.ok("/state", token)).xp, 25);
+    assert.equal((await f.ok("/state", token)).xp, 15);
     assert.equal(
       (
         await f.request(path, token, {
@@ -172,7 +186,7 @@ for (const order of ["reading-first", "speaking-first"])
     await f.reading(token);
     await f.spin(token);
     await f.service.runJobs();
-    assert.equal((await f.ok("/state", token)).xp, 25);
+    assert.equal((await f.ok("/state", token)).xp, 15);
   });
 
 test("daily processing pins the receipt day, and a missed day preserves earned progress", async (t) => {
@@ -186,14 +200,14 @@ test("daily processing pins the receipt day, and a missed day preserves earned p
   assert.equal(state.dailyWorkout.day, "2026-11-12");
   assert.equal(state.dailyWorkout.completed, 0);
   assert.equal(state.dailyWorkout.streak.current, 1);
-  assert.equal(state.xp, 25);
+  assert.equal(state.xp, 15);
   f.setTime("2026-11-13T16:01:00Z");
   state = await f.ok("/state", token);
   assert.equal(state.dailyWorkout.streak.current, 0);
-  assert.equal(state.xp, 25);
+  assert.equal(state.xp, 15);
 });
 
-test("reading validates ownership, attestation and meaningful interaction; optional modes cannot secure a day", async (t) => {
+test("reading validates ownership and attestation; Read & Reflect earns shared progress separately from the daily checklist", async (t) => {
   const f = await fixture(t),
     token = await f.guest(),
     other = await f.guest();
@@ -244,7 +258,9 @@ test("reading validates ownership, attestation and meaningful interaction; optio
   });
   await f.ok(`/attempts/${attempt.id}/evaluate`, token, {});
   await f.service.runJobs();
-  assert.equal((await f.ok("/state", token)).xp, 0);
+  assert.equal((await f.ok("/state", token)).xp, 15);
+  assert.equal((await f.ok("/state", token)).wallet.coins, 3);
+  assert.equal((await f.ok("/state", token)).streak, 1);
   assert.equal((await f.ok("/state", token)).dailyWorkout.completed, 0);
   const legacy = await f.guest(false);
   assert.equal((await f.request("/read-aloud/assignment", legacy)).status, 409);
@@ -254,45 +270,24 @@ test("reading validates ownership, attestation and meaningful interaction; optio
   );
 });
 
-test("daily gardens survive a long break and optional watering cannot grant mastery", async (t) => {
+test("retired garden actions and optional avatar care cannot remove earned learning progress", async (t) => {
   const f = await fixture(t),
     token = await f.guest();
-  const planted = await f.ok("/garden/plant", token, {
-    plotId: "plot-1",
-    plantType: "fern",
-    idempotencyKey: randomUUID(),
-  });
-  const plant = planted.plots.find((item) => item.id === "plot-1");
-  assert.equal(plant.carePolicy, "non_punitive_v1");
+  await f.reading(token); await f.spin(token); await f.service.runJobs();
+  const before = await f.ok('/state', token);
+  await f.ok('/avatar/care', token, { careEnabled: true }, 'PATCH');
   f.setTime("2026-12-11T12:00:00Z");
   await f.restart();
   const state = await f.ok("/state", token);
-  const retained = state.plots.find((item) => item.id === "plot-1");
-  assert.equal(retained.plantId, plant.plantId);
-  assert.equal(
-    plantCareStatus(retained, Date.parse("2026-12-11T12:00:00Z")),
-    "thirsty",
-  );
-  const watered = await f.ok("/garden/water", token, {
-    plotId: plant.id,
-    plantId: plant.plantId,
-    idempotencyKey: randomUUID(),
-  });
-  assert.equal(watered.wallet.water, state.wallet.water);
-  assert.equal(watered.xp, state.xp);
-  assert.equal(watered.plots[0].growth, plant.growth);
-  f.setTime("2027-01-11T12:00:00Z");
-  const archived = await f.ok("/garden/archive", token, {
-    plotId: plant.id,
-    plantId: plant.plantId,
-    idempotencyKey: randomUUID(),
-  });
-  const restored = await f.ok("/garden/restore", token, {
-    archiveId: archived.archivedPlants[0].id,
-    plotId: "plot-1",
-    idempotencyKey: randomUUID(),
-  });
-  assert.equal(restored.plots[0].plantId, plant.plantId);
+  assert.equal(state.gamification.fullness.value, 0);
+  assert.equal(state.xp, before.xp);
+  assert.deepEqual(state.wallet, before.wallet);
+  for (const action of ['plant','water','archive','restore'])
+    assert.equal((await f.request(`/garden/${action}`, token, { plotId: 'plot-1', idempotencyKey: randomUUID() })).status, 410);
+  await f.spin(token); await f.service.runJobs();
+  const after = await f.ok('/state', token);
+  assert.equal(after.xp, before.xp + 15);
+  assert.equal(after.wallet.coins, before.wallet.coins + 2);
 });
 
 test("the production guest limit remains 30 per hour despite the isolated browser-test override", async (t) => {
@@ -315,13 +310,17 @@ test("job polling recovers delayed local scheduling without duplicate daily rewa
   assert.equal((await f.ok("/state", token)).xp, 15);
 });
 
-test("enrollment preserves historical XP and plant growth without retroactive daily credit", async (t) => {
+test("enrollment preserves imported historical XP and garden artwork without retroactive daily credit", async (t) => {
   const f = await fixture(t);
   const token = await f.guest(false);
-  await f.spin(token); await f.service.runJobs();
-  const planted = await f.ok("/garden/plant", token, { plotId: "plot-1", plantType: "fern", idempotencyKey: randomUUID() });
-  const plant = planted.plots[0];
-  const before = await f.ok("/garden/water", token, { plotId: plant.id, plantId: plant.plantId, idempotencyKey: randomUUID() });
+  // This represents a saved pre-retirement account, not a bypass of a current
+  // planting endpoint. Those endpoints are intentionally unavailable.
+  const owner = f.service.db.prepare('SELECT id FROM users').get();
+  const plant = { id: 'plot-1', plantId: randomUUID(), plantType: 'fern', growth: 1,
+    plantedAt: '2026-10-01T00:00:00Z', waterDueAt: '2026-10-03T00:00:00Z' };
+  f.service.db.prepare('UPDATE users SET xp=?,wallet=?,plots=? WHERE id=?').run(30,
+    JSON.stringify({ seeds: 4, water: 2, sunlight: 3 }), JSON.stringify([plant]), owner.id);
+  const before = await f.ok('/state', token);
   assert.equal(before.plots[0].growth, 1);
   assert.equal(before.xp, 30);
   f.setTime("2026-12-11T12:00:00Z");
@@ -332,7 +331,6 @@ test("enrollment preserves historical XP and plant growth without retroactive da
   assert.deepEqual(after.wallet, before.wallet);
   assert.equal(after.plots[0].plantId, before.plots[0].plantId);
   assert.equal(after.plots[0].growth, before.plots[0].growth);
-  assert.equal(after.plots[0].carePolicy, "non_punitive_v1");
   assert.equal(after.dailyWorkout.completed, 0);
   assert.equal(after.dailyWorkout.streak.securedToday, false);
   assert.equal(after.attempts.length, before.attempts.length);

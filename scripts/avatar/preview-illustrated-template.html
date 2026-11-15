@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BridgingMinds · Illustrated avatar studio</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #242424; background: #fff; font: 15px/1.5 system-ui, sans-serif; }
+    main { max-width: 1160px; margin: auto; padding: 32px 22px; }
+    h1 { margin: 5px 0 10px; font-size: 32px; line-height: 1.2; letter-spacing: -.7px; }
+    h2 { margin: 0 0 12px; font-size: 19px; }
+    p { margin: 0; }
+    header { margin-bottom: 24px; }
+    .eyebrow { font-size: 11px; letter-spacing: 2px; color: #737373; }
+    .muted { color: #737373; font-size: 13px; }
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .panel { min-width: 0; border: 1px solid #e7e7e7; border-radius: 18px; padding: 22px; background: #fff; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    button, select { min-height: 44px; border: 1px solid #dedad6; border-radius: 9px; background: #fff; color: #242424; padding: 8px 12px; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { background: #ede6dd; border-color: #b8a58d; }
+    button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid #b79d78; outline-offset: 3px; }
+    button:disabled { opacity: .5; cursor: default; }
+    .primary { background: #242424; color: #fff; }
+    .stage { display: flex; align-items: flex-end; justify-content: center; gap: 14px; min-height: 430px; margin-bottom: 20px; padding: 8px 0 18px; border-bottom: 1px solid #eee; background: #fff; }
+    .figure { width: 50%; min-width: 0; text-align: center; }
+    .figure canvas { display: block; width: 100%; max-width: 256px; height: auto; margin: auto; image-rendering: pixelated; }
+    .figure.chibi { width: 44%; padding-bottom: 28px; }
+    .figure.chibi canvas { max-width: 216px; }
+    .figure p { margin-top: 8px; }
+    .figure strong { display: block; font-size: 13px; font-weight: 600; }
+    .figure .pose { display: block; min-height: 20px; font-size: 12px; color: #737373; }
+    .controls { margin-top: 14px; }
+    .hint { margin-top: 12px; color: #737373; font-size: 12px; line-height: 1.6; }
+    #items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-top: 16px; }
+    .item { min-width: 0; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 7px; }
+    .thumb { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 100px; background: #fff; border-radius: 6px; }
+    .thumb canvas { display: block; width: 88px; max-width: 100%; height: auto; image-rendering: pixelated; }
+    .thumb.tall { min-height: 132px; }
+    .item span { font-size: 12px; line-height: 1.4; }
+    .palette { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 8px; align-items: center; margin-top: 14px; }
+    select { width: 100%; min-width: 0; }
+    hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+    #none { margin-top: 12px; }
+    #status { min-height: 22px; margin-top: 12px; }
+    #motion-note { min-height: 20px; font-size: 12px; color: #737373; margin-top: 10px; }
+    .food-panel { margin-top: 22px; }
+    .food-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .food-card { margin: 0; min-width: 0; text-align: center; }
+    .food-card img { display: block; width: 128px; max-width: 100%; height: 128px; object-fit: contain; margin: 0 auto 8px; image-rendering: pixelated; }
+    .food-card strong { display: block; font-size: 14px; }
+    .food-card button { display: block; margin: 8px auto 0; font-size: 12px; padding: 8px; }
+    .food-card a { display: inline-flex; min-height: 44px; align-items: center; font-size: 12px; }
+    footer { margin-top: 22px; }
+    a { color: #655541; }
+    @media (max-width: 700px) {
+      main { padding: 22px 14px; }
+      .layout { grid-template-columns: 1fr; }
+      .panel { padding: 16px; }
+      h1 { font-size: 27px; }
+      .stage { min-height: 300px; gap: 10px; }
+      .figure.chibi { padding-bottom: 20px; }
+      .figure .pose { font-size: 11px; }
+      .thumb canvas { width: 80px; }
+      .thumb.tall { min-height: 120px; }
+      .food-grid { gap: 8px; }
+      .food-card img { height: 88px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">BRIDGINGMINDS · ILLUSTRATED AVATARS</div>
+    <h1>One look. Two expressions.</h1>
+    <p class="muted">42 designs · 3 per category in each collection</p>
+  </header>
+  <div class="layout">
+    <section class="panel" aria-labelledby="preview-title">
+      <h2 id="preview-title">Your character</h2>
+      <div class="stage">
+        <div class="figure">
+          <canvas id="big" role="img" aria-label="Taller full-body avatar preview"></canvas>
+          <p><strong>Street & wardrobe</strong><span class="pose" id="big-pose"></span></p>
+        </div>
+        <div class="figure chibi">
+          <canvas id="chibi" role="img" aria-label="Upper-body chibi avatar preview, without legs"></canvas>
+          <p><strong>Chibi · upper body</strong><span class="pose" id="chibi-pose"></span></p>
+        </div>
+      </div>
+      <div class="row" id="animations" role="group" aria-label="Animation"></div>
+      <div class="controls">
+        <p class="muted" id="food-choice-label">Food for eating</p>
+        <div class="row" id="foods" role="group" aria-labelledby="food-choice-label"></div>
+      </div>
+      <p class="hint">Walking uses the taller character. Greeting, speaking, celebrating and eating use the chibi. The other preview stays idle.</p>
+      <div class="row controls" role="group" aria-label="Playback controls">
+        <button id="left" type="button" aria-pressed="false">← Face left</button>
+        <button id="right" type="button" aria-pressed="true">Face right →</button>
+        <button id="pause" type="button">Pause</button>
+        <button id="step" type="button">Next frame</button>
+      </div>
+      <div id="motion-note" aria-live="polite"></div>
+      <div class="muted" id="frame"></div>
+    </section>
+    <section class="panel" aria-labelledby="wardrobe-title">
+      <h2 id="wardrobe-title">Build a look</h2>
+      <div class="row" id="collections" role="group" aria-label="Style collection"></div>
+      <div class="row controls" id="categories" role="group" aria-label="Wardrobe category"></div>
+      <div id="items" role="group" aria-label="Wearable choices"></div>
+      <button id="none" type="button" hidden>Remove item</button>
+      <p class="hint" id="category-note"></p>
+      <hr>
+      <label class="palette">Skin tone<select id="skin"></select></label>
+      <label class="palette">Hair colour<select id="hairColor"></select></label>
+      <label class="palette">Eye colour<select id="eyeColor"></select></label>
+      <div class="row controls">
+        <button id="reset" type="button">Reset look</button>
+        <button id="download" type="button" class="primary">Download selection JSON</button>
+      </div>
+      <div id="status" class="muted" role="status"></div>
+    </section>
+  </div>
+  <section class="panel food-panel" aria-labelledby="food-title">
+    <h2 id="food-title">Food assets</h2>
+    <div class="food-grid">
+      <figure class="food-card">
+        <img src="../../assets/avatar/food-v1/ramen.png" alt="Pixel ramen bowl" width="128" height="128">
+        <figcaption><strong>Ramen</strong><button type="button" id="preview-food-ramen" aria-label="Preview eating ramen" aria-pressed="false">Preview eating</button><a href="../../assets/avatar/food-v1/ramen.png" download="ramen.png" aria-label="Download ramen PNG">Download PNG</a></figcaption>
+      </figure>
+      <figure class="food-card">
+        <img src="../../assets/avatar/food-v1/onigiri.png" alt="Pixel onigiri" width="128" height="128">
+        <figcaption><strong>Onigiri</strong><button type="button" id="preview-food-onigiri" aria-label="Preview eating onigiri" aria-pressed="false">Preview eating</button><a href="../../assets/avatar/food-v1/onigiri.png" download="onigiri.png" aria-label="Download onigiri PNG">Download PNG</a></figcaption>
+      </figure>
+      <figure class="food-card">
+        <img src="../../assets/avatar/food-v1/bento.png" alt="Pixel bento box" width="128" height="128">
+        <figcaption><strong>Bento</strong><button type="button" id="preview-food-bento" aria-label="Preview eating bento" aria-pressed="false">Preview eating</button><a href="../../assets/avatar/food-v1/bento.png" download="bento.png" aria-label="Download bento PNG">Download PNG</a></figcaption>
+      </figure>
+    </div>
+  </section>
+  <footer class="muted">Boy and girl collections stay separate. The app preview is at Profile → My avatar. <a href="./head-food-audit/index.html">View head and food checks</a> · <a href="../../docs/avatar-modular.md">Asset documentation</a></footer>
+</main>
+<script>
+const PACK = __PACK_JSON__;
+__CUSTOMIZATION_JS__
+
+let selection = defaultAvatarSelection(PACK, 'girl');
+let category = 'hair', animation = 'idle', frame = 0, playing = true, facing = 1;
+let food = 'ramen';
+let revision = 0, last = 0, rendering = false;
+const imageCache = new Map();
+const paintTokens = new WeakMap();
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const names = { hair: 'Hair', hat: 'Hats', top: 'Tops', jacket: 'Jackets', bottom: 'Bottoms', shoes: 'Shoes', accessory: 'Accessories' };
+const actionNames = { idle: 'Idle / blink', walk: 'Walk', greet: 'Greet', speak: 'Speak', celebrate: 'Celebrate', eat: 'Eat' };
+// Matches src/avatar/food-assets.ts. Food is preview state, separate from the look.
+const FOODS = [
+  { id: 'ramen', name: 'Ramen', animation: 'eat' },
+  { id: 'onigiri', name: 'Onigiri', animation: 'eatOnigiri' },
+  { id: 'bento', name: 'Bento', animation: 'eatBento' },
+];
+const actionLabel = (action) => {
+  const entry = FOODS.find((candidate) => candidate.animation === action);
+  return entry ? 'Eating ' + entry.name : actionNames[action];
+};
+const $ = (id) => document.getElementById(id);
+const animationInfo = (action) => PACK.animations[action];
+const supportedAction = (style, requested) => (PACK.styles[style].animations || Object.keys(PACK.animations)).includes(requested) ? requested : 'idle';
+const frameIndex = (action, index) => Math.max(0, Math.trunc(Number.isFinite(index) ? index : 0)) % animationInfo(action).frames;
+
+function load(file) {
+  if (!imageCache.has(file)) {
+    const pending = new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => image.decode().then(() => resolve(image), () => { imageCache.delete(file); reject(new Error('Could not decode avatar artwork. Reload the preview to try again.')); });
+      image.onerror = () => { imageCache.delete(file); reject(new Error('Could not load avatar artwork. Try another choice or reload the preview.')); };
+      image.src = '../../assets/avatar/illustrated-v2/' + file;
+    });
+    imageCache.set(file, pending);
+  }
+  return imageCache.get(file);
+}
+
+async function paint(canvas, look, style, requested, index, direction = 1) {
+  const token = (paintTokens.get(canvas) || 0) + 1;
+  paintTokens.set(canvas, token);
+  const rig = PACK.styles[style];
+  const action = supportedAction(style, requested);
+  const pieces = resolveAvatarPieces(PACK, look, style, action, frameIndex(action, index));
+  const images = await Promise.all(pieces.map((piece) => load(piece.file)));
+  if (paintTokens.get(canvas) !== token) return;
+  if (canvas.width !== rig.width) canvas.width = rig.width;
+  if (canvas.height !== rig.height) canvas.height = rig.height;
+  const context = canvas.getContext('2d');
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.imageSmoothingEnabled = false;
+  context.save();
+  if (direction === -1) { context.translate(canvas.width, 0); context.scale(-1, 1); }
+  pieces.forEach((piece, i) => context.drawImage(images[i], piece.x, piece.y, piece.width, piece.height, piece.offsetX, piece.offsetY, piece.width, piece.height));
+  context.restore();
+}
+
+async function render() {
+  const current = ++revision;
+  const look = { ...selection }, action = animation, index = frame, direction = facing;
+  await Promise.all(['big', 'chibi'].map((style) => paint($(style), look, style, action, index, direction)));
+  if (current !== revision) return;
+  $('frame').textContent = `${actionLabel(action)} · frame ${index + 1} / ${animationInfo(action).frames}`;
+  for (const style of ['big', 'chibi']) {
+    const actual = supportedAction(style, action);
+    $(style + '-pose').textContent = actual === action ? actionLabel(actual) : 'Idle · other character performs this action';
+    $(style).setAttribute('aria-label', `${style === 'big' ? 'Taller full-body avatar' : 'Upper-body chibi avatar without legs'}, ${actual}, facing ${direction === -1 ? 'left' : 'right'}`);
+  }
+}
+
+function report(error) { $('status').textContent = error.message || 'The avatar preview could not be loaded.'; }
+function draw() { return render().catch(report); }
+function button(label, active, action) {
+  const element = document.createElement('button');
+  element.type = 'button';
+  element.textContent = label;
+  element.setAttribute('aria-pressed', String(active));
+  element.onclick = action;
+  return element;
+}
+
+function selectAction(action) {
+  animation = action === 'eat' ? FOODS.find((entry) => entry.id === food).animation : action;
+  frame = 0; last = performance.now(); controls(); void draw();
+}
+function selectFood(id) {
+  food = id;
+  selectAction('eat');
+}
+
+function controls() {
+  $('collections').replaceChildren(...['girl', 'boy'].map((collection) => button(collection === 'girl' ? 'Girl styles' : 'Boy styles', selection.collection === collection, () => {
+    selection = normalizeAvatarSelection(PACK, { ...defaultAvatarSelection(PACK, collection), skin: selection.skin, hairColor: selection.hairColor, eyeColor: selection.eyeColor });
+    update();
+  })));
+  $('categories').replaceChildren(...AVATAR_CATEGORIES.map((value) => button(names[value], category === value, () => { category = value; update(); })));
+  $('animations').replaceChildren(...Object.keys(actionNames).map((action) => button(actionNames[action], action === 'eat' ? FOODS.some((entry) => entry.animation === animation) : animation === action, () => selectAction(action))));
+  $('foods').replaceChildren(...FOODS.map((entry) => {
+    const choice = button(entry.name, food === entry.id, () => selectFood(entry.id));
+    choice.id = 'food-' + entry.id;
+    const preview = $('preview-food-' + entry.id);
+    preview.setAttribute('aria-pressed', String(animation === entry.animation));
+    preview.onclick = () => { selectFood(entry.id); $('chibi').scrollIntoView({ block: 'center' }); };
+    return choice;
+  }));
+  for (const [field, key] of [['skin', 'skin'], ['hairColor', 'hair'], ['eyeColor', 'eyes']]) {
+    const select = $(field);
+    select.replaceChildren(...PACK.palettes[key].map((palette) => {
+      const option = document.createElement('option'); option.value = palette.id; option.textContent = palette.name; return option;
+    }));
+    select.value = selection[field];
+    select.onchange = () => { selection[field] = select.value; update(); };
+  }
+  const grid = $('items');
+  grid.replaceChildren();
+  const thumbnailStyle = category === 'bottom' || category === 'shoes' ? 'big' : 'chibi';
+  $('category-note').textContent = thumbnailStyle === 'big' ? 'Bottoms and shoes are shown on the full-body character. The chibi has no legs.' : '';
+  for (const item of PACK.catalog[selection.collection][category]) {
+    const choice = button('', selection[category] === item.id, () => { selection = { ...selection, [category]: item.id }; update(); });
+    choice.className = 'item'; choice.setAttribute('aria-label', 'Wear ' + item.name);
+    const holder = document.createElement('div'); holder.className = 'thumb' + (thumbnailStyle === 'big' ? ' tall' : '');
+    const canvas = document.createElement('canvas');
+    canvas.width = PACK.styles[thumbnailStyle].width; canvas.height = PACK.styles[thumbnailStyle].height;
+    canvas.setAttribute('aria-hidden', 'true');
+    const label = document.createElement('span'); label.textContent = item.name;
+    holder.append(canvas); choice.append(holder, label); grid.append(choice);
+    const thumbnail = { ...selection, [category]: item.id, ...(category === 'top' ? { jacket: null } : {}) };
+    void paint(canvas, thumbnail, thumbnailStyle, 'idle', 0).catch(report);
+  }
+  const none = $('none');
+  none.hidden = !['hat', 'jacket', 'accessory'].includes(category);
+  none.textContent = 'No ' + category;
+  none.setAttribute('aria-pressed', String(selection[category] === null));
+  none.onclick = () => { selection = { ...selection, [category]: null }; update(); };
+}
+
+function update() { $('status').textContent = ''; controls(); void draw(); }
+function setFacing(value) {
+  facing = value;
+  $('left').setAttribute('aria-pressed', String(value === -1));
+  $('right').setAttribute('aria-pressed', String(value === 1));
+  void draw();
+}
+$('left').onclick = () => setFacing(-1);
+$('right').onclick = () => setFacing(1);
+$('pause').onclick = () => { playing = !playing; $('pause').textContent = playing ? 'Pause' : 'Play'; };
+$('step').onclick = () => { playing = false; $('pause').textContent = 'Play'; frame = frameIndex(animation, frame + 1); void draw(); };
+$('reset').onclick = () => { selection = defaultAvatarSelection(PACK, selection.collection); update(); };
+$('download').onclick = () => {
+  const blob = new Blob([JSON.stringify({ version: PACK.version, ...selection }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob), link = document.createElement('a');
+  link.href = url; link.download = 'bridgingminds-avatar.json'; link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  $('status').textContent = 'Selection exported.';
+};
+function motion() {
+  $('motion-note').textContent = reduced.matches ? 'Reduced motion: animation paused. Use Next frame to inspect individual poses.' : '';
+  $('pause').disabled = reduced.matches;
+  if (reduced.matches) { frame = 0; void draw(); }
+}
+reduced.addEventListener('change', motion);
+function tick(time) {
+  if (playing && !reduced.matches && !document.hidden && !rendering && time - last >= 1000 / animationInfo(animation).fps) {
+    last = time; frame = frameIndex(animation, frame + 1); rendering = true;
+    void draw().finally(() => { rendering = false; });
+  }
+  requestAnimationFrame(tick);
+}
+for (const style of ['big', 'chibi']) { $(style).width = PACK.styles[style].width; $(style).height = PACK.styles[style].height; }
+update(); motion(); requestAnimationFrame(tick);
+window.AvatarPreview = {
+  set(patch) { selection = normalizeAvatarSelection(PACK, { ...selection, ...patch }); update(); },
+  pose(action, index = 0) {
+    if (!Object.prototype.hasOwnProperty.call(PACK.animations, action)) throw new TypeError('Unknown avatar animation: ' + action);
+    const entry = FOODS.find((candidate) => candidate.animation === action);
+    if (entry) food = entry.id;
+    playing = false; animation = action; frame = frameIndex(action, index); $('pause').textContent = 'Play'; controls(); return render();
+  },
+  getSelection() { return { ...selection }; },
+  getPreviewState() { return { food, animation, frame, playing, facing }; },
+  supportedAction,
+};
+</script>
+</body>
+</html>

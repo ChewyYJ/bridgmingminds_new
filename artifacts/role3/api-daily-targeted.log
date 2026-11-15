@@ -1,0 +1,242 @@
+TAP version 13
+# (node:32204) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: new learner completes onboarding, all modes, journal, Coins, and synchronized login
+ok 1 - new learner completes onboarding, all modes, journal, Coins, and synchronized login
+  ---
+  duration_ms: 440.8961
+  type: 'test'
+  ...
+# Subtest: idempotent concurrent evaluation, retries, duplicate content and retired garden cannot mint Coins
+ok 2 - idempotent concurrent evaluation, retries, duplicate content and retired garden cannot mint Coins
+  ---
+  duration_ms: 258.4693
+  type: 'test'
+  ...
+# Subtest: authentication, cross-user isolation, secure audio, reports, export and cascading deletion
+ok 3 - authentication, cross-user isolation, secure audio, reports, export and cascading deletion
+  ---
+  duration_ms: 222.0568
+  type: 'test'
+  ...
+# [assessment-failed] a8987683-e691-4f6b-b497-8b02a876468d invalid_evidence
+# Subtest: evaluation failures retain the answer, reject invented quotes, and recover durable jobs after restart
+ok 4 - evaluation failures retain the answer, reject invented quotes, and recover durable jobs after restart
+  ---
+  duration_ms: 232.0502
+  type: 'test'
+  ...
+# Subtest: debate duplicate turns are idempotent and completed session cannot acquire extra rounds
+ok 5 - debate duplicate turns are idempotent and completed session cannot acquire extra rounds
+  ---
+  duration_ms: 189.1489
+  type: 'test'
+  ...
+# Subtest: classic practice and retries remain available without farming; retired spending cannot change assessments
+ok 6 - classic practice and retries remain available without farming; retired spending cannot change assessments
+  ---
+  duration_ms: 377.8616
+  type: 'test'
+  ...
+# (node:32204) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# Subtest: long valid debate rounds queue their complete transcript without widening single-answer limits
+ok 7 - long valid debate rounds queue their complete transcript without widening single-answer limits
+  ---
+  duration_ms: 235.2108
+  type: 'test'
+  ...
+# Subtest: practice rhythm includes rewarded and unrewarded retries, uses local Monday weeks and handles DST
+ok 8 - practice rhythm includes rewarded and unrewarded retries, uses local Monday weeks and handles DST
+  ---
+  duration_ms: 179.8763
+  type: 'test'
+  ...
+# Subtest: comparable analytics keep coaching templates and providers in separate groups
+ok 9 - comparable analytics keep coaching templates and providers in separate groups
+  ---
+  duration_ms: 117.8799
+  type: 'test'
+  ...
+# Subtest: browser sessions use HttpOnly cookies, reject missing mutation origins and expire
+ok 10 - browser sessions use HttpOnly cookies, reject missing mutation origins and expire
+  ---
+  duration_ms: 99.0049
+  type: 'test'
+  ...
+# Subtest: exported web hosting exposes only dist and rejects malformed URL decoder input
+ok 11 - exported web hosting exposes only dist and rejects malformed URL decoder input
+  ---
+  duration_ms: 101.0376
+  type: 'test'
+  ...
+# Subtest: maximum-length Unicode answers get bounded exact quotes without inventing sentence structure
+ok 12 - maximum-length Unicode answers get bounded exact quotes without inventing sentence structure
+  ---
+  duration_ms: 138.3575
+  type: 'test'
+  ...
+# Subtest: evidence beyond the saved answer is rejected even when slice would truncate it
+ok 13 - evidence beyond the saved answer is rejected even when slice would truncate it
+  ---
+  duration_ms: 0.6748
+  type: 'test'
+  ...
+# Subtest: empty drafts are rejected while unusable repetitions receive honest N/A feedback
+ok 14 - empty drafts are rejected while unusable repetitions receive honest N/A feedback
+  ---
+  duration_ms: 148.3397
+  type: 'test'
+  ...
+# Subtest: static assets do not consume the API rate budget, while API bursts remain limited
+ok 15 - static assets do not consume the API rate budget, while API bursts remain limited
+  ---
+  duration_ms: 699.3668
+  type: 'test'
+  ...
+# Subtest: today news endpoint requires authentication and uses each account’s saved timezone
+ok 16 - today news endpoint requires authentication and uses each account’s saved timezone
+  ---
+  duration_ms: 103.0503
+  type: 'test'
+  ...
+# Subtest: local background worker completes a queued practice without manual polling work
+ok 17 - local background worker completes a queued practice without manual polling work
+  ---
+  duration_ms: 126.8125
+  type: 'test'
+  ...
+# (node:58916) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:58916) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# Subtest: real daily API flow reading-first, retries, export and restart
+not ok 18 - real daily API flow reading-first, retries, export and restart
+  ---
+  duration_ms: 433.0011
+  type: 'test'
+  location: 'C:\\Users\\mango\\Codex\\bridgingminds\\bridgmingminds_new\\tests\\daily-flow.test.mjs:123:3'
+  failureType: 'testCodeFailure'
+  error: '/sessions: {"status":503,"data":{"error":"There are no new headlines left for your daily question. Check back for a fresh story."}}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    ok (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:53:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Object.spin (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:68:21)
+    async TestContext.<anonymous> (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:141:7)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: real daily API flow speaking-first, retries, export and restart
+not ok 19 - real daily API flow speaking-first, retries, export and restart
+  ---
+  duration_ms: 238.3067
+  type: 'test'
+  location: 'C:\\Users\\mango\\Codex\\bridgingminds\\bridgmingminds_new\\tests\\daily-flow.test.mjs:123:3'
+  failureType: 'testCodeFailure'
+  error: '/sessions: {"status":503,"data":{"error":"There are no new headlines left for your daily question. Check back for a fresh story."}}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    ok (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:53:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Object.spin (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:68:21)
+    async TestContext.<anonymous> (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:132:7)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: daily processing pins the receipt day, and a missed day preserves earned progress
+not ok 20 - daily processing pins the receipt day, and a missed day preserves earned progress
+  ---
+  duration_ms: 202.6039
+  type: 'test'
+  location: 'C:\\Users\\mango\\Codex\\bridgingminds\\bridgmingminds_new\\tests\\daily-flow.test.mjs:187:1'
+  failureType: 'testCodeFailure'
+  error: '/sessions: {"status":503,"data":{"error":"There are no new headlines left for your daily question. Check back for a fresh story."}}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    ok (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:53:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Object.spin (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:68:21)
+    async TestContext.<anonymous> (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:191:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: reading validates ownership and attestation; Read & Reflect earns shared progress separately from the daily checklist
+ok 21 - reading validates ownership and attestation; Read & Reflect earns shared progress separately from the daily checklist
+  ---
+  duration_ms: 208.5007
+  type: 'test'
+  ...
+# Subtest: retired garden actions and optional avatar care cannot remove earned learning progress
+not ok 22 - retired garden actions and optional avatar care cannot remove earned learning progress
+  ---
+  duration_ms: 196.1412
+  type: 'test'
+  location: 'C:\\Users\\mango\\Codex\\bridgingminds\\bridgmingminds_new\\tests\\daily-flow.test.mjs:268:1'
+  failureType: 'testCodeFailure'
+  error: '/sessions: {"status":503,"data":{"error":"There are no new headlines left for your daily question. Check back for a fresh story."}}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    ok (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:53:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Object.spin (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:68:21)
+    async TestContext.<anonymous> (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:271:27)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: the production guest limit remains 30 per hour despite the isolated browser-test override
+ok 23 - the production guest limit remains 30 per hour despite the isolated browser-test override
+  ---
+  duration_ms: 230.1969
+  type: 'test'
+  ...
+# Subtest: job polling recovers delayed local scheduling without duplicate daily rewards
+not ok 24 - job polling recovers delayed local scheduling without duplicate daily rewards
+  ---
+  duration_ms: 214.9161
+  type: 'test'
+  location: 'C:\\Users\\mango\\Codex\\bridgingminds\\bridgmingminds_new\\tests\\daily-flow.test.mjs:295:1'
+  failureType: 'testCodeFailure'
+  error: '/sessions: {"status":503,"data":{"error":"There are no new headlines left for your daily question. Check back for a fresh story."}}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    ok (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:53:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Object.spin (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:68:21)
+    async TestContext.<anonymous> (file:///C:/Users/mango/Codex/bridgingminds/bridgmingminds_new/tests/daily-flow.test.mjs:298:19)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: enrollment preserves imported historical XP and garden artwork without retroactive daily credit
+ok 25 - enrollment preserves imported historical XP and garden artwork without retroactive daily credit
+  ---
+  duration_ms: 188.0483
+  type: 'test'
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 20
+# fail 5
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3920.7729

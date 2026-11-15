@@ -94,7 +94,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (e: any) {
       if (generation === sessionGeneration.current)
-        setError(e.message || "The garden server is not available yet.");
+        setError(e.message || "The app server is not available yet.");
     } finally {
       if (generation === sessionGeneration.current) {
         bootstrapping.current = false;

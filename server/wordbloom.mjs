@@ -12,7 +12,6 @@ import {
 } from "../shared/wordbloom-catalogue.mjs";
 
 const activeStatuses = new Set(["scheduled", "introduced", "review_due"]);
-const reviewReward = 5;
 const recallDays = [1, 7, 30];
 const dayMs = 86_400_000;
 const reviewError = (status, message) =>
@@ -60,7 +59,7 @@ export function localWordBloom(answer) {
   ];
 }
 
-export function createWordBloomService({ db, now = () => new Date() }) {
+export function createWordBloomService({ db, now = () => new Date(), awardCompletion }) {
   const pronunciation = createVocabularyPronunciation({ db, now });
   const instant = () => new Date(now()).toISOString();
   const profile = async (uid) => {
@@ -212,26 +211,18 @@ export function createWordBloomService({ db, now = () => new Date() }) {
           streak,
         };
         const day = localDay(new Date(at), user.timezone || "UTC");
-        const reward = await db
-          .prepare(
-            "INSERT INTO reward_ledger VALUES(?,?,?,?,?,?,?) ON CONFLICT(user_id,source_key) DO NOTHING",
-          )
-          .run(
-            randomUUID(),
-            uid,
-            `vocabulary-review:${day}`,
-            day,
-            "vocabulary_review",
-            JSON.stringify({
-              xp: reviewReward,
-              completionId: id,
-              activity: "read_reflect",
-            }),
-            at,
-          );
-        const xp = reward.changes ? reviewReward : 0;
-        if (xp)
-          await db.prepare("UPDATE users SET xp=xp+? WHERE id=?").run(xp, uid);
+        // Only the server-validated recall/reflection path may emit this event.
+        // Currency and XP are always owned by the shared reward transaction.
+        const reward = awardCompletion ? await awardCompletion(uid, {
+          eventId: `vocabulary-review:${id}`,
+          completionId: id,
+          activityType: "vocabulary_review",
+          completedAt: at,
+          localDate: day,
+          timezone: user.timezone || "UTC",
+          dedupeKey: `vocabulary-review:${day}`,
+        }) : null;
+        const xp = reward?.xpGranted || 0;
         const wordData = { ...JSON.parse(row.data), recallProgress: progress };
         await db
           .prepare(

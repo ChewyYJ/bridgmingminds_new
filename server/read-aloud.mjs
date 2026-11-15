@@ -229,7 +229,7 @@ export function installReadAloud({
       await daily.pinReceipt(req.userId, attempt.id);
       attempt.rewards = data.selfReviewConfirmed
         ? await daily.complete(req.userId, attempt.id)
-        : { xp: 0, seeds: 0, completed: 0, streakSecured: false };
+        : { xp: 0, coins: 0, completed: 0, streakSecured: false };
       if (data.selfReviewConfirmed)
         await wordBloom.completeReading(
           req.userId,

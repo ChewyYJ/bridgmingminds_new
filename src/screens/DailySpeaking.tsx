@@ -20,6 +20,7 @@ import {
   uploadAudio,
 } from "../lib/api";
 import { useApp } from "../lib/state";
+import { ConfirmedUnlocks } from "../role3/ConfirmedUnlocks";
 import type {
   Attempt,
   Evaluation,
@@ -1385,9 +1386,9 @@ export function DailySpeaking({
                 </View>
                 <View style={[s.card, s.rewardRow]}>
                   <Reward
-                    icon="sun"
-                    value={`+${rewards?.seeds || 0}`}
-                    label="Seeds"
+                    icon="circle"
+                    value={`+${rewards?.coins || 0}`}
+                    label="Coins"
                   />
                   <Reward
                     icon="bar-chart"
@@ -1403,6 +1404,7 @@ export function DailySpeaking({
                 <Text style={s.small}>
                   {rewards?.reason || "Rewards recognise your participation."}
                 </Text>
+                <ConfirmedUnlocks receipt={rewards?.reward} />
                 {savedWordIds.length ? (
                   <Text style={s.copy}>
                     Your selected words are saved to My Dictionary.

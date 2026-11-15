@@ -1,0 +1,60 @@
+
+> mind-garden@1.0.0 ai:smoke
+> node scripts/ai-smoke.mjs
+
+Offline AI smoke: temporary databases, fake credentials, mocked provider transport. No external requests or changes to your account data.
+✔ original mode rubrics expose independent task-specific criteria and research limits (1.195ms)
+✔ local keywords never become semantic or numeric judgments in any mode (4.1693ms)
+✔ provider prompts route by mode, retain actual model identity, and treat injected answer as data (15.7625ms)
+✔ debate evaluator receives bounded role-labeled context but rejects opponent words as learner evidence (0.9262ms)
+✔ unavailable source and absent opponent-response opportunities force N/A regardless of model levels (0.4011ms)
+✔ N/A for an unelicited criterion is preserved separately from a low rating (0.1854ms)
+✔ strict schema rejects invented evidence, duplicated criteria, injected provenance and invalid numeric levels (1.2341ms)
+✔ evidence validation uses exact UTF-16 bounds and rejects split surrogate quotes (0.4516ms)
+✔ canonical keyed dimensions are losslessly normalized before normal evidence validation (0.9843ms)
+✔ malformed or ambiguous provider dimensions never become invented ratings or raw diagnostics (3.1243ms)
+✔ refusals, truncated generations and malformed JSON fail safely without automatic paid retry (0.582ms)
+✔ quote-only and miscounted legacy evidence is anchored exactly across UTF-16, CRLF and combining marks (1.9605ms)
+✔ an exact explicit legacy range preserves the selected occurrence of repeated evidence (0.3171ms)
+✔ quote anchoring rejects ambiguity, altered text and malformed spans without fuzzy matching or coercion (2.8767ms)
+✔ a unique 800-UTF-16-unit quotation remains valid at the legacy storage boundary (0.3348ms)
+✔ local coaching always supplies mode-specific questions without numerical judgments (0.3889ms)
+✔ tailored guiding questions survive provider validation without changing ratings or evidence (0.7894ms)
+✔ missing or malformed optional legacy guidance cannot fail otherwise valid feedback or weaken rating validation (0.6893ms)
+✔ one server key selects current compatible request profiles; empty values retain local coaching (1.065ms)
+✔ legacy profiles keep compatible parameters and disclose shutdown dates (0.1478ms)
+✔ invalid model, leaked public-key setting and placeholder diagnostics never echo values (0.1657ms)
+✔ invalid configuration blocks the request before transport and never retries (0.5098ms)
+✔ provider errors have actionable categories without leaking transport or provider payloads (14.7122ms)
+✔ timeouts, connection failures and unreadable JSON preserve safe retry messages (0.9617ms)
+✔ offline readiness CLI prints only safe status and refuses any live flag (142.8035ms)
+✔ configured evaluation sends saved context, validates evidence, and keeps provider secrets off client data (197.3658ms)
+✔ health reports configuration separately from live verification without a provider call (95.7673ms)
+✔ whitespace-only key keeps local feedback and configuration errors cannot spend provider requests (112.1197ms)
+✔ invalid configuration cannot exhaust retries; fixing settings recovers the same saved answer (128.9832ms)
+✔ a durable queued job blocked by changed configuration preserves its provider retry budget (142.7342ms)
+✔ five actual provider failures still cap paid requests across restarts and model changes (170.5822ms)
+✔ legacy model override evaluates without unsupported reasoning parameters (106.4473ms)
+✔ bad provider credentials retain work with actionable errors instead of silently falling back (112.2097ms)
+[assessment-failed] 15a1232c-291a-4acc-a3be-90daceb7b469 quote_missing
+✔ configured evaluation rejects invented evidence, retains the answer, and recovers without duplicate rewards (125.3858ms)
+[assessment-failed] 44ef7e7d-1ec8-4ac2-b335-f48da3b0ed3e invalid_shape
+✔ configured evaluation rejects missing dimensions, retains the answer, and recovers without duplicate rewards (127.1329ms)
+[assessment-failed] c185a1d1-4be6-4d2d-b2b8-0a97c3e60c9b invalid_json
+✔ configured evaluation rejects malformed JSON, retains the answer, and recovers without duplicate rewards (122.5476ms)
+✔ configured evaluation rejects provider HTTP failure, retains the answer, and recovers without duplicate rewards (132.8098ms)
+✔ configured debate preserves rejected turns, retries once, and sends proposition and conversation context (124.6877ms)
+✔ configured transcription sends only an owned recording and preserves it through failures and correction (130.3419ms)
+✔ late transcription cannot overwrite a corrected transcript saved by another request (115.4222ms)
+✔ late transcription cannot overwrite a completed evaluation saved by another request (118.9758ms)
+[assessment-failed] 744bc4ee-3980-4855-bc9e-d74e0106b8e9 invalid_shape
+✔ historical raw schema failures are safely projected without rewriting data or retry counts (135.1369ms)
+✔ quote-only feedback derives exact spans, logs only safe failure reasons, and retries once without duplicate rewards (129.6702ms)
+ℹ tests 43
+ℹ suites 0
+ℹ pass 43
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2553.1657

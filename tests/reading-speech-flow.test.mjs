@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createApp } from "../server/app.mjs";
 import { prompts } from "../server/content.mjs";
+import { silentWav } from "./helpers/silent-wav.mjs";
 import {
   speechCapabilities,
   normalizeSpeechResult,
@@ -137,7 +138,7 @@ async function fixture(t) {
   async function reading(token, audio = true) {
     const assignment = await ok("/read-aloud/assignment", token);
     const upload = audio
-      ? await ok("/audio", token, null, "POST", Buffer.alloc(100, 1))
+      ? await ok("/audio", token, null, "POST", silentWav())
       : null;
     return ok(`/read-aloud/assignments/${assignment.id}/submit`, token, {
       idempotencyKey: randomUUID(),
@@ -167,7 +168,7 @@ async function fixture(t) {
         token,
         null,
         "POST",
-        Buffer.alloc(100, 1),
+        silentWav(),
       );
       const attempt = await ok("/attempts", token, {
         sessionId: session.id,
@@ -195,6 +196,13 @@ async function fixture(t) {
       });
     },
     enqueue,
+    async assertReadingRewards(token, count = 1) {
+      const ledger = (await ok("/export", token)).gamificationData.ledger
+        .filter(item => item.activity_type === "read_aloud");
+      assert.equal(ledger.length, count, "speech jobs must not mint separate reading rewards");
+      assert.equal(ledger.reduce((total, row) => total + row.coins_delta, 0), count * 3);
+      assert.equal(ledger.reduce((total, row) => total + row.xp_delta, 0), 0);
+    },
     get calls() {
       return calls;
     },
@@ -237,7 +245,8 @@ test("explicit acoustic assessment persists once, survives restart/export and ch
   const saved = await f.ok(`/attempts/${attempt.id}`, token);
   assert.equal(saved.evaluation.provider, "self_review");
   assert.equal(saved.speechAssessment.status, "assessed");
-  assert.equal((await f.ok("/state", token)).xp, 10);
+  assert.equal((await f.ok("/state", token)).xp, 0);
+  await f.assertReadingRewards(token);
   await f.enqueue(token, attempt.id);
   await f.run();
   assert.equal(f.calls, 1);
@@ -331,7 +340,8 @@ test("provider failures remain explicit and retry the same job without duplicati
   assert.equal((await f.enqueue(token, attempt.id)).id, job.id);
   await f.run();
   assert.equal(f.calls, 2);
-  assert.equal((await f.ok("/state", token)).xp, 10);
+  assert.equal((await f.ok("/state", token)).xp, 0);
+  await f.assertReadingRewards(token);
   const noAudio = await f.reading(token, false);
   assert.equal(
     (
@@ -364,7 +374,8 @@ test("withdrawn recording consent during processing prevents result persistence"
     (await f.ok(`/attempts/${attempt.id}`, token)).speechAssessment,
     undefined,
   );
-  assert.equal((await f.ok("/state", token)).xp, 10);
+  assert.equal((await f.ok("/state", token)).xp, 0);
+  await f.assertReadingRewards(token);
 });
 
 test("repeated provider failures stop at the retry cap without minting rewards", async (t) => {
@@ -387,7 +398,8 @@ test("repeated provider failures stop at the retry cap without minting rewards",
     ).status,
     429,
   );
-  assert.equal((await f.ok("/state", token)).xp, 10);
+  assert.equal((await f.ok("/state", token)).xp, 0);
+  await f.assertReadingRewards(token);
 });
 test("account deletion while a provider is processing cannot resurrect assessments or jobs", async (t) => {
   const f = await fixture(t),
@@ -429,7 +441,8 @@ test("WordBloom pronunciation observations commit with speech feedback while rew
     ).length,
     1,
   );
-  assert.equal((await f.ok("/state", token)).xp, 25);
+  assert.equal((await f.ok("/state", token)).xp, 15);
+  await f.assertReadingRewards(token);
   await f.enqueue(token, attempt.id);
   await f.run();
   assert.equal(
@@ -460,7 +473,8 @@ test("a vocabulary observation write failure rolls back the acoustic result and 
     (await f.ok("/export", token)).wordBloom.pronunciationObservations.length,
     0,
   );
-  assert.equal((await f.ok("/state", token)).xp, 25);
+  assert.equal((await f.ok("/state", token)).xp, 15);
+  await f.assertReadingRewards(token);
   f.db.exec("DROP TRIGGER reject_pronunciation");
   await f.enqueue(token, attempt.id);
   await f.run();
@@ -473,7 +487,8 @@ test("a vocabulary observation write failure rolls back the acoustic result and 
     1,
   );
   assert.equal(f.calls, 2);
-  assert.equal((await f.ok("/state", token)).xp, 25);
+  assert.equal((await f.ok("/state", token)).xp, 15);
+  await f.assertReadingRewards(token);
 });
 
 test("separate days of stable reading observations adjust WordBloom intervals through the real job API", async (t) => {
@@ -502,5 +517,6 @@ test("separate days of stable reading observations adjust WordBloom intervals th
   assert.equal(word.intervalDays, 6);
   assert.equal(word.exposureCount, 2);
   assert.equal(word.productiveUseCandidates, 0);
-  assert.equal((await f.ok("/state", token)).xp, 35);
+  assert.equal((await f.ok("/state", token)).xp, 15);
+  await f.assertReadingRewards(token, 2);
 });

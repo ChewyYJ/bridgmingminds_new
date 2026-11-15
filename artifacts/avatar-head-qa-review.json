@@ -1,0 +1,815 @@
+{
+  "phase": "Final canonical visual review complete",
+  "reviewedSheetCount": 116,
+  "reviewedTileCount": 1408,
+  "sourceDirectory": "artifacts/avatar-modular/wardrobe-audit/",
+  "coverage": "All 64 head sheets and 12 head-only pairwise sheets rechecked; all 40 chibi outfit/action/accessory sheets inspected. Used all corresponding overview tiles plus original-resolution zooms for findings and representative action/clothing intersections.",
+  "foods": {
+    "files": [
+      "ramen.png",
+      "onigiri.png",
+      "bento.png"
+    ],
+    "originalsInspected": true,
+    "whiteBackgroundSizes": [
+      64,
+      128
+    ],
+    "evidence": "artifacts/avatar-food-ui-qa.png",
+    "findings": []
+  },
+  "findings": [
+    {
+      "status": "resolved",
+      "description": "Hatted ponytail no longer has rectangular clipped contour."
+    },
+    {
+      "status": "resolved",
+      "file": "girl-big-head-accessory-2-idle-0.png",
+      "cells": "All rows/columns; r1c1 x236–241,y268–280",
+      "description": "Rear strap nub no longer protrudes beside the upper arm in the final torso-envelope composition."
+    }
+  ],
+  "sheets": [
+    {
+      "file": "girl-big-pairwise-hair-hat-idle-0.png",
+      "cells": 12,
+      "group": "pairwise",
+      "sha256": "64ef38d13e4b5770de4463b9722ff1f65c6cadbda17bdad0070d7a4e8e9311d6"
+    },
+    {
+      "file": "girl-big-pairwise-hair-accessory-idle-0.png",
+      "cells": 12,
+      "group": "pairwise",
+      "sha256": "7b3ec3619f305d2d2e9a53ad87b6cf7c7a372d70383a36739b42664200c70e64"
+    },
+    {
+      "file": "girl-big-pairwise-hat-accessory-idle-0.png",
+      "cells": 16,
+      "group": "pairwise",
+      "sha256": "6be0d102f9f17c6397b7c8c36e4924fcfb21e43728948473ec78862299c6b59c"
+    },
+    {
+      "file": "girl-big-head-accessory-none-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "4a7f8a40bbd92e84deb2cd33445fca3a9f9f15328a7f206d21a45d3f00b70445"
+    },
+    {
+      "file": "girl-big-head-accessory-0-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "81754e1953ec180d7ae1739497546c8992433e91185a08c873205a02b5dc0a68"
+    },
+    {
+      "file": "girl-big-head-accessory-1-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "155b29d4386a947e4d67ccc2ba236c7d1619fed79219c6235e7af822a109327d"
+    },
+    {
+      "file": "girl-big-head-accessory-2-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "4a7f8a40bbd92e84deb2cd33445fca3a9f9f15328a7f206d21a45d3f00b70445"
+    },
+    {
+      "file": "girl-big-head-accessory-none-walk-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "3fee887b2e5479abdc9ea340399704b1bf679aef32921fbf9ce0e4410bebd390"
+    },
+    {
+      "file": "girl-big-head-accessory-0-walk-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "acdfb7815eb8a819b689f310014aae42b5aa4589920c23c4c17b9a981cbe5b7b"
+    },
+    {
+      "file": "girl-big-head-accessory-1-walk-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "deb0e1220c7413a47ed3c6d3a1752185bfc3b01bcc14387ed04544c00e33c19c"
+    },
+    {
+      "file": "girl-big-head-accessory-2-walk-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "3fee887b2e5479abdc9ea340399704b1bf679aef32921fbf9ce0e4410bebd390"
+    },
+    {
+      "file": "girl-big-head-accessory-none-walk-6.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "e28deb1c640d500f1a2af229e8ab2fc7d6e0582cac3561e939880237069c444b"
+    },
+    {
+      "file": "girl-big-head-accessory-0-walk-6.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "8fc1ca9f40008ab69d0aabf5a61770d6e20134f732a189a11ba8d6b3c7a2daf2"
+    },
+    {
+      "file": "girl-big-head-accessory-1-walk-6.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "1de0439a5739e52f3b9c414aa72ef5ceeba1af8033ddf6811531dbbf80a75ac2"
+    },
+    {
+      "file": "girl-big-head-accessory-2-walk-6.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "e28deb1c640d500f1a2af229e8ab2fc7d6e0582cac3561e939880237069c444b"
+    },
+    {
+      "file": "girl-chibi-pairwise-hair-hat-idle-0.png",
+      "cells": 12,
+      "group": "pairwise",
+      "sha256": "9dd6e9ec4eae6cee1602d5b3ecf4e1d632647040203e7d327b66a5eb58bf60c3"
+    },
+    {
+      "file": "girl-chibi-pairwise-hair-accessory-idle-0.png",
+      "cells": 12,
+      "group": "pairwise",
+      "sha256": "b444d9a8ed5efd73de070c9e2b3aa1c6a5742c352f245b39ad30124d13959134"
+    },
+    {
+      "file": "girl-chibi-pairwise-hat-accessory-idle-0.png",
+      "cells": 16,
+      "group": "pairwise",
+      "sha256": "004b84e4a349b9500e64532a829ab7a45dcec0da17bd8a11bfa145403fe4cb91"
+    },
+    {
+      "file": "girl-chibi-head-accessory-none-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "4cdd3c7ef22c65e34680c11900c1d7ba971ac9f931014fdc037afd6071549f19"
+    },
+    {
+      "file": "girl-chibi-head-accessory-0-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "576a624efca9fe67ca57687c4ddff88996f21f53a68b2417b960caebca61af02"
+    },
+    {
+      "file": "girl-chibi-head-accessory-1-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "bfe6bd385ef9967cbfa825d4e2b805dd9bab4feaea91c5d5e7933f736b6fd2de"
+    },
+    {
+      "file": "girl-chibi-head-accessory-2-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "4cdd3c7ef22c65e34680c11900c1d7ba971ac9f931014fdc037afd6071549f19"
+    },
+    {
+      "file": "girl-chibi-head-accessory-none-greet-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "66c57a9db9a320c6e0db1d97fcad7d86cb10da2edf9df264da35f8f4c78929e5"
+    },
+    {
+      "file": "girl-chibi-head-accessory-0-greet-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "125df82aa7ff3976d4907d810c21d892b466fbfa1ff70157e3e3120c7c87e087"
+    },
+    {
+      "file": "girl-chibi-head-accessory-1-greet-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "e615e36129c41a06077d77076fc8b5331adc2f0c55c4718a753ee261f27608f9"
+    },
+    {
+      "file": "girl-chibi-head-accessory-2-greet-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "66c57a9db9a320c6e0db1d97fcad7d86cb10da2edf9df264da35f8f4c78929e5"
+    },
+    {
+      "file": "girl-chibi-head-accessory-none-speak-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "f1e9e7d298e0b3da7131213a728677da6c2396c86c7fcbcc1b51aa065d2de6e3"
+    },
+    {
+      "file": "girl-chibi-head-accessory-0-speak-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "22f5604f0296e9eac6a4d9b5593b9075b859ded18b19753a2a39aeb668931fec"
+    },
+    {
+      "file": "girl-chibi-head-accessory-1-speak-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "fd1b88cecf1ef9af21775045c8d59bbc6c8afa045a13fed7366eddae8ec63a8e"
+    },
+    {
+      "file": "girl-chibi-head-accessory-2-speak-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "f1e9e7d298e0b3da7131213a728677da6c2396c86c7fcbcc1b51aa065d2de6e3"
+    },
+    {
+      "file": "girl-chibi-head-accessory-none-celebrate-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "7f08d1d11b3745d150c4a3d33fc8d72f8d4ef7d88a2bdb4c6def06aaa40772d2"
+    },
+    {
+      "file": "girl-chibi-head-accessory-0-celebrate-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "5d0f562c20ce8c71e56baf15f04b0f78cba4d8efbb573adcde7ea6b8aa71c714"
+    },
+    {
+      "file": "girl-chibi-head-accessory-1-celebrate-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "289894a1edda294ecc10d386284aac2741aa6f0c9b7589a144ee4c6f4601b5f0"
+    },
+    {
+      "file": "girl-chibi-head-accessory-2-celebrate-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "7f08d1d11b3745d150c4a3d33fc8d72f8d4ef7d88a2bdb4c6def06aaa40772d2"
+    },
+    {
+      "file": "girl-chibi-head-accessory-none-eat-3.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "973bea3d1dc9e99ae1309054d12b9c2d1201578af700b46bdf1ad052e360bbce"
+    },
+    {
+      "file": "girl-chibi-head-accessory-0-eat-3.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "19e930bd2a46bef5fd2ea6a9af2e41223a5570709a451be91cb6fd02f367bf64"
+    },
+    {
+      "file": "girl-chibi-head-accessory-1-eat-3.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "7d61889de4fff846fecda63d1ea99867d9a1af9565d9e0de2cbc1e8dc2784f07"
+    },
+    {
+      "file": "girl-chibi-head-accessory-2-eat-3.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "973bea3d1dc9e99ae1309054d12b9c2d1201578af700b46bdf1ad052e360bbce"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-none-idle-0.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "946eb7d7703a1b9f8b58c93e4f59d25e8a0380a9bdd9efa46cda5d50bad59f5a"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-0-idle-0.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "778d792583f08161d0862dd04522ae06b537b17b02c65e402b98d14af56f019a"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-1-idle-0.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "bac65050b3aff34e45de0fe417956bde784f0f7c06a7ca9387cdc0f1ca6de3bb"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-2-idle-0.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "b33ef2ffa5581d72950912d461bbd92aec3960a93dbf67fb7f2f815d8b388eae"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-none-greet-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "1de2cf9b877c6962a9fd577a957af722ff40b4457d1047d6e54dcb74c2214e43"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-0-greet-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "aeb1de8f67623a0c4c37aa5dbcfa69f3f989ac235b18f11d50a19c5f6a8a19be"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-1-greet-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "dd0127c96aa3b3050b3e152c5f1eae112c7885974eba7f90c01e6459e9bbd3a7"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-2-greet-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "41eae8c1db032d2c3cbc3333f7d7b77cbb84b37952a465f8c56cb040d0f4fb2a"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-none-speak-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "241958806125d9204e727f879e032d3dc2af3e98bc7005df1fa40d73e4ba5014"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-0-speak-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "531ff997435793c107609a4ddeb07b3d0fdee8df5abbf61da92a90c4dd9d0264"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-1-speak-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "1e5d920d7595c71728ba127de898a1a87dbe9f4af774a0d35e344c578b121fe2"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-2-speak-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "faa52eea4d72a6879c42f190b2ef25ddc456a1e36bfc4e293fe46aaa08e5cc5d"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-none-celebrate-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "5d283f2ac90d5dc14d8ee8cac636a203a07ccff2ef1cc80e22bdbf50f805551e"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-0-celebrate-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "72dedd4c7d3f98c4648ad4ee1f25d3e39df981d4f30958a0d7276248f9f19223"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-1-celebrate-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "66d63e5500b999c07e7b7c1d6e9243b670078688b898880633b0a73fe6033b4a"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-2-celebrate-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "8c010f061c152ae81d270a85433f181c6876fccdc7ec1b70ee56832a06d164b3"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-none-eat-3.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "55487e7c471d1f3b7c60bb16c33cd523a5f95c206993a5159d1b30baab6b7673"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-0-eat-3.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "7148f4e883ac03c7b0a65c51000a866d7395d3bacd41b734ac89a32d4d8d17ea"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-1-eat-3.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "209a5e56f60cd9cad115d1ab8e73fe5e944aabe1dba7809d5c976e0fcaf91b9e"
+    },
+    {
+      "file": "girl-chibi-outfit-top-jacket-accessory-2-eat-3.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "6500fc22a6f5fb9092d210eff4d439d8b00c1081804f8eacad316b882e96bfc7"
+    },
+    {
+      "file": "boy-big-pairwise-hair-hat-idle-0.png",
+      "cells": 12,
+      "group": "pairwise",
+      "sha256": "c6799dba740bdea337d86a2ec1dd6a359d81998f45226de14b8f5dbf93427fdc"
+    },
+    {
+      "file": "boy-big-pairwise-hair-accessory-idle-0.png",
+      "cells": 12,
+      "group": "pairwise",
+      "sha256": "77c287921889afe2de9441e40fa728451c9ea88d9d178f78a000e9cb073b8796"
+    },
+    {
+      "file": "boy-big-pairwise-hat-accessory-idle-0.png",
+      "cells": 16,
+      "group": "pairwise",
+      "sha256": "e5f214ed76e8660ba7a7d4157d55cb3f8cde4b01ea24c57f3146c66915123bef"
+    },
+    {
+      "file": "boy-big-head-accessory-none-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "47f1eb1f8542d6837579bbd51c869f1433a169a4b72c697c2ba8419ce2b2de86"
+    },
+    {
+      "file": "boy-big-head-accessory-0-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "c06305ef8c5fce0748b0c6fa9c3b4571034f8cf7d1f1f243fabe5ba1e09c79df"
+    },
+    {
+      "file": "boy-big-head-accessory-1-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "17fa3a4520efd297d91955dee666fcf39357adf89f3ae85bd4fefe7fff993b0b"
+    },
+    {
+      "file": "boy-big-head-accessory-2-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "47f1eb1f8542d6837579bbd51c869f1433a169a4b72c697c2ba8419ce2b2de86"
+    },
+    {
+      "file": "boy-big-head-accessory-none-walk-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "02c03170d79102838138ba68a2cd1a08d6c9538947defc929447e9e00c8af647"
+    },
+    {
+      "file": "boy-big-head-accessory-0-walk-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "01a4ac99f4ba5367b86d23ecdb0f8ca3a8bd95216bc616daf4fb98535149abdf"
+    },
+    {
+      "file": "boy-big-head-accessory-1-walk-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "d7ce7c6c8666d1fc6b3fa875d2c492d8228b48a655e9322ed76aa4c9c424426b"
+    },
+    {
+      "file": "boy-big-head-accessory-2-walk-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "02c03170d79102838138ba68a2cd1a08d6c9538947defc929447e9e00c8af647"
+    },
+    {
+      "file": "boy-big-head-accessory-none-walk-6.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "52de14a6a579852991fc94d1a01ca7987c1e9c49b3a29757fd7be0d77eca0002"
+    },
+    {
+      "file": "boy-big-head-accessory-0-walk-6.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "12913af9651837ff1537d8564449f6dc18aa92f4b1f565b4b45169b5e4eb0d0e"
+    },
+    {
+      "file": "boy-big-head-accessory-1-walk-6.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "d33f6846418c5cb9a6dfe6fb129381cb0fa18b9ed5f78111abb4a5850dd35efa"
+    },
+    {
+      "file": "boy-big-head-accessory-2-walk-6.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "52de14a6a579852991fc94d1a01ca7987c1e9c49b3a29757fd7be0d77eca0002"
+    },
+    {
+      "file": "boy-chibi-pairwise-hair-hat-idle-0.png",
+      "cells": 12,
+      "group": "pairwise",
+      "sha256": "b2916c1b4ef7b540c2cf210e1ff8f3e17979f568f77dc2e44e9c582590464881"
+    },
+    {
+      "file": "boy-chibi-pairwise-hair-accessory-idle-0.png",
+      "cells": 12,
+      "group": "pairwise",
+      "sha256": "1edb260177f0cadd89d3b42f0d222075a821b3f15a0e229d295d5bb348fb3516"
+    },
+    {
+      "file": "boy-chibi-pairwise-hat-accessory-idle-0.png",
+      "cells": 16,
+      "group": "pairwise",
+      "sha256": "dbfb84218ceb6c7a9b9236b99e0fdc8811c64cd9c54d7f0b92a442d9d6848182"
+    },
+    {
+      "file": "boy-chibi-head-accessory-none-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "3f591f941babf3a9051455730e6937ae4ff092e87a380942e088067264c13f14"
+    },
+    {
+      "file": "boy-chibi-head-accessory-0-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "98f726ebd7eb4c419e111600ce7265ca0c734b9b124a5e2e58511386de9718db"
+    },
+    {
+      "file": "boy-chibi-head-accessory-1-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "2b2f5134da818bfbf5db102a689f1bbbd4a8bd5b1870d03c0b3c89e54fa07286"
+    },
+    {
+      "file": "boy-chibi-head-accessory-2-idle-0.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "3f591f941babf3a9051455730e6937ae4ff092e87a380942e088067264c13f14"
+    },
+    {
+      "file": "boy-chibi-head-accessory-none-greet-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "6cc91a1e677ce8ca9e5e58a0f8e49365e3f35491d86311315b04e1a640d9834d"
+    },
+    {
+      "file": "boy-chibi-head-accessory-0-greet-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "7871fe47afe910de862cfefddc2128edc021d2a2f05315dc2cced0b5f86de250"
+    },
+    {
+      "file": "boy-chibi-head-accessory-1-greet-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "b3f5eabb7b3f0655afaeb8a36e964a37520cda41254575cbe95deff0bd697d5d"
+    },
+    {
+      "file": "boy-chibi-head-accessory-2-greet-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "6cc91a1e677ce8ca9e5e58a0f8e49365e3f35491d86311315b04e1a640d9834d"
+    },
+    {
+      "file": "boy-chibi-head-accessory-none-speak-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "0fdf3c73cb7d84d56ff403930a6d1ffea92a0dac3dbb2f732fe19c2bf47f4771"
+    },
+    {
+      "file": "boy-chibi-head-accessory-0-speak-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "5693a6329605cb9d4579486617751dbadc9a1d839c40530bb235c3978077b2c6"
+    },
+    {
+      "file": "boy-chibi-head-accessory-1-speak-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "10f71ea7ea726b4ef8fdb1bddd2cd2f78eeeb78ddd9561dba1105573f23a2e63"
+    },
+    {
+      "file": "boy-chibi-head-accessory-2-speak-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "0fdf3c73cb7d84d56ff403930a6d1ffea92a0dac3dbb2f732fe19c2bf47f4771"
+    },
+    {
+      "file": "boy-chibi-head-accessory-none-celebrate-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "1490b606c790396ee52d4c980635f2ba8afe0c019cba4df53e3ecd8269a91e1a"
+    },
+    {
+      "file": "boy-chibi-head-accessory-0-celebrate-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "b367b933377949806e7e9318dd6f67815a31a25f26cbb5ae22e2d0e89feebe59"
+    },
+    {
+      "file": "boy-chibi-head-accessory-1-celebrate-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "ddd6ca2eb29bb0aa93b499b60cfe78ffbf6f709f352ed1927c7b15a629b3135e"
+    },
+    {
+      "file": "boy-chibi-head-accessory-2-celebrate-2.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "1490b606c790396ee52d4c980635f2ba8afe0c019cba4df53e3ecd8269a91e1a"
+    },
+    {
+      "file": "boy-chibi-head-accessory-none-eat-3.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "4943392c5395be86c8f327de05ce832a77ad848fbb556236f93a3a8567cc80d0"
+    },
+    {
+      "file": "boy-chibi-head-accessory-0-eat-3.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "d76c0b93fc40d8945e5c78d32c8c22e1a4e6f7481db7dc91544aa1a27a372a91"
+    },
+    {
+      "file": "boy-chibi-head-accessory-1-eat-3.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "d7703cbeba2373cb8a4bd13187d5e0a6508787b3b5586666b6d36eeb00a6b8e4"
+    },
+    {
+      "file": "boy-chibi-head-accessory-2-eat-3.png",
+      "cells": 12,
+      "group": "head",
+      "sha256": "4943392c5395be86c8f327de05ce832a77ad848fbb556236f93a3a8567cc80d0"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-none-idle-0.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "9e54aac34645bfd4f69e488b87b351b2abc0538fc7d1cc2cd6082ab5e0fb04c9"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-0-idle-0.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "6cc69eafa391cae73f5d04d92e26723d8eb465ef7fcf82cf084a664a75e279b3"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-1-idle-0.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "8e58e6f57a281849de99324fb20f13a51e08134931303d743863cff5649c0b0e"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-2-idle-0.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "0179c433e639d4ba103d462ea9e9f098bf0dbe11b358ab5901f33179b83a2a2c"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-none-greet-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "d6d820e5f16b41ebce26b72289b261ba69b4fb1e92c721d608cddc2b7d7c22f4"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-0-greet-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "a80ad1bcf721cfdd15c6d586d46981c8f29b6eba6fcd0d26e9aeb3320af1ecc9"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-1-greet-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "de3dc15c54ef5184ea6547ac0f9d6a0430f734addaeb15e0adeafca0dd1ddab4"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-2-greet-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "6f4d729b9f8bcce5ee7940446f84ff335087dfe665f907278abe5a2c2b01675e"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-none-speak-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "8916106ab0e365fe061c590e0dd473cf7ff75b92151d2a97185045896ed87c73"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-0-speak-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "bc2f724d6256f9f0e6c39667c282a38bfa916c477ef3c4c1a52ac6346b55bac8"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-1-speak-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "e30eccdd9cc5091d9c677f8b3cca8928a27f7bfa39d4d19e5f5e7bae3ba10207"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-2-speak-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "aa489fd948ce800a3adfc3dad77b6a33ee7fb5d4f2bfb196e141d6bc666ce577"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-none-celebrate-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "10787914821154d3722263337e1d4e5fdbedfdbb34624667d1d43529de71a869"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-0-celebrate-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "2ece37a31393a0034169220d9fff9a4c76affd1bc52a1431cd602cd9052cc4be"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-1-celebrate-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "f0f3ef89d21cd30b002e591557e5dd316470bb83162d87bf411df734f1982eb6"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-2-celebrate-2.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "f740c4bf8503d909935fba15a795385b672ba1cb70f982fdbe4634acce29a0e2"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-none-eat-3.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "0d5e57477040a8a6201b9c9389e3914f426b137e229886aa4831a5d17cfc9ed8"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-0-eat-3.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "92557ed0ed28e31f5363f85ceb574524388584085d6d0d05feae93cede126fe9"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-1-eat-3.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "2ca68552f1518b25885043ca44de1aa0038b92617c5eb1a9087a870804f2fd13"
+    },
+    {
+      "file": "boy-chibi-outfit-top-jacket-accessory-2-eat-3.png",
+      "cells": 12,
+      "group": "outfit",
+      "sha256": "b388a059e24efd80629ae378cab1df12aeabd28efee322e701af1de342af36a0"
+    }
+  ],
+  "history": {
+    "originalResolutionHeadPass": {
+      "sheets": 76,
+      "tiles": 928,
+      "findings": [
+        {
+          "file": "girl-big-head-accessory-2-idle-0.png",
+          "cells": "All rows/columns",
+          "description": "Brown bag strap stub outside viewer-right shoulder; rig agent fixing."
+        },
+        {
+          "file": "girl-chibi-pairwise-hair-hat-idle-0.png",
+          "cells": "Row3,columns2–4; most obvious column4. Also adult head sheets.",
+          "description": "Global hatted-hair crop creates flat rectangular top on exposed ponytail; rig agent replacing with actual hat occlusion."
+        }
+      ]
+    }
+  },
+  "counts": {
+    "head": 64,
+    "headOnlyPairwise": 12,
+    "chibiOutfit": 40
+  },
+  "assessedDetail": {
+    "description": "Narrow selected-top-colour strip within open jacket panel assessed with clothing reviewer; it is an undershirt aperture, not detached side artwork.",
+    "disposition": "not-a-defect"
+  },
+  "originalResolutionZooms": [
+    "girl-big-head-accessory-2-idle-0.png",
+    "girl-chibi-head-accessory-none-idle-0.png",
+    "girl-big-head-accessory-1-walk-6.png",
+    "girl-chibi-outfit-top-jacket-accessory-none-greet-2.png",
+    "girl-chibi-outfit-top-jacket-accessory-2-eat-3.png",
+    "boy-chibi-outfit-top-jacket-accessory-1-celebrate-2.png",
+    "boy-chibi-outfit-top-jacket-accessory-2-speak-2.png"
+  ],
+  "result": "No unresolved visual defects found within the reviewed scope",
+  "sourceHashes": {
+    "scripts/avatar/illustrated/rig.mjs": "d3ae968eac0ee70f41dda6455ae3f631a75ce8db39831b42c78b0489cba39859",
+    "scripts/avatar/illustrated/raster.mjs": "4927aafbc24cf48e0bc69ae90095d70d26febe70bc9084df279ce92d5686aa76",
+    "assets/avatar/illustrated-v2/source/girl-kit.png": "086d583df99d87c25150a856d456d2004653b4aeaf56e48b7a05098988fe0213",
+    "assets/avatar/illustrated-v2/source/boy-kit.png": "6ffb98397361baae16d50720d4208f3718c2d274ade5c68e581569d81c021297",
+    "assets/avatar/illustrated-v2/source/pixel-faces-v3.png": "600199940cb045fac8a7409bb5164fd1fd2626d240155a398a410e020e54ed0b",
+    "assets/avatar/illustrated-v2/source/details-kit.png": "c33028d7dacef7f99d1991ca85d707aa3a4b8a0d227589656d01de1ec9664e2a"
+  },
+  "finalPatchRecheck": {
+    "method": "All changed sheets re-inspected at original resolution; unchanged approvals preserved by SHA256 equality",
+    "changedSheets": 30,
+    "unchangedSheets": 86,
+    "files": [
+      "girl-big-pairwise-hair-hat-idle-0.png",
+      "girl-big-pairwise-hair-accessory-idle-0.png",
+      "girl-big-pairwise-hat-accessory-idle-0.png",
+      "girl-big-head-accessory-2-idle-0.png",
+      "girl-big-head-accessory-2-walk-2.png",
+      "girl-big-head-accessory-2-walk-6.png",
+      "girl-chibi-pairwise-hair-accessory-idle-0.png",
+      "girl-chibi-pairwise-hat-accessory-idle-0.png",
+      "girl-chibi-head-accessory-2-idle-0.png",
+      "girl-chibi-head-accessory-2-greet-2.png",
+      "girl-chibi-head-accessory-2-speak-2.png",
+      "girl-chibi-head-accessory-2-celebrate-2.png",
+      "girl-chibi-outfit-top-jacket-accessory-2-idle-0.png",
+      "girl-chibi-outfit-top-jacket-accessory-2-greet-2.png",
+      "girl-chibi-outfit-top-jacket-accessory-2-speak-2.png",
+      "girl-chibi-outfit-top-jacket-accessory-2-celebrate-2.png",
+      "boy-big-pairwise-hair-accessory-idle-0.png",
+      "boy-big-pairwise-hat-accessory-idle-0.png",
+      "boy-big-head-accessory-2-idle-0.png",
+      "boy-big-head-accessory-2-walk-6.png",
+      "boy-chibi-pairwise-hair-accessory-idle-0.png",
+      "boy-chibi-pairwise-hat-accessory-idle-0.png",
+      "boy-chibi-head-accessory-2-idle-0.png",
+      "boy-chibi-head-accessory-2-greet-2.png",
+      "boy-chibi-head-accessory-2-speak-2.png",
+      "boy-chibi-head-accessory-2-celebrate-2.png",
+      "boy-chibi-outfit-top-jacket-accessory-2-idle-0.png",
+      "boy-chibi-outfit-top-jacket-accessory-2-greet-2.png",
+      "boy-chibi-outfit-top-jacket-accessory-2-speak-2.png",
+      "boy-chibi-outfit-top-jacket-accessory-2-celebrate-2.png"
+    ]
+  },
+  "unresolvedFindings": [],
+  "limits": "Visual audit covers the named pairwise/head/clothing combinations and sampled poses in coverage.json. It is not every palette/frame/full-outfit permutation or native-device validation."
+}

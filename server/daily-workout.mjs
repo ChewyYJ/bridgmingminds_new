@@ -1,8 +1,8 @@
-import { randomUUID } from "node:crypto";
+import { GAMIFICATION_CONFIG } from "../shared/gamification.mjs";
 
 export const DAILY_ACTIVITY_XP = Object.freeze({
-  read_aloud: 10,
-  spin_speak: 15,
+  read_aloud: GAMIFICATION_CONFIG.rewards.read_aloud.xp,
+  spin_speak: GAMIFICATION_CONFIG.rewards.daily_practice.xp,
 });
 
 export function localDay(instant, timezone) {
@@ -45,7 +45,7 @@ export function workoutStreak(securedDays, today) {
  * The caller pins a receipt only after validating a submission. Completion reads
  * the persisted outcome and commits inside the same transaction as that outcome.
  */
-export function createDailyWorkoutService({ db, now = () => new Date() }) {
+export function createDailyWorkoutService({ db, now = () => new Date(), awardCompletion, getProgression }) {
   const user = async (uid) => {
     const row = await db.prepare("SELECT * FROM users WHERE id=?").get(uid);
     if (!row) throw new Error("Daily workout owner not found.");
@@ -90,7 +90,7 @@ export function createDailyWorkoutService({ db, now = () => new Date() }) {
   async function complete(uid, attemptId) {
     return db.transaction(async () => {
       await db.lockUser(uid);
-      const owner = await user(uid);
+      await user(uid);
       const receipt = await db
         .prepare(
           "SELECT * FROM daily_attempt_receipts WHERE attempt_id=? AND user_id=?",
@@ -144,63 +144,39 @@ export function createDailyWorkoutService({ db, now = () => new Date() }) {
           receipt.timezone,
           at,
         );
-      const xp = inserted.changes
-        ? DAILY_ACTIVITY_XP[receipt.activity_type]
-        : 0;
-      if (xp) {
-        await db
-          .prepare("INSERT INTO reward_ledger VALUES(?,?,?,?,?,?,?)")
-          .run(
-            randomUUID(),
-            uid,
-            `daily:${receipt.local_date}:${receipt.activity_type}`,
-            receipt.local_date,
-            "daily_activity",
-            JSON.stringify({ xp, attemptId }),
-            at,
-          );
-        await db.prepare("UPDATE users SET xp=xp+? WHERE id=?").run(xp, uid);
-      }
+      const reward = inserted.changes && awardCompletion
+        ? await awardCompletion(uid, {
+            eventId: `daily:${attemptId}`,
+            activityType: receipt.activity_type === "spin_speak" ? "daily_practice" : "read_aloud",
+            completionId: attemptId,
+            completedAt: at,
+            localDate: receipt.local_date,
+            timezone: receipt.timezone,
+            dedupeKey: `daily:${receipt.local_date}:${receipt.activity_type}`,
+          })
+        : null;
+      const xp = reward?.xpGranted || 0;
       const activities = await db
         .prepare(
           "SELECT activity_type FROM daily_activity_completions WHERE user_id=? AND local_date=?",
         )
         .all(uid, receipt.local_date);
-      let cosmeticGranted = false;
       if (activities.length === 2) {
-        const secured = await db
+        await db
           .prepare(
             `INSERT INTO daily_workout_days
           (user_id,local_date,secured_at) VALUES(?,?,?)
           ON CONFLICT(user_id,local_date) DO NOTHING`,
           )
           .run(uid, receipt.local_date, at);
-        if (secured.changes) {
-          cosmeticGranted = true;
-          const wallet = JSON.parse(owner.wallet);
-          wallet.seeds += 1;
-          await db
-            .prepare("UPDATE users SET wallet=? WHERE id=?")
-            .run(JSON.stringify(wallet), uid);
-          await db
-            .prepare("INSERT INTO reward_ledger VALUES(?,?,?,?,?,?,?)")
-            .run(
-              randomUUID(),
-              uid,
-              `daily:${receipt.local_date}:cosmetic`,
-              receipt.local_date,
-              "daily_cosmetic",
-              JSON.stringify({ seeds: 1 }),
-              at,
-            );
-        }
       }
       return {
         day: receipt.local_date,
         xp,
-        seeds: cosmeticGranted ? 1 : 0,
+        coins: reward?.coinsGranted || 0,
+        ...(reward ? { reward } : {}),
         completed: activities.length,
-        streakSecured: activities.length === 2,
+        streakSecured: reward?.streak.securedToday || Boolean((await getProgression?.(uid))?.streak.securedToday),
       };
     });
   }
@@ -228,13 +204,14 @@ export function createDailyWorkoutService({ db, now = () => new Date() }) {
         activities: Object.entries(DAILY_ACTIVITY_XP).map(([type, xp]) => ({
           type,
           xp,
+          coins: GAMIFICATION_CONFIG.rewards[type === "spin_speak" ? "daily_practice" : "read_aloud"].coins,
           completed: rows.some((row) => row.activity_type === type),
         })),
         xp: rows.reduce(
           (sum, row) => sum + DAILY_ACTIVITY_XP[row.activity_type],
           0,
         ),
-        streak: workoutStreak(
+        streak: (await getProgression?.(uid))?.streak || workoutStreak(
           secured.map((row) => row.local_date),
           day,
         ),

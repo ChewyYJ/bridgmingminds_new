@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createRequire } from "node:module";
+import childProcess from "node:child_process";
+import { createRequire, syncBuiltinESMExports } from "node:module";
+import { observePrivateFileOperations } from "./helpers/private-file-fixture.mjs";
 import { createAzureSpeech } from "../server/azure-speech.mjs";
 import {
   decodeSpeechAudio,
@@ -11,6 +13,32 @@ import {
   validatePcm,
 } from "../server/speech-audio.mjs";
 const require = createRequire(import.meta.url);
+function decoderFixture(t, directory) {
+  const executable = join(directory, "decoder.cjs");
+  const spawn = childProcess.spawn;
+  // Keep a real child process, pipes, termination and exit events on every OS.
+  // Windows cannot execute a POSIX shebang file directly. Only this fixture
+  // path is adapted; missing binaries still go through the actual spawn path.
+  const mocked = t.mock.method(childProcess, "spawn", (file, args, options) => {
+    if (file !== executable) return spawn(file, args, options);
+    assert.ok(!options.shell, "decoder must never invoke a shell");
+    assert.equal(options.windowsHide, true);
+    assert.deepEqual(options.stdio, ["pipe", "pipe", "pipe"]);
+    const input = args[args.indexOf("-i") + 1];
+    assert.equal(args[args.indexOf("-protocol_whitelist") + 1], input === "pipe:0" ? "pipe" : "file,pipe");
+    if (input !== "pipe:0") {
+      assert.equal(args[args.indexOf("-enable_drefs") + 1], "0");
+      assert.equal(args[args.indexOf("-use_absolute_path") + 1], "0");
+    }
+    return spawn(process.execPath, [executable, ...args], options);
+  });
+  syncBuiltinESMExports();
+  t.after(() => {
+    mocked.mock.restore();
+    syncBuiltinESMExports();
+  });
+  return executable;
+}
 function wave(samples = 16000) {
   const b = Buffer.alloc(44 + samples * 2);
   b.write("RIFF");
@@ -197,10 +225,10 @@ test("WAV decoding validates container, sample format and duration without a sub
 test("decoder failures, cancellation and timeouts are bounded and never leak process diagnostics", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "speech-decoder-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
-  const executable = join(directory, "decoder");
+  const executable = decoderFixture(t, directory);
   await writeFile(
     executable,
-    `#!${process.execPath}\nprocess.stdin.resume();process.stdin.on('end',()=>process.stdout.end(Buffer.alloc(32000)));`,
+    "process.stdin.resume();process.stdin.on('end',()=>process.stdout.end(Buffer.alloc(32000)));",
     { mode: 0o700 },
   );
   assert.equal(
@@ -211,6 +239,11 @@ test("decoder failures, cancellation and timeouts are bounded and never leak pro
     ).durationMs,
     1000,
   );
+  await writeFile(executable, "process.stderr.write('SECRET decoder diagnostics');process.exitCode=2;");
+  await assert.rejects(
+    decodeSpeechAudio(Buffer.from("x"), "audio/webm", { executable }),
+    error => error.code === "invalid_speech_audio" && !error.message.includes("SECRET"),
+  );
   await assert.rejects(
     decodeSpeechAudio(Buffer.from("x"), "audio/webm", {
       executable: "/missing/ffmpeg",
@@ -219,7 +252,7 @@ test("decoder failures, cancellation and timeouts are bounded and never leak pro
   );
   await writeFile(
     executable,
-    `#!${process.execPath}\nsetInterval(()=>{},1000);`,
+    "setInterval(()=>{},1000);",
     { mode: 0o700 },
   );
   await assert.rejects(
@@ -306,14 +339,15 @@ test("timeout, abort, missing configuration and unsupported locale fail before i
   );
 });
 
-test("seekable M4A copies are owner-only and removed on success, decoder failure and cancellation", async (t) => {
+test("seekable M4A copies request private permissions and are removed on success, decoder failure and cancellation", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "speech-seekable-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const temporaryRoot = join(directory, "scratch"),
-    executable = join(directory, "decoder");
+    executable = decoderFixture(t, directory);
+  const fileOperations = observePrivateFileOperations(t);
   await writeFile(
     executable,
-    `#!${process.execPath}\nconst fs=require('node:fs');const path=process.argv[process.argv.indexOf('-i')+1];if((fs.statSync(path).mode&511)!==384||fs.readFileSync(path).toString()!=='compressed-fixture')process.exit(2);process.stdout.end(Buffer.alloc(32000));`,
+    "const fs=require('node:fs');const path=process.argv[process.argv.indexOf('-i')+1];if((process.platform!=='win32'&&(fs.statSync(path).mode&511)!==384)||fs.readFileSync(path).toString()!=='compressed-fixture')process.exit(2);process.stdout.end(Buffer.alloc(32000));",
     { mode: 0o700 },
   );
   await decodeSpeechAudio(Buffer.from("compressed-fixture"), "audio/m4a", {
@@ -321,7 +355,13 @@ test("seekable M4A copies are owner-only and removed on success, decoder failure
     temporaryRoot,
   });
   const { readdir, stat } = await import("node:fs/promises");
-  assert.equal((await stat(temporaryRoot)).mode & 0o777, 0o700);
+  const copy = fileOperations.writeFile.find(([path]) => String(path).endsWith("input.m4a"));
+  assert.ok(copy, "the decoder receives a real seekable input file");
+  assert.equal(copy[2].mode, 0o600);
+  assert.equal(copy[2].flag, "wx", "private input must never overwrite an existing file");
+  assert.equal(fileOperations.chmod.find(([path]) => path === temporaryRoot)?.[1], 0o700);
+  if (process.platform !== "win32")
+    assert.equal((await stat(temporaryRoot)).mode & 0o777, 0o700);
   assert.deepEqual(await readdir(temporaryRoot), []);
   await assert.rejects(
     decodeSpeechAudio(Buffer.from("compressed-fixture"), "audio/m4a", {
@@ -333,7 +373,7 @@ test("seekable M4A copies are owner-only and removed on success, decoder failure
   assert.deepEqual(await readdir(temporaryRoot), []);
   await writeFile(
     executable,
-    `#!${process.execPath}\nsetInterval(()=>{},1000);`,
+    "setInterval(()=>{},1000);",
     { mode: 0o700 },
   );
   await assert.rejects(

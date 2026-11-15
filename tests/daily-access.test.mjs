@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createApp } from "../server/app.mjs";
 import { bridgeFixture } from "./helpers/bridge-fixture.mjs";
+import { silentWav } from "./helpers/silent-wav.mjs";
 const answer =
   "A small trial can test an idea. It gives people a chance to compare outcomes before a wider change.";
 async function fixture(t) {
@@ -90,9 +91,9 @@ async function fixture(t) {
       method,
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(body ? { "Content-Type": "application/json" } : {}),
+        ...(body ? { "Content-Type": Buffer.isBuffer(body) ? "audio/wav" : "application/json" } : {}),
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: Buffer.isBuffer(body) ? body : body ? JSON.stringify(body) : undefined,
     });
     return { status: response.status, data: await response.json() };
   }
@@ -106,14 +107,24 @@ async function fixture(t) {
     await ok(
       "/me",
       token,
-      { onboardingComplete: true, timezone: "UTC" },
+      { onboardingComplete: true, timezone: "UTC", consent: { recording: true } },
       "PATCH",
     );
     return token;
   }
   async function attempt(token, mode = "spin_speak") {
-    const session = await ok("/sessions", token, { mode });
-    return ok("/attempts", token, { sessionId: session.id, text: answer });
+    // Admission is independent of live news. Keep one fixed, valid prompt.
+    const session = await ok("/sessions", token, {
+      mode,
+      ...(mode === "spin_speak" ? { promptId: "society-shared-space" } : {}),
+    });
+    const audio = session.dailySpeakingJourney
+      ? await ok("/audio", token, silentWav()) : null;
+    return ok("/attempts", token, {
+      sessionId: session.id,
+      text: answer,
+      ...(audio ? { responseType: "audio", audioId: audio.id } : {}),
+    });
   }
   async function evaluate(token, attempt) {
     const queued = await ok(`/attempts/${attempt.id}/evaluate`, token, {});
@@ -200,7 +211,11 @@ test("outage and daily-cap retries recover after service midnight and keep the o
   assert.equal(limited.status, "failed");
   assert.match(limited.error, /daily speaking feedback request limit/);
   assert.equal(f.calls, 12);
-  assert.equal((await f.ok("/state", token)).xp, 10);
+  assert.equal((await f.ok("/state", token)).xp, 0);
+  const readingLedger = (await f.ok("/export", token)).gamificationData.ledger
+    .filter(item => item.activity_type === "read_aloud");
+  assert.equal(readingLedger.length, 1);
+  assert.equal(readingLedger[0].coins_delta, 3);
   await f.restart();
   assert.equal((await f.evaluate(token, pending)).status, "failed");
   assert.equal(f.calls, 12);
@@ -213,7 +228,7 @@ test("outage and daily-cap retries recover after service midnight and keep the o
     (item) => item.attempt_id === pending.id,
   );
   assert.equal(receipt.local_date, "2026-11-02");
-  assert.equal((await f.ok("/state", token)).xp, 25);
+  assert.equal((await f.ok("/state", token)).xp, 15);
   assert.equal(exported.securedDailyWorkouts.length, 1);
   assert.equal(exported.securedDailyWorkouts[0].local_date, "2026-11-02");
 });

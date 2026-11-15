@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Script } from "node:vm";
 import ts from "typescript";
+import { observePrivateFileOperations } from "./helpers/private-file-fixture.mjs";
 import {
   createAudioStorage,
   setupPrivateBucket,
@@ -55,16 +56,21 @@ function cloudFixture(
   return { options, requests, storage: createAudioStorage(options) };
 }
 
-test("local storage keeps old absolute audio paths and private file permissions", async (t) => {
+test("local storage keeps old absolute paths and requests exclusive private file creation", async (t) => {
   const dir = mkdtempSync(join(tmpdir(), "garden-audio-storage-"));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const storage = createAudioStorage({ storageDir: dir });
+  const fileOperations = observePrivateFileOperations(t);
   await storage.ready;
   assert.equal(storage.kind, "local");
   const result = await storage.put("original-id", bytes, "audio/webm");
   assert.equal(result.path, join(dir, "original-id"));
   assert.deepEqual(await storage.read(result.path), bytes);
-  assert.equal(statSync(result.path).mode & 0o777, 0o600);
+  const write = fileOperations.writeFile.find(([path]) => path === result.path);
+  assert.equal(write?.[2].mode, 0o600);
+  assert.equal(write?.[2].flag, "wx");
+  if (process.platform !== "win32")
+    assert.equal(statSync(result.path).mode & 0o777, 0o600);
   assert.equal(await storage.exists(result.path), true);
   assert.equal((await storage.inspect(result.path)).size, bytes.length);
   await assert.rejects(storage.put("original-id", bytes, "audio/webm"), {

@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createApp } from "../server/app.mjs";
 import { bridgeFixture } from "./helpers/bridge-fixture.mjs";
+import { silentWav } from "./helpers/silent-wav.mjs";
 const answer =
   "A shared garden can bring neighbours together. Caring for plants gives people a reason to meet.";
 async function fixture(t) {
@@ -37,6 +38,19 @@ async function fixture(t) {
     storageDir: join(dir, "audio"),
     apiKey: "offline-learner-key",
     disableWorker: true,
+    newsService: {
+      getFeed: async () => ({
+        status: "ok",
+        articles: [{
+          id: "learner-fixture-news",
+          title: "Neighbours study a new community garden",
+          source: "Fixture News",
+          sourceUrl: "https://example.com/learner-garden",
+          publishedAt: "2026-11-15T09:00:00Z",
+          category: "Society",
+        }],
+      }),
+    },
   });
   server = await new Promise((resolve) => {
     const current = service.app.listen(0, "127.0.0.1", () => resolve(current));
@@ -52,9 +66,9 @@ async function fixture(t) {
       method,
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(body ? { "Content-Type": "application/json" } : {}),
+        ...(body ? { "Content-Type": Buffer.isBuffer(body) ? "audio/wav" : "application/json" } : {}),
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: Buffer.isBuffer(body) ? body : body ? JSON.stringify(body) : undefined,
     });
     return { status: response.status, data: await response.json() };
   }
@@ -65,6 +79,7 @@ async function fixture(t) {
   }
   async function guest() {
     const { token } = await ok("/auth/guest", null, {});
+    await ok("/me", token, { consent: { recording: true } }, "PATCH");
     await ok("/daily-workout/enroll", token, {});
     return token;
   }
@@ -73,8 +88,11 @@ async function fixture(t) {
       mode: "spin_speak",
       ...(promptId ? { promptId } : {}),
     });
+    const audio = await ok("/audio", token, silentWav());
     const attempt = await ok("/attempts", token, {
       sessionId: session.id,
+      responseType: "audio",
+      audioId: audio.id,
       text: answer,
       selfReflection: "PRIVATE_LEARNER_NOTE_NOT_EVIDENCE",
     });

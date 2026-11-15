@@ -18,6 +18,8 @@ import { installReadingSpeech } from "./reading-speech-jobs.mjs";
 import { installReadingSample } from "./reading-sample.mjs";
 import { createUsageService } from "./usage.mjs";
 import { createDailyWorkoutService } from "./daily-workout.mjs";
+import { createGamificationService } from "./gamification.mjs";
+import { installAIDebate } from "./ai-debate.mjs";
 import { installReadAloud } from "./read-aloud.mjs";
 import { evaluateBridge } from "./bridge-evaluator.mjs";
 import { createWordBloomService } from "./wordbloom.mjs";
@@ -207,6 +209,7 @@ export function createApp(options = {}) {
   // Snapshot provider settings once, so changing the environment mid-job cannot
   // mix the reported model, credentials and request parameters. Restart to apply.
   const providerConfig = readProviderConfig(options);
+  const completionTime = () => new Date(options.dailyNow?.() ?? Date.now()).toISOString();
   const gardenNow = () => Number(options.gardenNow?.() ?? Date.now());
   // Constructor-only override for the isolated browser-test server. Production
   // startup uses the default; authentication and per-user limits stay separate.
@@ -309,8 +312,10 @@ export function createApp(options = {}) {
     });
   const getUser = async (uid) =>
     await db.prepare("SELECT * FROM users WHERE id=?").get(uid);
-  const dailyWorkout = createDailyWorkoutService({ db, now: options.dailyNow });
-  const wordBloom = createWordBloomService({ db, now: options.wordBloomNow || options.dailyNow });
+  const gamification = createGamificationService({ db, now: options.dailyNow });
+  const awardCompletion = gamification.awardValidatedCompletion;
+  const dailyWorkout = createDailyWorkoutService({ db, now: options.dailyNow, awardCompletion, getProgression: gamification.summary });
+  const wordBloom = createWordBloomService({ db, now: options.wordBloomNow || options.dailyNow, awardCompletion });
   const learner = createLearnerProfile({ db, now: options.dailyNow });
   const getSession = async (sid, uid) => {
     const row = await db
@@ -481,8 +486,8 @@ export function createApp(options = {}) {
         password ? passwordHash(password) : null,
         json(profile),
         json({
-          seeds: 1,
-          water: 2,
+          seeds: 0,
+          water: 0,
           sunlight: 0,
         }),
         json(plots),
@@ -490,53 +495,8 @@ export function createApp(options = {}) {
       );
     return profile;
   };
-  const getQuests = async (uid) => {
-    const day = await userDay(uid);
-    const ledger = await db
-      .prepare("SELECT source_key FROM reward_ledger WHERE user_id=? AND day=?")
-      .all(uid, day);
-    const keys = new Set(ledger.map((l) => l.source_key));
-    return [
-      {
-        id: "morning-bloom",
-        title: "Morning Bloom",
-        description: "Complete one Spin & Speak.",
-        target: 1,
-        mode: "spin_speak",
-      },
-      {
-        id: "deep-roots",
-        title: "Deep Roots",
-        description: "Complete a debate and consider another view.",
-        target: 1,
-        mode: "debate",
-      },
-      {
-        id: "curious-reader",
-        title: "Curious Reader",
-        description: "Reflect on one reading.",
-        target: 1,
-        mode: "read_reflect",
-      },
-      {
-        id: "second-bloom",
-        title: "Second Bloom",
-        description: "Try a feedback-based retry.",
-        target: 1,
-        mode: "retry",
-      },
-    ].map((q) => ({
-      ...q,
-      progress: keys.has(`quest:${day}:${q.mode}`) ? 1 : 0,
-      completed: keys.has(`quest:${day}:${q.mode}`),
-      reward: {
-        seeds: 0,
-        water: 1,
-        sunlight: 1,
-        xp: 10,
-      },
-    }));
-  };
+  // Legacy garden quests are retired; their records remain exportable.
+  const getQuests = async () => [];
   const normalizePlots = async (user) => {
     const plots = parse(user.plots);
     const careStart = gardenNow();
@@ -643,10 +603,12 @@ export function createApp(options = {}) {
       const monday = new Date(`${day}T12:00:00Z`);
       monday.setUTCDate(monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7));
       const weekStart = monday.toISOString().slice(0, 10);
+      const progression = await gamification.summary(uid);
       return {
         profile,
-        wallet: parse(user.wallet),
-        plots: await normalizePlots(user),
+        wallet: { coins: progression.coins },
+        gamification: progression,
+        plots: parse(user.plots),
         archivedPlants: (
           await db
             .prepare(
@@ -657,12 +619,12 @@ export function createApp(options = {}) {
         attempts: attempts.filter((attempt) => attempt.mode !== "read_aloud").map(presentAttempt),
         readAloudAttempts: attempts.filter((attempt) => attempt.mode === "read_aloud"),
         dailyWorkout: daily,
-        quests: daily ? [] : await getQuests(uid),
+        quests: [],
         journal: (
           await db.prepare("SELECT data FROM journal WHERE user_id=?").all(uid)
         ).map((r) => parse(r.data)),
         decorations: parse(user.decorations),
-        streak: daily ? daily.streak.current : streak,
+        streak: progression.streak.current,
         practiceWeek: {
           day,
           timezone,
@@ -674,7 +636,7 @@ export function createApp(options = {}) {
             .reverse(),
           target: 3,
         },
-        xp: user.xp,
+        xp: progression.xp,
         usage: await usage.snapshot(uid),
       };
     });
@@ -725,7 +687,7 @@ export function createApp(options = {}) {
       );
       res.setHeader(
         "Access-Control-Allow-Methods",
-        "GET, POST, PATCH, DELETE, OPTIONS",
+        "GET, POST, PUT, PATCH, DELETE, OPTIONS",
       );
     }
     if (req.method === "OPTIONS") return res.sendStatus(204);
@@ -1347,90 +1309,24 @@ export function createApp(options = {}) {
     }),
   );
   async function grantRewards(uid, attempt, session) {
-    const owner = await getUser(uid);
-    if (parse(owner.profile).dailyWorkout) {
-      const receipt = await db.prepare("SELECT attempt_id FROM daily_attempt_receipts WHERE attempt_id=? AND user_id=?").get(attempt.id, uid);
-      if (receipt && attempt.mode === "spin_speak") {
-        const reward = await dailyWorkout.complete(uid, attempt.id);
-        return { xp: reward.xp, seeds: reward.seeds, water: 0, sunlight: 0, reason: reward.xp ? "First Spin & Speak completed today. Both daily activities are required to secure your streak." : "Extra practice. Today's Spin & Speak XP was already awarded." };
-      }
-      return { seeds: 0, water: 0, sunlight: 0, xp: 0, reason: "Optional practice. Daily XP and streak credit come from Read Aloud and Spin & Speak." };
+    const receipt = await db.prepare("SELECT attempt_id FROM daily_attempt_receipts WHERE attempt_id=? AND user_id=?").get(attempt.id, uid);
+    if (receipt && attempt.mode === "spin_speak") {
+      const result = await dailyWorkout.complete(uid, attempt.id);
+      return {
+        ...result,
+        reason: result.coins ? "Daily practice completed. Your Coins and XP are saved." : "Practice saved. Today's reward has already been earned.",
+      };
     }
-    const user = await getUser(uid),
-      wallet = parse(user.wallet),
-      day = await userDay(uid);
-    const total = {
-      seeds: 0,
-      water: 0,
-      sunlight: 0,
-      xp: 0,
-      reason: "",
-    };
-    const grant = async (key, kind, reward) => {
-      if (
-        await db
-          .prepare(
-            "SELECT id FROM reward_ledger WHERE user_id=? AND source_key=?",
-          )
-          .get(uid, key)
-      )
-        return false;
-      await db
-        .prepare("INSERT INTO reward_ledger VALUES(?,?,?,?,?,?,?)")
-        .run(id(), uid, key, day, kind, json(reward), now());
-      for (const k of ["seeds", "water", "sunlight", "xp"])
-        total[k] += reward[k] || 0;
-      return true;
-    };
-    const count = async (kind) =>
-      (
-        await db
-          .prepare(
-            "SELECT COUNT(*) count FROM reward_ledger WHERE user_id=? AND day=? AND kind=?",
-          )
-          .get(uid, day, kind)
-      ).count;
-    const kind = attempt.retryOf ? "retry" : session.mode;
-    if (attempt.retryOf) {
-      if ((await count("retry")) < 3)
-        await grant(`retry:${session.id}`, "retry", {
-          sunlight: 2,
-          xp: 5,
-        });
-    } else if (
-      (await count("completion")) < 10 &&
-      !(await db
-        .prepare(
-          "SELECT id FROM reward_ledger WHERE user_id=? AND source_key=?",
-        )
-        .get(uid, `content:${day}:${session.mode}:${session.prompt.id}`))
-    ) {
-      await grant(`session:${session.id}`, "completion", {
-        seeds: 1,
-        water: 2,
-        xp: 20,
-      });
-      await grant(
-        `content:${day}:${session.mode}:${session.prompt.id}`,
-        "content",
-        {},
-      );
-    }
-    await grant(`quest:${day}:${kind}`, "quest", {
-      water: 1,
-      sunlight: 1,
-      xp: 10,
+    // Only persisted server-validated completions can earn rewards.
+    if (attempt.mode !== "read_reflect")
+      return { coins: 0, xp: 0, reason: "Practice saved. Use Daily Practice or Debate Street to earn eligible rewards." };
+    const reward = await gamification.awardCompletion(uid, {
+      eventId: 'attempt:' + attempt.id,
+      activityType: "read_reflect",
+      completionId: attempt.id,
     });
-    for (const k of ["seeds", "water", "sunlight"]) wallet[k] += total[k];
-    await db
-      .prepare("UPDATE users SET wallet=?,xp=xp+? WHERE id=?")
-      .run(json(wallet), total.xp, uid);
-    total.reason = total.xp
-      ? attempt.retryOf
-        ? "Thoughtful retry and any first daily quest bonus."
-        : "Practice completion and any first daily quest bonus."
-      : "This challenge has already earned its reward or today’s resource cap is reached. Keep practising freely.";
-    return total;
+    return { coins: reward.coinsGranted, xp: reward.xpGranted, reward,
+      reason: reward.coinsGranted ? "Read & Reflect completed. Your rewards are saved." : "Practice saved. Eligible rewards have already been earned." };
   }
   async function runJob(jobId) {
     if (closed || working.has(jobId)) return;
@@ -1516,15 +1412,15 @@ export function createApp(options = {}) {
         if (!current.evaluation) {
           current.evaluation = evaluation;
           current.status = "completed";
+          current.completedAt = completionTime();
           await saveAttempt(current);
           await learner.record(job.user_id, current, session, evaluation);
           current.rewards = await grantRewards(job.user_id, current, session);
           current.wordBloom = await wordBloom.processAttempt(job.user_id, current, evaluation, { discover: !session.dailySpeakingJourney });
-          current.completedAt = now();
           await saveAttempt(current);
           const latestSession = await getSession(session.id, job.user_id);
           latestSession.status = "completed";
-          latestSession.completedAt = now();
+          latestSession.completedAt = current.completedAt;
           await saveSession(latestSession);
         }
         await db
@@ -1897,6 +1793,27 @@ export function createApp(options = {}) {
       }),
   });
   const { transcribeAudio, cleanupAudio } = audioRoutes;
+  installAIDebate({ app, db, wrap, providerConfig, usage, audioRoutes,
+    resolveAuth, awardValidatedCompletion: awardCompletion, now: options.debateNow,
+    providerRequest: options.debateProviderRequest, rewardPreview: gamification.rewardPreview("ai_debate") });
+  app.get("/api/gamification", wrap(async (req, res) => res.json(await gamification.summary(req.userId))));
+  app.put("/api/avatar/equipment", mutate(async (req, res) => {
+    res.json(await gamification.equip(req.userId, req.body.selection || req.body));
+  }));
+  app.post("/api/avatar/purchase", mutate(async (req, res) => {
+    res.json(await gamification.purchaseItem(req.userId, req.body));
+  }));
+  app.patch("/api/avatar/care", mutate(async (req, res) => {
+    res.json(await gamification.updateSettings(req.userId, req.body));
+  }));
+  app.post("/api/food/purchase", mutate(async (req, res) => {
+    res.json(await gamification.purchaseFood(req.userId, req.body));
+  }));
+  // The garden remains available in account exports; its old resource economy
+  // is retired. No route may spend or award Seeds, Water or Sunlight.
+  app.use("/api/garden", (_req, res) => res.status(410).json({
+    error: "The garden has retired. Your saved history is preserved; use your avatar and Coins instead.",
+  }));
   installReadingSample({ app, db, wrap, getAttempt, audioRoutes, audioStorage, limit, failure, options });
   const readingSpeech = installReadingSpeech({ app, db, wrap, getAttempt, getUser, wordBloom,
     audioRoutes, audioStorage, limit, cloud, options, daily: dailyWorkout });
@@ -2492,6 +2409,7 @@ export function createApp(options = {}) {
       res.json({
         exportedAt: now(),
         ...(await getState(req.userId)),
+        gamificationData: await gamification.exportData(req.userId),
         wordBloom: await wordBloom.exportData(req.userId),
         skillObservations: await learner.exportData(req.userId),
         speechJobs: (await db.prepare("SELECT * FROM speech_jobs WHERE user_id=? ORDER BY created_at").all(req.userId)).map((row) => ({ ...row, data: JSON.parse(row.data) })),
@@ -2576,7 +2494,7 @@ export function createApp(options = {}) {
       );
     res.status(error.status || 500).json({
       ...(error.code?.startsWith("provider_") ||
-      error.code?.startsWith("guided_response_")
+      error.code?.startsWith("guided_response_") || error.code?.startsWith("debate_")
         ? {
             code: error.code,
           }

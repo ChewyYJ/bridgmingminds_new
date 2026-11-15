@@ -12,7 +12,7 @@ import { NewsFeed } from "../components/NewsFeed";
 import { DailyHome, DailyPlanIntro } from "./DailyWorkout";
 export const modeNames = {
   spin_speak: "Spin & Speak",
-  debate: "Debate Garden",
+  debate: "AI Debate",
   read_reflect: "Read & Reflect",
 };
 const activities: [Mode, string, string, string][] = [

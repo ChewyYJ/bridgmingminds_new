@@ -235,9 +235,15 @@ test("speaking → WordBloom → reading → adaptive review uses actual persist
   const completed = await f.read(token, assignment, [
     { vocabularyId: word.id, outcome: "needs_practice" },
   ]);
-  assert.equal((await f.ok("/state", token)).xp, 25);
+  assert.equal((await f.ok("/state", token)).xp, 15);
   assert.equal((await f.ok("/state", token)).dailyWorkout.completed, 2);
+  assert.equal(completed.result.rewards.coins, 3);
   await f.ok(completed.path, token, completed.body);
+  const readingLedger = (await f.ok("/export", token)).gamificationData.ledger
+    .filter(item => item.activity_type === "read_aloud");
+  assert.equal(readingLedger.length, 1);
+  assert.equal(readingLedger[0].coins_delta, 3);
+  assert.equal(readingLedger[0].xp_delta, 0);
   word = (await f.ok("/wordbloom/summary", token)).words[0];
   assert.equal(word.exposureCount, 1);
   assert.equal(word.intervalDays, 1);
@@ -250,7 +256,7 @@ test("speaking → WordBloom → reading → adaptive review uses actual persist
   assert.equal(word.productiveUseCandidates, 1);
   assert.equal(word.exposureCount, 1);
   assert.equal(word.status, "introduced");
-  assert.equal((await f.ok("/state", token)).xp, 25);
+  assert.equal((await f.ok("/state", token)).xp, 15);
   f.setTime("2026-11-13T08:00:01.000Z");
   await f.restart();
   const review = await f.ok("/read-aloud/assignment", token);
@@ -321,7 +327,7 @@ test("concurrent assignment, dismissal, explicit familiarity, opt-out and accoun
   assert.equal(invalid.status, 400);
   await f.ok("/me", token, { wordBloomEnabled: false }, "PATCH");
   await f.read(token, assignments[0]);
-  assert.equal((await f.ok("/state", token)).xp, 25);
+  assert.equal((await f.ok("/state", token)).xp, 15);
   assert.equal(
     (await f.ok("/wordbloom/summary", token)).words[0].exposureCount,
     0,

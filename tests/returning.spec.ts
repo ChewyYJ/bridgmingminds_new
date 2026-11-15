@@ -2,7 +2,10 @@ import { continueWithoutReflection } from "./helpers/self-reflection";
 import { expect, test, type Page } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
-import type { AppState, Attempt } from "../src/types";
+import type { AppState as CurrentAppState, Attempt, LegacyWallet } from "../src/types";
+// The skipped garden journey documents the retired UI. Current return,
+// wallet persistence and debate recovery are exercised in role3.spec.ts.
+type AppState = Omit<CurrentAppState, "wallet"> & { wallet: LegacyWallet };
 import { getThoughtGuide } from "../shared/thought-guide.mjs";
 
 test.use({
@@ -95,7 +98,7 @@ async function completeViaApi(page: Page, sessionId: string, retryOf?: string) {
   return (await state(page)).attempts.find((item) => item.id === attempt.id)!;
 }
 
-test("a small daily practice earns its quest, unlocks a plant, and offers a useful return visit", async ({
+test.skip("retired garden journey: replaced by Coins, avatar care and role3.spec.ts", async ({
   page,
 }) => {
   const before = await seedUser(page, "Returning Gardener");

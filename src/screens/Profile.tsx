@@ -18,11 +18,13 @@ export function ProfileScreen({
   state,
   openAttempt,
   openSettings,
+  openAvatar,
   start,
 }: {
   state: AppState;
   openAttempt: (a: Attempt) => void;
   openSettings: () => void;
+  openAvatar?: () => void;
   start: (m: Mode) => void;
 }) {
   const [mode, setMode] = useState<Mode>("spin_speak");
@@ -57,51 +59,42 @@ export function ProfileScreen({
     Array.from(groups.values()).sort((a, b) => b.length - a.length)[0] || [];
   const show = comparable.length >= 3;
   const plot = comparable.slice(0, 7).reverse();
-  const badges = [
-    {
-      icon: "feather",
-      title: "First seed",
-      copy: "Complete your first practice",
-      earned: completed.length > 0,
-    },
-    {
-      icon: "refresh-cw",
-      title: "Second bloom",
-      copy: "Try a feedback-based retry",
-      earned: completed.some((a) => a.retryOf),
-    },
-    {
-      icon: "compass",
-      title: "Curious explorer",
-      copy: "Try all three practice modes",
-      earned: new Set(completed.map((a) => a.mode)).size === 3,
-    },
-    {
-      icon: "sun",
-      title: "Fully grown",
-      copy: "Grow a plant to its final stage",
-      earned: state.plots.some((p) => p.growth === 3),
-    },
-  ];
+  const badges = (state.gamification?.achievements || []).map((achievement) => ({
+    icon: "award",
+    title: achievement.title,
+    copy: achievement.description,
+    earned: !!achievement.earnedAt,
+  }));
   return (
     <View style={{ gap: 24 }}>
       <View
         style={{
           flexDirection: "row",
+          flexWrap: "wrap",
           justifyContent: "space-between",
           alignItems: "center",
           gap: 10,
         }}
       >
-        <View style={{ gap: 8, flex: 1 }}>
+        <View style={{ gap: 8, flexGrow: 1, flexBasis: 220 }}>
           <Text style={T.title}>Your progress</Text>
         </View>
-        <Button
-          label="Settings"
-          icon="settings"
-          variant="secondary"
-          onPress={openSettings}
-        />
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          {openAvatar && (
+            <Button
+              label="My avatar"
+              icon="smile"
+              variant="secondary"
+              onPress={openAvatar}
+            />
+          )}
+          <Button
+            label="Settings"
+            icon="settings"
+            variant="secondary"
+            onPress={openSettings}
+          />
+        </View>
       </View>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 14 }}>
         {[
@@ -130,7 +123,7 @@ export function ProfileScreen({
       {state.profile.dailyWorkout ? <LearnerProfile start={() => start("spin_speak")} /> : null}
       {state.dailyWorkout ? <Card style={{ gap: 10 }}>
         <Text style={T.h2}>Daily workout · {state.dailyWorkout.completed}/2</Text>
-        <Text style={T.body}>{state.dailyWorkout.streak.securedToday ? "Today’s streak is secured." : "Both Read Aloud and Spin & Speak are required to secure today’s streak."}</Text>
+        <Text style={T.body}>{state.dailyWorkout.streak.securedToday ? "Today’s streak is secured." : "One eligible learning activity keeps your streak going. Both daily activities together earn 5 Coins."}</Text>
         <Text style={T.small}>{state.dailyWorkout.streak.current} day streak · longest {state.dailyWorkout.streak.longest} · {state.dailyWorkout.timezone}. XP recognises participation; it does not measure mastery.</Text>
       </Card> : null}
       {!!state.readAloudAttempts?.length ? <Card style={{ gap: 12 }}>

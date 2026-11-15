@@ -1,6 +1,6 @@
 export type Mode = "spin_speak" | "debate" | "read_reflect";
 export type Page =
-  "home" | "play" | "discover" | "garden" | "profile" | "settings";
+  "home" | "play" | "discover" | "garden" | "profile" | "settings" | "avatar" | "food" | "achievements" | "debate-street" | "tournament" | "daily-practice";
 export interface Profile {
   id: string;
   displayName: string;
@@ -18,6 +18,16 @@ export interface Profile {
   createdAt: string;
 }
 export interface Wallet {
+  coins: number;
+  /** @deprecated Read only when importing historical garden snapshots. */
+  seeds?: number;
+  /** @deprecated Read only when importing historical garden snapshots. */
+  water?: number;
+  /** @deprecated Read only when importing historical garden snapshots. */
+  sunlight?: number;
+}
+/** Frozen historical garden data; never an active wallet. */
+export interface LegacyWallet {
   seeds: number;
   water: number;
   sunlight: number;
@@ -113,7 +123,7 @@ export interface Attempt {
   createdAt: string;
   completedAt?: string;
   evaluation?: Evaluation;
-  rewards?: Partial<Wallet> & { xp?: number; reason?: string };
+  rewards?: Partial<Wallet> & { xp?: number; reason?: string; reward?: import("../shared/gamification.mjs").RewardReceipt };
   articleId?: string;
 }
 export interface Quest {
@@ -133,6 +143,7 @@ export interface JournalEntry {
   createdAt: string;
 }
 export interface AppState {
+  gamification?: import("../shared/gamification.mjs").GamificationSummary;
   dailyWorkout?: DailyWorkoutStatus | null;
   readAloudAttempts?: ReadAloudAttempt[];
   profile: Profile;
@@ -161,6 +172,7 @@ export interface DailyWorkoutStatus {
   activities: {
     type: "read_aloud" | "spin_speak";
     xp: number;
+    coins?: number;
     completed: boolean;
   }[];
   streak: { current: number; longest: number; securedToday: boolean };
@@ -254,7 +266,7 @@ export interface ReadAloudAttempt {
   };
   rewards: {
     xp: number;
-    seeds: number;
+    coins: number;
     completed: number;
     streakSecured: boolean;
   };

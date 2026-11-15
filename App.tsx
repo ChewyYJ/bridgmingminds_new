@@ -16,7 +16,6 @@ import {
   T,
   Icon,
   Button,
-  Resource,
   ErrorNote,
   Card,
 } from "./src/components/ui";
@@ -24,28 +23,27 @@ import { BridgingMindsMark } from "./src/components/art";
 import { useApp } from "./src/lib/state";
 import { Home, Play, Discover } from "./src/screens/Dashboard";
 import { Onboarding } from "./src/screens/Onboarding";
-import { Garden } from "./src/screens/Garden";
 import { ProfileScreen } from "./src/screens/Profile";
 import { Settings } from "./src/screens/Settings";
 import { Practice, Feedback } from "./src/screens/Practice";
 import Friends from "./src/screens/Friends";
 import { ReadAloud } from "./src/screens/DailyWorkout";
 import { VocabularyReviewScreen } from "./src/screens/VocabularyReview";
+import { GamificationHome, FoodCareScreen, AchievementsScreen, AvatarWardrobeScreen, DebateScreen } from "./src/role3";
+import { CoinBalance } from "./src/role3/common";
 import { Mode, Page, Article, Attempt } from "./src/types";
 import { api } from "./src/lib/api";
 const nav: [Page, string, string][] = [
   ["home", "Home", "home"],
-  ["play", "Play", "grid"],
-  ["discover", "Discover", "compass"],
-  ["garden", "Homeland", "feather"],
-  ["profile", "Profile", "user"],
+  ["avatar", "Avatar", "user"],
+  ["debate-street", "Debate", "message-circle"],
+  ["profile", "Progress", "bar-chart-2"],
 ];
 export default function App() {
   const pageScroll = useRef<ScrollView>(null);
   const showResultFromTop = useCallback(() => {
     pageScroll.current?.scrollTo({ y: 0, animated: false });
   }, []);
-  const [gardenInteracting, setGardenInteracting] = useState(false);
   const { state, articles, loading, error, refresh, logout, bootstrap } =
     useApp();
   const { width } = useWindowDimensions();
@@ -58,7 +56,7 @@ export default function App() {
     id?: string;
   }>();
   const page = (pathname.split("/")[1] || "home") as
-    Page | "practice" | "attempt" | "friends" | "read-aloud" | "vocabulary-review";
+    Page | "practice" | "attempt" | "friends" | "read-aloud" | "vocabulary-review" | "avatar";
   const practiceMode: Mode =
     params.mode === "debate" || params.mode === "read_reflect"
       ? params.mode
@@ -66,6 +64,7 @@ export default function App() {
   const navigate = (p: Page) =>
     router.push(p === "home" ? "/" : (`/${p}` as any));
   function start(mode: Mode, article?: Article, retry?: Attempt) {
+    if (mode === "debate" && !retry) { router.push("/debate-street" as any); return; }
     router.push({
       pathname: "/practice",
       params: {
@@ -144,7 +143,7 @@ export default function App() {
                 key={id}
                 label={label}
                 icon={icon}
-                active={page === id || (id === "play" && page === "friends")}
+                active={page === id || (id === "debate-street" && page === "tournament") || (id === "play" && page === "friends")}
                 onPress={() => navigate(id)}
               />
             ))}
@@ -222,32 +221,13 @@ export default function App() {
                     gap: width < 450 ? 4 : 9,
                   }}
                 >
-                  <Resource
-                    icon="feather"
-                    value={state.wallet.seeds}
-                    label={width < 450 ? "" : "seeds"}
-                  />
-                  <Resource
-                    icon="droplet"
-                    value={state.wallet.water}
-                    label={width < 450 ? "" : "water"}
-                    color="#E8F0EE"
-                  />
-                  {width > 550 && (
-                    <Resource
-                      icon="sun"
-                      value={state.wallet.sunlight}
-                      label="sunlight"
-                      color="#F6EFD9"
-                    />
-                  )}
+                  <CoinBalance value={state.wallet.coins || 0} />
                 </View>
               ) : null}
             </View>
           )}
           <ScrollView
             ref={pageScroll}
-            scrollEnabled={!gardenInteracting}
             key={pathname + JSON.stringify(params)}
             style={{ flex: 1, ...(dailySpeaking ? { backgroundColor: C.cream } : {}) }}
             contentContainerStyle={{
@@ -265,23 +245,32 @@ export default function App() {
               ) : page === "vocabulary-review" ? (
                 <VocabularyReviewScreen key={state.profile.id} />
               ) : page === "home" ? (
+                <GamificationHome
+                  onOpenAvatar={() => navigate("avatar")} onOpenFood={() => navigate("food")}
+                  onOpenAchievements={() => navigate("achievements")} onOpenDebate={() => navigate("debate-street")}
+                  onDailyPractice={() => navigate("daily-practice")}
+                  onReadAloud={() => router.push("/read-aloud" as any)} onReadReflect={() => navigate("discover")} />
+              ) : page === "daily-practice" ? (
                 <Home {...common} />
               ) : page === "play" ? (
                 <Play {...common} />
               ) : page === "discover" ? (
                 <Discover {...common} />
+              ) : page === "avatar" ? (
+                <AvatarWardrobeScreen key={state.profile.id} onBack={() => navigate("home")} />
+              ) : page === "food" ? (
+                <FoodCareScreen key={state.profile.id} onBack={() => navigate("home")} />
+              ) : page === "achievements" ? (
+                <AchievementsScreen onBack={() => navigate("home")} />
+              ) : page === "debate-street" || page === "tournament" ? (
+                <DebateScreen key={`${state.profile.id}-${page}`} initialTab={page === "tournament" ? "lobby" : "street"} onBack={() => navigate("home")} onScrollTop={showResultFromTop} />
               ) : page === "friends" ? (
                 <Friends
                   userId={state.profile.id}
                   onClose={() => navigate("play")}
                 />
               ) : page === "garden" ? (
-                <Garden
-                  state={state}
-                  refresh={refresh}
-                  startPractice={() => navigate("play")}
-                  onInteractionChange={setGardenInteracting}
-                />
+                <AvatarWardrobeScreen key={state.profile.id} onBack={() => navigate("home")} />
               ) : page === "profile" ? (
                 <ProfileScreen
                   state={state}
@@ -292,6 +281,7 @@ export default function App() {
                     } as any)
                   }
                   openSettings={() => navigate("settings")}
+                  openAvatar={() => router.push("/avatar" as any)}
                   start={start}
                 />
               ) : page === "settings" ? (
@@ -321,7 +311,7 @@ export default function App() {
                   onResultShown={showResultFromTop}
                   onGarden={() => {
                     void refresh();
-                    navigate("garden");
+                    navigate("avatar");
                   }}
                 />
               ) : page === "attempt" ? (
@@ -336,7 +326,7 @@ export default function App() {
                     )
                   }
                   refresh={refresh}
-                  onGarden={() => navigate("garden")}
+                  onGarden={() => navigate("avatar")}
                 />
               ) : (
                 <Home {...common} />
@@ -352,7 +342,7 @@ export default function App() {
                   accessibilityLabel={`Navigate to ${label}`}
                   accessibilityState={{
                     selected:
-                      page === id || (id === "play" && page === "friends"),
+                      page === id || (id === "debate-street" && page === "tournament") || (id === "play" && page === "friends"),
                   }}
                   onPress={() => navigate(id)}
                   style={{
@@ -367,7 +357,7 @@ export default function App() {
                     name={icon}
                     size={20}
                     color={
-                      page === id || (id === "play" && page === "friends")
+                      page === id || (id === "debate-street" && page === "tournament") || (id === "play" && page === "friends")
                         ? C.forest
                         : "#9A9F94"
                     }
@@ -375,12 +365,12 @@ export default function App() {
                   <Text
                     style={{
                       fontFamily:
-                        page === id || (id === "play" && page === "friends")
+                        page === id || (id === "debate-street" && page === "tournament") || (id === "play" && page === "friends")
                           ? "DMBold"
                           : "DM",
                       fontSize: 10,
                       color:
-                        page === id || (id === "play" && page === "friends")
+                        page === id || (id === "debate-street" && page === "tournament") || (id === "play" && page === "friends")
                           ? C.forest
                           : "#848D7D",
                     }}

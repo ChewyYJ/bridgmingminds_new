@@ -1,0 +1,1794 @@
+{
+  "version": 1,
+  "scope": "screenshot-follow-up-head-fit-and-three-food-actions",
+  "sourceHashes": {
+    "scripts/avatar/illustrated/rig.mjs": "c3e08701d0c681052b53b8517d35ae691c49e1fa64911cf1db1fe124606a2a46",
+    "scripts/avatar/illustrated/raster.mjs": "4927aafbc24cf48e0bc69ae90095d70d26febe70bc9084df279ce92d5686aa76",
+    "scripts/avatar/illustrated/meals.mjs": "584d3063c776c7fd85801f1fe069f4f2ba708fcff129533462bd838753b35ea9",
+    "shared/avatar-customization.mjs": "743a273b8a41408b7f817fe70d86872646e4258cb25be7cc4ab121aae59b3dd3",
+    "scripts/avatar/qa-pairwise.mjs": "22ad9769ca9c77369d68c64a39f9b73079b7f7cb94bde9a533db7dd33b8e4752",
+    "scripts/avatar/qa-head-food.mjs": "79860e69455cad4c193e19384dfd1e82671f383ca5c592e5f5e7ffe744ab38fc",
+    "scripts/avatar/lib/render.mjs": "ad32922a3245d0b2ef92012de0d10d021b5e18df619052f3846ea1a1c5a36552",
+    "assets/avatar/illustrated-v2/source/girl-kit.png": "086d583df99d87c25150a856d456d2004653b4aeaf56e48b7a05098988fe0213",
+    "assets/avatar/illustrated-v2/source/boy-kit.png": "6ffb98397361baae16d50720d4208f3718c2d274ade5c68e581569d81c021297",
+    "assets/avatar/illustrated-v2/source/details-kit.png": "c33028d7dacef7f99d1991ca85d707aa3a4b8a0d227589656d01de1ec9664e2a",
+    "assets/avatar/illustrated-v2/source/pixel-faces-v3.png": "600199940cb045fac8a7409bb5164fd1fd2626d240155a398a410e020e54ed0b",
+    "assets/avatar/food-v1/ramen.png": "01e50208b0d98f314d76db33fb453b59a00d94579642ccee0137bf6aa57b4c2a",
+    "assets/avatar/food-v1/ramen-held.png": "a4f954ce84dd0d3b5e3f85fd10a9737562a168dfe3f26195059304d07808c681",
+    "assets/avatar/food-v1/onigiri.png": "9a82a3d0ffbd3913074ef04774de798fb941fc89110b3a54bd264d29402b0bc2",
+    "assets/avatar/food-v1/bento.png": "2f53cf584d14abf298f1fe775a6f155c382966287a9918a31d68949c958831c7"
+  },
+  "palettes": {
+    "skin": "peach",
+    "hair": "espresso",
+    "eyes": "hazel"
+  },
+  "sheets": [
+    {
+      "file": "girl-big-head-idle-0.png",
+      "group": "head",
+      "collection": "girl",
+      "style": "big",
+      "animation": "idle",
+      "frame": 0,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "a1a36a05396981d9c7d107d3699823210b34f70c7780275fbdec7cab99152785"
+    },
+    {
+      "file": "girl-big-head-walk-2.png",
+      "group": "head",
+      "collection": "girl",
+      "style": "big",
+      "animation": "walk",
+      "frame": 2,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "60dfdc0a3b9ca60f33c0feebe2129d05ffe5589772e3f45b5d674cdfa8f4f2c4"
+    },
+    {
+      "file": "girl-chibi-head-idle-0.png",
+      "group": "head",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "idle",
+      "frame": 0,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "47e6e59f02f092316933f3ca6b695525c71624dd1991bc84f14a8a103dd20677"
+    },
+    {
+      "file": "girl-chibi-head-greet-2.png",
+      "group": "head",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "greet",
+      "frame": 2,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "908999c96eabca123b4227d2f3d3760f9c7f8ab0ef9a7f1339f1bc39614c55f4"
+    },
+    {
+      "file": "girl-chibi-head-celebrate-2.png",
+      "group": "head",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "celebrate",
+      "frame": 2,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "39351c5e532bc92c86b8da35141e3e0c211a7229a7fdb7df4abdaecdd22706bd"
+    },
+    {
+      "file": "girl-chibi-head-eat-3.png",
+      "group": "head",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "eat",
+      "frame": 3,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "ada8a5f9710209e622ce29d7c5be35ee31334b347ed2ca0d61e218374fa22db3"
+    },
+    {
+      "file": "girl-chibi-head-eatOnigiri-3.png",
+      "group": "head",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "eatOnigiri",
+      "frame": 3,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "d0e412bb1be970980260488c249e0b8b73abbaa6b346cb37ea60c180e45ff96b"
+    },
+    {
+      "file": "girl-chibi-head-eatBento-3.png",
+      "group": "head",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "eatBento",
+      "frame": 3,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "db1220c658d3e989c1c0d0d137587425cbddeb5608502a931380ab0983d34d76"
+    },
+    {
+      "file": "girl-eat-frames.png",
+      "group": "food-frames",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "eat",
+      "frameOrder": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ],
+      "selection": {
+        "hair": 1,
+        "jacket": 0
+      },
+      "tiles": 8,
+      "sha256": "4619eb9c8dd870a82560f8fc07e36e46a15be49000cf087d744dd0088917736f"
+    },
+    {
+      "file": "girl-eat-clothing.png",
+      "group": "food-clothing",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "eat",
+      "frame": 3,
+      "rows": [
+        "Top 0",
+        "Top 1",
+        "Top 2"
+      ],
+      "columns": [
+        "No jacket",
+        "Jacket 0",
+        "Jacket 1",
+        "Jacket 2"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 1,
+            "jacket": null,
+            "top": 0
+          },
+          {
+            "hair": 1,
+            "jacket": 0,
+            "top": 0
+          },
+          {
+            "hair": 1,
+            "jacket": 1,
+            "top": 0
+          },
+          {
+            "hair": 1,
+            "jacket": 2,
+            "top": 0
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "jacket": null,
+            "top": 1
+          },
+          {
+            "hair": 1,
+            "jacket": 0,
+            "top": 1
+          },
+          {
+            "hair": 1,
+            "jacket": 1,
+            "top": 1
+          },
+          {
+            "hair": 1,
+            "jacket": 2,
+            "top": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "jacket": null,
+            "top": 2
+          },
+          {
+            "hair": 1,
+            "jacket": 0,
+            "top": 2
+          },
+          {
+            "hair": 1,
+            "jacket": 1,
+            "top": 2
+          },
+          {
+            "hair": 1,
+            "jacket": 2,
+            "top": 2
+          }
+        ]
+      ],
+      "tiles": 12,
+      "sha256": "8038e53e1d38c6229cec2db520f08da3c177729343f2dc471044642e34441ca3"
+    },
+    {
+      "file": "girl-eatOnigiri-frames.png",
+      "group": "food-frames",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "eatOnigiri",
+      "frameOrder": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ],
+      "selection": {
+        "hair": 1,
+        "jacket": 0
+      },
+      "tiles": 8,
+      "sha256": "54b2b11131e8a3c742ca60b07d67fd851ced110fc3e7116add9cf33cf5c5607d"
+    },
+    {
+      "file": "girl-eatOnigiri-clothing.png",
+      "group": "food-clothing",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "eatOnigiri",
+      "frame": 3,
+      "rows": [
+        "Top 0",
+        "Top 1",
+        "Top 2"
+      ],
+      "columns": [
+        "No jacket",
+        "Jacket 0",
+        "Jacket 1",
+        "Jacket 2"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 1,
+            "jacket": null,
+            "top": 0
+          },
+          {
+            "hair": 1,
+            "jacket": 0,
+            "top": 0
+          },
+          {
+            "hair": 1,
+            "jacket": 1,
+            "top": 0
+          },
+          {
+            "hair": 1,
+            "jacket": 2,
+            "top": 0
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "jacket": null,
+            "top": 1
+          },
+          {
+            "hair": 1,
+            "jacket": 0,
+            "top": 1
+          },
+          {
+            "hair": 1,
+            "jacket": 1,
+            "top": 1
+          },
+          {
+            "hair": 1,
+            "jacket": 2,
+            "top": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "jacket": null,
+            "top": 2
+          },
+          {
+            "hair": 1,
+            "jacket": 0,
+            "top": 2
+          },
+          {
+            "hair": 1,
+            "jacket": 1,
+            "top": 2
+          },
+          {
+            "hair": 1,
+            "jacket": 2,
+            "top": 2
+          }
+        ]
+      ],
+      "tiles": 12,
+      "sha256": "9495bf1a3804f88655318f22fa757f94c908756f262e7ee36efc399ab84bb5c6"
+    },
+    {
+      "file": "girl-eatBento-frames.png",
+      "group": "food-frames",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "eatBento",
+      "frameOrder": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ],
+      "selection": {
+        "hair": 1,
+        "jacket": 0
+      },
+      "tiles": 8,
+      "sha256": "81da91377fd1e9fcb792ce715dd4104406fda84667ceb77773e3eb37524a6f8f"
+    },
+    {
+      "file": "girl-eatBento-clothing.png",
+      "group": "food-clothing",
+      "collection": "girl",
+      "style": "chibi",
+      "animation": "eatBento",
+      "frame": 3,
+      "rows": [
+        "Top 0",
+        "Top 1",
+        "Top 2"
+      ],
+      "columns": [
+        "No jacket",
+        "Jacket 0",
+        "Jacket 1",
+        "Jacket 2"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 1,
+            "jacket": null,
+            "top": 0
+          },
+          {
+            "hair": 1,
+            "jacket": 0,
+            "top": 0
+          },
+          {
+            "hair": 1,
+            "jacket": 1,
+            "top": 0
+          },
+          {
+            "hair": 1,
+            "jacket": 2,
+            "top": 0
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "jacket": null,
+            "top": 1
+          },
+          {
+            "hair": 1,
+            "jacket": 0,
+            "top": 1
+          },
+          {
+            "hair": 1,
+            "jacket": 1,
+            "top": 1
+          },
+          {
+            "hair": 1,
+            "jacket": 2,
+            "top": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "jacket": null,
+            "top": 2
+          },
+          {
+            "hair": 1,
+            "jacket": 0,
+            "top": 2
+          },
+          {
+            "hair": 1,
+            "jacket": 1,
+            "top": 2
+          },
+          {
+            "hair": 1,
+            "jacket": 2,
+            "top": 2
+          }
+        ]
+      ],
+      "tiles": 12,
+      "sha256": "4ddf9b0a237610017d2d5342aead0785f21292d0a37cdb7eff509d5a9a97d336"
+    },
+    {
+      "file": "boy-big-head-idle-0.png",
+      "group": "head",
+      "collection": "boy",
+      "style": "big",
+      "animation": "idle",
+      "frame": 0,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "17e461427e2a26cf2bc6686ec3617642c74d29540ecc7166734931d2a0142ce3"
+    },
+    {
+      "file": "boy-big-head-walk-2.png",
+      "group": "head",
+      "collection": "boy",
+      "style": "big",
+      "animation": "walk",
+      "frame": 2,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "10d4efc0a766bcc03db477379b43968d32b922de626b5cbd72220e46aa68eff2"
+    },
+    {
+      "file": "boy-chibi-head-idle-0.png",
+      "group": "head",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "idle",
+      "frame": 0,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "7395f4685a1a3c5fe318976214c426b7ea2da8f149446f3e4659b1bf11bd3e99"
+    },
+    {
+      "file": "boy-chibi-head-greet-2.png",
+      "group": "head",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "greet",
+      "frame": 2,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "1430573a9a21caa58c682b639e1305a795c1d0d25e169586617fbd5642dd677f"
+    },
+    {
+      "file": "boy-chibi-head-celebrate-2.png",
+      "group": "head",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "celebrate",
+      "frame": 2,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "76b73f1dba56993a9158048452bdf90656eb60498280ea5a87af2aab8c7bc5b4"
+    },
+    {
+      "file": "boy-chibi-head-eat-3.png",
+      "group": "head",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "eat",
+      "frame": 3,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "62ed40a4802f19e7efbe300d867b99abb68ba957507c81557d4af74875cff34d"
+    },
+    {
+      "file": "boy-chibi-head-eatOnigiri-3.png",
+      "group": "head",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "eatOnigiri",
+      "frame": 3,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "be7a185a32a0ae28a70e8827829cf9d88f3a169ded9379263615f70dc5634f7a"
+    },
+    {
+      "file": "boy-chibi-head-eatBento-3.png",
+      "group": "head",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "eatBento",
+      "frame": 3,
+      "rows": [
+        "Hair 0",
+        "Hair 1",
+        "Hair 2"
+      ],
+      "columns": [
+        "No accessory",
+        "Glasses",
+        "Headphones"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "accessory": null
+          },
+          {
+            "hair": 0,
+            "accessory": 0
+          },
+          {
+            "hair": 0,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 1,
+            "accessory": null
+          },
+          {
+            "hair": 1,
+            "accessory": 0
+          },
+          {
+            "hair": 1,
+            "accessory": 1
+          }
+        ],
+        [
+          {
+            "hair": 2,
+            "accessory": null
+          },
+          {
+            "hair": 2,
+            "accessory": 0
+          },
+          {
+            "hair": 2,
+            "accessory": 1
+          }
+        ]
+      ],
+      "tiles": 9,
+      "sha256": "7e10f80b11c04558ced55e8ffc8bbaf236db469a14b6e205bed728e5045488ae"
+    },
+    {
+      "file": "boy-eat-frames.png",
+      "group": "food-frames",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "eat",
+      "frameOrder": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ],
+      "selection": {
+        "hair": 0,
+        "jacket": 0
+      },
+      "tiles": 8,
+      "sha256": "f8966b8acd6954f66f9237998be35f55b6f20840fb02d21ae92f8ac00e78dfe4"
+    },
+    {
+      "file": "boy-eat-clothing.png",
+      "group": "food-clothing",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "eat",
+      "frame": 3,
+      "rows": [
+        "Top 0",
+        "Top 1",
+        "Top 2"
+      ],
+      "columns": [
+        "No jacket",
+        "Jacket 0",
+        "Jacket 1",
+        "Jacket 2"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "jacket": null,
+            "top": 0
+          },
+          {
+            "hair": 0,
+            "jacket": 0,
+            "top": 0
+          },
+          {
+            "hair": 0,
+            "jacket": 1,
+            "top": 0
+          },
+          {
+            "hair": 0,
+            "jacket": 2,
+            "top": 0
+          }
+        ],
+        [
+          {
+            "hair": 0,
+            "jacket": null,
+            "top": 1
+          },
+          {
+            "hair": 0,
+            "jacket": 0,
+            "top": 1
+          },
+          {
+            "hair": 0,
+            "jacket": 1,
+            "top": 1
+          },
+          {
+            "hair": 0,
+            "jacket": 2,
+            "top": 1
+          }
+        ],
+        [
+          {
+            "hair": 0,
+            "jacket": null,
+            "top": 2
+          },
+          {
+            "hair": 0,
+            "jacket": 0,
+            "top": 2
+          },
+          {
+            "hair": 0,
+            "jacket": 1,
+            "top": 2
+          },
+          {
+            "hair": 0,
+            "jacket": 2,
+            "top": 2
+          }
+        ]
+      ],
+      "tiles": 12,
+      "sha256": "88ad1ce00933d656f376e5ff9b84c59967172fc918de6fa89fdfa4aade953445"
+    },
+    {
+      "file": "boy-eatOnigiri-frames.png",
+      "group": "food-frames",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "eatOnigiri",
+      "frameOrder": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ],
+      "selection": {
+        "hair": 0,
+        "jacket": 0
+      },
+      "tiles": 8,
+      "sha256": "e0c611d2a0e76332e87911ffb2e91424db3ebdd2fe4a69f2c44e18b729db5a82"
+    },
+    {
+      "file": "boy-eatOnigiri-clothing.png",
+      "group": "food-clothing",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "eatOnigiri",
+      "frame": 3,
+      "rows": [
+        "Top 0",
+        "Top 1",
+        "Top 2"
+      ],
+      "columns": [
+        "No jacket",
+        "Jacket 0",
+        "Jacket 1",
+        "Jacket 2"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "jacket": null,
+            "top": 0
+          },
+          {
+            "hair": 0,
+            "jacket": 0,
+            "top": 0
+          },
+          {
+            "hair": 0,
+            "jacket": 1,
+            "top": 0
+          },
+          {
+            "hair": 0,
+            "jacket": 2,
+            "top": 0
+          }
+        ],
+        [
+          {
+            "hair": 0,
+            "jacket": null,
+            "top": 1
+          },
+          {
+            "hair": 0,
+            "jacket": 0,
+            "top": 1
+          },
+          {
+            "hair": 0,
+            "jacket": 1,
+            "top": 1
+          },
+          {
+            "hair": 0,
+            "jacket": 2,
+            "top": 1
+          }
+        ],
+        [
+          {
+            "hair": 0,
+            "jacket": null,
+            "top": 2
+          },
+          {
+            "hair": 0,
+            "jacket": 0,
+            "top": 2
+          },
+          {
+            "hair": 0,
+            "jacket": 1,
+            "top": 2
+          },
+          {
+            "hair": 0,
+            "jacket": 2,
+            "top": 2
+          }
+        ]
+      ],
+      "tiles": 12,
+      "sha256": "28463589bab0bfa30ec8b5158b05a80ca32c19bcb7826cb24dbc5fbcc3c65d5b"
+    },
+    {
+      "file": "boy-eatBento-frames.png",
+      "group": "food-frames",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "eatBento",
+      "frameOrder": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ],
+      "selection": {
+        "hair": 0,
+        "jacket": 0
+      },
+      "tiles": 8,
+      "sha256": "cc1af0333a6024324ca2e3afc0192a935c9b618b123089f263522159d81264a1"
+    },
+    {
+      "file": "boy-eatBento-clothing.png",
+      "group": "food-clothing",
+      "collection": "boy",
+      "style": "chibi",
+      "animation": "eatBento",
+      "frame": 3,
+      "rows": [
+        "Top 0",
+        "Top 1",
+        "Top 2"
+      ],
+      "columns": [
+        "No jacket",
+        "Jacket 0",
+        "Jacket 1",
+        "Jacket 2"
+      ],
+      "selections": [
+        [
+          {
+            "hair": 0,
+            "jacket": null,
+            "top": 0
+          },
+          {
+            "hair": 0,
+            "jacket": 0,
+            "top": 0
+          },
+          {
+            "hair": 0,
+            "jacket": 1,
+            "top": 0
+          },
+          {
+            "hair": 0,
+            "jacket": 2,
+            "top": 0
+          }
+        ],
+        [
+          {
+            "hair": 0,
+            "jacket": null,
+            "top": 1
+          },
+          {
+            "hair": 0,
+            "jacket": 0,
+            "top": 1
+          },
+          {
+            "hair": 0,
+            "jacket": 1,
+            "top": 1
+          },
+          {
+            "hair": 0,
+            "jacket": 2,
+            "top": 1
+          }
+        ],
+        [
+          {
+            "hair": 0,
+            "jacket": null,
+            "top": 2
+          },
+          {
+            "hair": 0,
+            "jacket": 0,
+            "top": 2
+          },
+          {
+            "hair": 0,
+            "jacket": 1,
+            "top": 2
+          },
+          {
+            "hair": 0,
+            "jacket": 2,
+            "top": 2
+          }
+        ]
+      ],
+      "tiles": 12,
+      "sha256": "4d446712489d9db6fd06dc38843c5bb6193962f0882e8a39971beddfa6e22d53"
+    }
+  ],
+  "gifs": [
+    {
+      "file": "girl-eat.gif",
+      "collection": "girl",
+      "animation": "eat",
+      "sha256": "a1a91c965ee066437916c3b93ecb24fc2a92c85fadcdbe3123d4c6bf2af5bd55",
+      "frames": 8
+    },
+    {
+      "file": "girl-eatOnigiri.gif",
+      "collection": "girl",
+      "animation": "eatOnigiri",
+      "sha256": "849205e820f531724920cbaf50fb95f5928d6b887e2306f91b93c5a8a9c6e459",
+      "frames": 8
+    },
+    {
+      "file": "girl-eatBento.gif",
+      "collection": "girl",
+      "animation": "eatBento",
+      "sha256": "4932a43ec797cb0a0b7a016f6310cd92d171e8431c50568f99051a505f46e289",
+      "frames": 8
+    },
+    {
+      "file": "boy-eat.gif",
+      "collection": "boy",
+      "animation": "eat",
+      "sha256": "5bca5307f02dfe17080b6121f4db7d0009e617c5aad9a93811b0769d8a3fc385",
+      "frames": 8
+    },
+    {
+      "file": "boy-eatOnigiri.gif",
+      "collection": "boy",
+      "animation": "eatOnigiri",
+      "sha256": "99bdd515d33f0ba7458b08c9b4d6259798886d8633e7d34ed1b37b9838a92814",
+      "frames": 8
+    },
+    {
+      "file": "boy-eatBento.gif",
+      "collection": "boy",
+      "animation": "eatBento",
+      "sha256": "9fb0ea75673cff09a7c890e8706baa8b2a9bf37707b7333871b9d5ad1c78bf0a",
+      "frames": 8
+    }
+  ],
+  "totalTiles": 264,
+  "limits": "Focused coverage, not a full wardrobe rerun or native-device validation. Rendered output is not visual approval. Read visual-review.json for reviewed hashes."
+}

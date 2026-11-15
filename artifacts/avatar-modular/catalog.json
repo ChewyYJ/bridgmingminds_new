@@ -1,0 +1,296 @@
+[
+  {
+    "id": "boy-hair-sweep",
+    "name": "Side sweep",
+    "category": "hair",
+    "collection": "boy",
+    "preview": "boy-hair.png"
+  },
+  {
+    "id": "boy-hair-curls",
+    "name": "Short curls",
+    "category": "hair",
+    "collection": "boy",
+    "preview": "boy-hair.png"
+  },
+  {
+    "id": "boy-hair-curtains",
+    "name": "Curtain cut",
+    "category": "hair",
+    "collection": "boy",
+    "preview": "boy-hair.png"
+  },
+  {
+    "id": "boy-hat-field-cap",
+    "name": "Field cap",
+    "category": "hat",
+    "collection": "boy",
+    "preview": "boy-hat.png"
+  },
+  {
+    "id": "boy-hat-rib-beanie",
+    "name": "Ribbed beanie",
+    "category": "hat",
+    "collection": "boy",
+    "preview": "boy-hat.png"
+  },
+  {
+    "id": "boy-hat-canvas-bucket",
+    "name": "Canvas bucket",
+    "category": "hat",
+    "collection": "boy",
+    "preview": "boy-hat.png"
+  },
+  {
+    "id": "boy-top-everyday-tee",
+    "name": "Everyday tee",
+    "category": "top",
+    "collection": "boy",
+    "preview": "boy-top.png"
+  },
+  {
+    "id": "boy-top-sage-polo",
+    "name": "Sage polo",
+    "category": "top",
+    "collection": "boy",
+    "preview": "boy-top.png"
+  },
+  {
+    "id": "boy-top-stripe-knit",
+    "name": "Stripe knit",
+    "category": "top",
+    "collection": "boy",
+    "preview": "boy-top.png"
+  },
+  {
+    "id": "boy-jacket-city-overshirt",
+    "name": "City overshirt",
+    "category": "jacket",
+    "collection": "boy",
+    "preview": "boy-jacket.png"
+  },
+  {
+    "id": "boy-jacket-weekend-bomber",
+    "name": "Weekend bomber",
+    "category": "jacket",
+    "collection": "boy",
+    "preview": "boy-jacket.png"
+  },
+  {
+    "id": "boy-jacket-slate-denim",
+    "name": "Slate denim jacket",
+    "category": "jacket",
+    "collection": "boy",
+    "preview": "boy-jacket.png"
+  },
+  {
+    "id": "boy-bottom-school-trousers",
+    "name": "School Trousers",
+    "category": "bottom",
+    "collection": "boy",
+    "preview": "boy-bottom.png"
+  },
+  {
+    "id": "boy-bottom-cargo-pants",
+    "name": "Cargo Pants",
+    "category": "bottom",
+    "collection": "boy",
+    "preview": "boy-bottom.png"
+  },
+  {
+    "id": "boy-bottom-blue-jeans",
+    "name": "Blue Jeans",
+    "category": "bottom",
+    "collection": "boy",
+    "preview": "boy-bottom.png"
+  },
+  {
+    "id": "boy-shoes-white-sneakers",
+    "name": "White Sneakers",
+    "category": "shoes",
+    "collection": "boy",
+    "preview": "boy-shoes.png"
+  },
+  {
+    "id": "boy-shoes-brown-boots",
+    "name": "Brown Boots",
+    "category": "shoes",
+    "collection": "boy",
+    "preview": "boy-shoes.png"
+  },
+  {
+    "id": "boy-shoes-black-loafers",
+    "name": "Black Loafers",
+    "category": "shoes",
+    "collection": "boy",
+    "preview": "boy-shoes.png"
+  },
+  {
+    "id": "boy-accessory-square-glasses",
+    "name": "Square glasses",
+    "category": "accessory",
+    "collection": "boy",
+    "preview": "boy-accessory.png"
+  },
+  {
+    "id": "boy-accessory-studio-headphones",
+    "name": "Studio headphones",
+    "category": "accessory",
+    "collection": "boy",
+    "preview": "boy-accessory.png"
+  },
+  {
+    "id": "boy-accessory-canvas-messenger",
+    "name": "Canvas messenger",
+    "category": "accessory",
+    "collection": "boy",
+    "preview": "boy-accessory.png"
+  },
+  {
+    "id": "girl-hair-waves",
+    "name": "Soft waves",
+    "category": "hair",
+    "collection": "girl",
+    "preview": "girl-hair.png"
+  },
+  {
+    "id": "girl-hair-bob",
+    "name": "Classic bob",
+    "category": "hair",
+    "collection": "girl",
+    "preview": "girl-hair.png"
+  },
+  {
+    "id": "girl-hair-ponytail",
+    "name": "High ponytail",
+    "category": "hair",
+    "collection": "girl",
+    "preview": "girl-hair.png"
+  },
+  {
+    "id": "girl-hat-wool-beret",
+    "name": "Wool beret",
+    "category": "hat",
+    "collection": "girl",
+    "preview": "girl-hat.png"
+  },
+  {
+    "id": "girl-hat-newsboy-cap",
+    "name": "Newsboy cap",
+    "category": "hat",
+    "collection": "girl",
+    "preview": "girl-hat.png"
+  },
+  {
+    "id": "girl-hat-ribbon-sunhat",
+    "name": "Ribbon sunhat",
+    "category": "hat",
+    "collection": "girl",
+    "preview": "girl-hat.png"
+  },
+  {
+    "id": "girl-top-cotton-tee",
+    "name": "Cotton tee",
+    "category": "top",
+    "collection": "girl",
+    "preview": "girl-top.png"
+  },
+  {
+    "id": "girl-top-sage-blouse",
+    "name": "Sage blouse",
+    "category": "top",
+    "collection": "girl",
+    "preview": "girl-top.png"
+  },
+  {
+    "id": "girl-top-oat-rib-knit",
+    "name": "Oat rib knit",
+    "category": "top",
+    "collection": "girl",
+    "preview": "girl-top.png"
+  },
+  {
+    "id": "girl-jacket-tailored-blazer",
+    "name": "Tailored blazer",
+    "category": "jacket",
+    "collection": "girl",
+    "preview": "girl-jacket.png"
+  },
+  {
+    "id": "girl-jacket-soft-cardigan",
+    "name": "Soft cardigan",
+    "category": "jacket",
+    "collection": "girl",
+    "preview": "girl-jacket.png"
+  },
+  {
+    "id": "girl-jacket-sage-cropped",
+    "name": "Sage cropped jacket",
+    "category": "jacket",
+    "collection": "girl",
+    "preview": "girl-jacket.png"
+  },
+  {
+    "id": "girl-bottom-wide-trousers",
+    "name": "Wide Trousers",
+    "category": "bottom",
+    "collection": "girl",
+    "preview": "girl-bottom.png"
+  },
+  {
+    "id": "girl-bottom-blue-jeans",
+    "name": "Blue Jeans",
+    "category": "bottom",
+    "collection": "girl",
+    "preview": "girl-bottom.png"
+  },
+  {
+    "id": "girl-bottom-pleated-skirt",
+    "name": "Pleated Skirt",
+    "category": "bottom",
+    "collection": "girl",
+    "preview": "girl-bottom.png"
+  },
+  {
+    "id": "girl-shoes-chunky-sneakers",
+    "name": "Chunky Sneakers",
+    "category": "shoes",
+    "collection": "girl",
+    "preview": "girl-shoes.png"
+  },
+  {
+    "id": "girl-shoes-penny-loafers",
+    "name": "Penny Loafers",
+    "category": "shoes",
+    "collection": "girl",
+    "preview": "girl-shoes.png"
+  },
+  {
+    "id": "girl-shoes-ankle-boots",
+    "name": "Ankle Boots",
+    "category": "shoes",
+    "collection": "girl",
+    "preview": "girl-shoes.png"
+  },
+  {
+    "id": "girl-accessory-round-glasses",
+    "name": "Round glasses",
+    "category": "accessory",
+    "collection": "girl",
+    "preview": "girl-accessory.png"
+  },
+  {
+    "id": "girl-accessory-slim-headphones",
+    "name": "Slim headphones",
+    "category": "accessory",
+    "collection": "girl",
+    "preview": "girl-accessory.png"
+  },
+  {
+    "id": "girl-accessory-mini-crossbody",
+    "name": "Mini crossbody",
+    "category": "accessory",
+    "collection": "girl",
+    "preview": "girl-accessory.png"
+  }
+]

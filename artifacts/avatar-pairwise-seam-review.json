@@ -1,0 +1,870 @@
+{
+  "reviewer": "/root/learning_repo_read",
+  "scope": "72 non-head category-pair sheets plus12 enlarged seam sheets",
+  "sourceHashes": {
+    "scripts/avatar/illustrated/rig.mjs": "d3ae968eac0ee70f41dda6455ae3f631a75ce8db39831b42c78b0489cba39859",
+    "scripts/avatar/illustrated/raster.mjs": "4927aafbc24cf48e0bc69ae90095d70d26febe70bc9084df279ce92d5686aa76",
+    "assets/avatar/illustrated-v2/source/girl-kit.png": "086d583df99d87c25150a856d456d2004653b4aeaf56e48b7a05098988fe0213",
+    "assets/avatar/illustrated-v2/source/boy-kit.png": "6ffb98397361baae16d50720d4208f3718c2d274ade5c68e581569d81c021297",
+    "assets/avatar/illustrated-v2/source/pixel-faces-v3.png": "600199940cb045fac8a7409bb5164fd1fd2626d240155a398a410e020e54ed0b",
+    "assets/avatar/illustrated-v2/source/details-kit.png": "c33028d7dacef7f99d1991ca85d707aa3a4b8a0d227589656d01de1ec9664e2a"
+  },
+  "reviewedSheets": 84,
+  "reviewedTiles": 932,
+  "files": [
+    {
+      "file": "girl-big-pairwise-hair-top-idle-0.png",
+      "sha256": "3127478683e13d76ae852df8b45218219237fee70ecb9e56cc06ade53efe77fe",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-hair-jacket-idle-0.png",
+      "sha256": "5fa21ab7a9d8a586ad854772ba4597c7a51a6779e468a4a5561b0b6dc41235f4",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-hair-bottom-idle-0.png",
+      "sha256": "4e17c30c277faa5e1cde60fb4a965a2bb8a10da0f547535cbfc7815b7eee3305",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-hair-shoes-idle-0.png",
+      "sha256": "eda8da0f4fdb736f958c86b661fbef95ba699e0bfacade4b186de64f15c12c3f",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-hat-top-idle-0.png",
+      "sha256": "a547538b9944f25274b98052b5214fcb2c61c5a0d7a94227bf9296eb2ab85770",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-hat-jacket-idle-0.png",
+      "sha256": "3e7f87d6d976a4a024836b192e0d7d931ba796c49de605702ca63c2c316c883d",
+      "group": "pairwise",
+      "cells": 16,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-hat-bottom-idle-0.png",
+      "sha256": "7ed1d7b599ce8a808f2be239536cc8b65fb23eadb34af6c60f2350546335041c",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-hat-shoes-idle-0.png",
+      "sha256": "73eb4e7ee81a87d9f5b247d8e893035778ebc0d3dcc01b75c30898d5099236f5",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-top-jacket-idle-0.png",
+      "sha256": "cdd4889577e346b6903f94733557cdce9605d8f592cf4b03afb99f524af390af",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-top-bottom-idle-0.png",
+      "sha256": "fd24387d460e0dcf3a02569573adff4d96502c99127a09b6ece04b859c53fd85",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-top-shoes-idle-0.png",
+      "sha256": "769b71088b7eb45354d40c0df50e559157a1c41526145184c6bb067504fb65f5",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-top-accessory-idle-0.png",
+      "sha256": "49b7e27c70c99bce67958ab571fa87c7bf9ccf7cdd8c27222c788385289c7ad3",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-jacket-bottom-idle-0.png",
+      "sha256": "442bfc50b21e97bbb43565cd0f8eb6a132f05954a20e8c9081c4a21df1c28457",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-jacket-shoes-idle-0.png",
+      "sha256": "16df41232d9bd74ba84966f66a7647e343915ce0de2768060a4c44036243ecc0",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-jacket-accessory-idle-0.png",
+      "sha256": "83f84ee113313c0962a0759f2558dfa53c0e136db62ad4ba0cc8dcdfe1620af4",
+      "group": "pairwise",
+      "cells": 16,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-bottom-shoes-idle-0.png",
+      "sha256": "d84e0ff07222ea171f24f73422339c061bccce3e2c74a0d3cec2c2677d2593e4",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-bottom-accessory-idle-0.png",
+      "sha256": "fedf282bcc018fbbfad6a5fb49eae77bd096518400aeae08e2fefb376cad0a18",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-pairwise-shoes-accessory-idle-0.png",
+      "sha256": "3618ee7a3f831011e0e0ce8c4d516f98f5b5e87f8a76b684fc1f7b9c59436e14",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-seams-waist-idle-0.png",
+      "sha256": "5bce5104810af18bd8c9d1e2c5c1033460dfd2584270321789413b71fd4d56bc",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-seams-ankle-idle-0.png",
+      "sha256": "dca367e6b753f7ae7af3c84e73a2fc3a46c597caf26fd4d91a83bdc8065f88d6",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-seams-waist-walk-2.png",
+      "sha256": "59bc20bcee9eb434cf7f6ab4aab077e658c86f45b4b0d373af515247f89c7f84",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-seams-ankle-walk-2.png",
+      "sha256": "b52ce93127c7ecb8095222621a0b073d7a52f90f80ebc486e786e28ed10b9305",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-seams-waist-walk-6.png",
+      "sha256": "b15ad619ab4c9b579d688c1ea69bcb79f1c7c3dd5f666c90b86ef4cc8e1e3d8c",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-big-seams-ankle-walk-6.png",
+      "sha256": "55958f698ceba8617b6bb9f89e88770a2b90d15e4a9ab0ce59cb3207dc412044",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-chibi-pairwise-hair-top-idle-0.png",
+      "sha256": "fd4cff801847f45f413d922d579e24e4dff358d01414bdbee4a1468b43e49892",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-hair-jacket-idle-0.png",
+      "sha256": "db44c94c9ab98f85f53a6248c82ade56c53250ba4852e7f45691166c537c4177",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-hair-bottom-idle-0.png",
+      "sha256": "15c1bc32ad540f51df1dffe5d0963467dbf07272a0e3a124a7ebdd1e73c89645",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-hair-shoes-idle-0.png",
+      "sha256": "15c1bc32ad540f51df1dffe5d0963467dbf07272a0e3a124a7ebdd1e73c89645",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-hat-top-idle-0.png",
+      "sha256": "133422467f8b91e3f318db594ab2ad335e4f0e3c50a32f4c37f122084af10f6f",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-hat-jacket-idle-0.png",
+      "sha256": "303b035f385aff3d5d876dc64695a522c19006de7943a348a7786cd3ac87d664",
+      "group": "pairwise",
+      "cells": 16,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-hat-bottom-idle-0.png",
+      "sha256": "0468e84c7dda68d7282a59c3b6a78464f19b181139ed6c76c74ba9e6efdc607f",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-hat-shoes-idle-0.png",
+      "sha256": "0468e84c7dda68d7282a59c3b6a78464f19b181139ed6c76c74ba9e6efdc607f",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-top-jacket-idle-0.png",
+      "sha256": "946eb7d7703a1b9f8b58c93e4f59d25e8a0380a9bdd9efa46cda5d50bad59f5a",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-top-bottom-idle-0.png",
+      "sha256": "410892f71ac3ad7247d384b9f3e1e35ae8100edc09aa396e86758eaea4ae5f6c",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-top-shoes-idle-0.png",
+      "sha256": "410892f71ac3ad7247d384b9f3e1e35ae8100edc09aa396e86758eaea4ae5f6c",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-top-accessory-idle-0.png",
+      "sha256": "21b40a29442d14b4e40c75b524aadaac86cbaa44a4a20a32ef42c4e7f469f7d8",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-chibi-pairwise-jacket-bottom-idle-0.png",
+      "sha256": "0d637d1cd8b0e9431213ea8426453a08700d94d5e90e5fd9afd8293a8d51ddb1",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-jacket-shoes-idle-0.png",
+      "sha256": "0d637d1cd8b0e9431213ea8426453a08700d94d5e90e5fd9afd8293a8d51ddb1",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-jacket-accessory-idle-0.png",
+      "sha256": "e47331fea578cf649d9210bf6efe39255cf7dd30b05cd48379e4358eaa6267b5",
+      "group": "pairwise",
+      "cells": 16,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-chibi-pairwise-bottom-shoes-idle-0.png",
+      "sha256": "f6a3b844ef07a332ad37a41cc5bb6d67d44177576d586cfddded4ed01d0af5f9",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "girl-chibi-pairwise-bottom-accessory-idle-0.png",
+      "sha256": "e234114dbf7fdeba2ca98c48ded5eab8a25df719080b70a9421d53c5e90f47ec",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "girl-chibi-pairwise-shoes-accessory-idle-0.png",
+      "sha256": "e234114dbf7fdeba2ca98c48ded5eab8a25df719080b70a9421d53c5e90f47ec",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "boy-big-pairwise-hair-top-idle-0.png",
+      "sha256": "cd8086934d3fef243d4c1272a7ac8fe08204033e472957f53a8c00d00cb5f5d3",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-hair-jacket-idle-0.png",
+      "sha256": "90bb56ef423bd30c84ac0d02142726b2bb28a3d320e2cbbab6aab74555fbb0ae",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-hair-bottom-idle-0.png",
+      "sha256": "086b13cab1654115d99f9ffa3ce76fee5b8d47e90a6e6a527ee6e0ee8eeaefb3",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-hair-shoes-idle-0.png",
+      "sha256": "9ec8e377022fb3148c7fa6018395f6241e1e42bda1bbac01ea6c6ebac6db49c7",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-hat-top-idle-0.png",
+      "sha256": "24f0279673abb12ea73124f58aa54394fec38f499bbdf1d272ef6be2bef083ee",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-hat-jacket-idle-0.png",
+      "sha256": "3a5411561c8f2cc7a0d1f90aa0873e2bf643800aa2162809d3f20f8ec94decc6",
+      "group": "pairwise",
+      "cells": 16,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-hat-bottom-idle-0.png",
+      "sha256": "4f1c985cc7ba7ab1e47f80eeb1f29712287c460b552b5481b632a7991d8312a2",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-hat-shoes-idle-0.png",
+      "sha256": "3879fac9ff5dfc684ffe61626fab5895079cf6dc0578de4e896c2474ac569cb8",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-top-jacket-idle-0.png",
+      "sha256": "54d84690ca37eef9bce1ca410942805e63136ff770c4fa60446f73359efb3898",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-top-bottom-idle-0.png",
+      "sha256": "cd14037f21090c1e9eeef29e5590f6ef39694567e08877a25a4be192f1cef568",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-top-shoes-idle-0.png",
+      "sha256": "83631fdd23e5e68cc6c7fe6ff462515b8781ed6421056ee241331fee4dcb1eb2",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-top-accessory-idle-0.png",
+      "sha256": "b4bb06c1886b84f1c1b9856f3ca01122721fbd420ee3a9edc48bd0638b9604e5",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "boy-big-pairwise-jacket-bottom-idle-0.png",
+      "sha256": "9eeb558397e139eacb308a38f64a82ca32ec87e83d38aafbc9dfea73f15ff0e3",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-jacket-shoes-idle-0.png",
+      "sha256": "ad29f498e551af9ca3d8189d4e247bdca1d9df25625a9c767a4b3134409f0ab0",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-jacket-accessory-idle-0.png",
+      "sha256": "43e07d98e4b0adde50ddbfefb22a15d43fabfc15824cb073b6a347ff2d4c5303",
+      "group": "pairwise",
+      "cells": 16,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "boy-big-pairwise-bottom-shoes-idle-0.png",
+      "sha256": "f2076d57288733522ebcdafc2c286cb4432c067f2d99b7bbb9d4c87afed2f9a8",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-pairwise-bottom-accessory-idle-0.png",
+      "sha256": "cc968a98766cdf321ed9e58d544de284dd77348dd8975a5f5452c3b2e47885cd",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "boy-big-pairwise-shoes-accessory-idle-0.png",
+      "sha256": "0c8f909083130a5907fdd65e3958493eb3461531e1694ae75efbbeeb478b8731",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "boy-big-seams-waist-idle-0.png",
+      "sha256": "39fe7ec093b1f55e6925642bebfb5ef6eabdbe1421e6b039ae21dbb02d64411c",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-seams-ankle-idle-0.png",
+      "sha256": "55a75ec6e456bc7828b6e95e169776fd41cbe9d96d8324d3fb89bb2bc4d79c7d",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-seams-waist-walk-2.png",
+      "sha256": "4f3f6b79c0047b74cd01e1717b2f436f3420b81ba11be1ad49575b6c7a935191",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-seams-ankle-walk-2.png",
+      "sha256": "be957899b45f4b29b5c55e4596f2ddd4b9330c426d37eaaaaa0c73f9f257363c",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-seams-waist-walk-6.png",
+      "sha256": "6f96a5b1e6763a5c11abdffa1b52852c5bae0371a3bcf41f3c44d7c36c59ce7b",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-big-seams-ankle-walk-6.png",
+      "sha256": "da3693cbdad6fdb20cc3fd8d5c097802454bd4e4575df0598b06c5c0cf2453e8",
+      "group": "seams",
+      "cells": 9,
+      "reviewMethod": "original 3x enlarged seam PNG",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-hair-top-idle-0.png",
+      "sha256": "6202006ff902ca8bc1a27df4272bd1e2a143201015a1f3b77ca2bebe54d1b47c",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-hair-jacket-idle-0.png",
+      "sha256": "29faee86fb5d393b67bee583248d2eeee147d8f229bc4dfe8d31359c0abe4957",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-hair-bottom-idle-0.png",
+      "sha256": "f544a0c8331357e87261b460be0b464951d0553f8a7a9fbeef073974257a62d4",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-hair-shoes-idle-0.png",
+      "sha256": "f544a0c8331357e87261b460be0b464951d0553f8a7a9fbeef073974257a62d4",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-hat-top-idle-0.png",
+      "sha256": "6cd86b66d22ebdd1bf44ff6c6c1df39ff89dae075774273689ff36d7fcaa1c26",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-hat-jacket-idle-0.png",
+      "sha256": "1e09eecbb03e33c8219f438be1d81782037865eedd26e6d6d0705dc8a01b664c",
+      "group": "pairwise",
+      "cells": 16,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-hat-bottom-idle-0.png",
+      "sha256": "4ec0d911ffa94edc9db041b63cd9993ee71e8a69393ce22513c5e0bda78ccbeb",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-hat-shoes-idle-0.png",
+      "sha256": "4ec0d911ffa94edc9db041b63cd9993ee71e8a69393ce22513c5e0bda78ccbeb",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-top-jacket-idle-0.png",
+      "sha256": "9e54aac34645bfd4f69e488b87b351b2abc0538fc7d1cc2cd6082ab5e0fb04c9",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-top-bottom-idle-0.png",
+      "sha256": "e0b6507d061fafbcb691adbd4a3d028665d8b235176f88a9180ee6b753729ecf",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-top-shoes-idle-0.png",
+      "sha256": "e0b6507d061fafbcb691adbd4a3d028665d8b235176f88a9180ee6b753729ecf",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-top-accessory-idle-0.png",
+      "sha256": "2463cdefe900271881df5f9774ce94265a0d093b49e0aa0c6950b9cddde8b1e3",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "boy-chibi-pairwise-jacket-bottom-idle-0.png",
+      "sha256": "f193326159e96c1c8e00079a3d41410c8fed1a40c33066188574197fc3b87f6b",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-jacket-shoes-idle-0.png",
+      "sha256": "f193326159e96c1c8e00079a3d41410c8fed1a40c33066188574197fc3b87f6b",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-jacket-accessory-idle-0.png",
+      "sha256": "04d8babcc29fbec7d650cb99bac9b3c13666ace1a034574784b36ba44d8b2d07",
+      "group": "pairwise",
+      "cells": 16,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "boy-chibi-pairwise-bottom-shoes-idle-0.png",
+      "sha256": "240cdeb2e621d3e6e9db944aaa29dca54b262f17d88ad9e6c4479df6f7149036",
+      "group": "pairwise",
+      "cells": 9,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "retained-identical-PNG-hash"
+    },
+    {
+      "file": "boy-chibi-pairwise-bottom-accessory-idle-0.png",
+      "sha256": "7eff0ea7da0fc48d0302d3ce0b03d3997104ece5b79d424b855cbbe5f0bd246a",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    },
+    {
+      "file": "boy-chibi-pairwise-shoes-accessory-idle-0.png",
+      "sha256": "7eff0ea7da0fc48d0302d3ce0b03d3997104ece5b79d424b855cbbe5f0bd246a",
+      "group": "pairwise",
+      "cells": 12,
+      "reviewMethod": "overview thumbnail plus targeted original-resolution top/jacket inspection",
+      "status": "reviewed-no-blocking-defect",
+      "findings": [],
+      "finalRecheck": "changed-PNG-visually-rechecked"
+    }
+  ],
+  "notes": [
+    "All12 baseline pairwise overview pages were visually inspected. Only assigned non-head pairs are counted here to avoid duplicate coverage.",
+    "All12 seam sheets were inspected at original3x enlargement.",
+    "Default fixed review palette is peach skin, espresso hair and hazel eyes; palettes are not exhaustively covered.",
+    "No native-device validation."
+  ],
+  "finalChangedSheetsRechecked": 36,
+  "unresolvedIssues": [],
+  "resolvedFindings": [
+    "Short-shirt side strips were removed and lower-torso continuity passes.",
+    "Waist/hip transitions are continuous; sampled widths97.9–100%ofjeans.",
+    "Rear strap nubs were clipped within torso; bag-changed pair grids rechecked.",
+    "Girl wide-trouser opposite-leg sliver is absent in all final sampled ankle closeups."
+  ]
+}

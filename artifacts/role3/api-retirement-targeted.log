@@ -1,0 +1,52 @@
+✔ new learner completes onboarding, all modes, journal, Coins, and synchronized login (516.4614ms)
+✔ idempotent concurrent evaluation, retries, duplicate content and retired garden cannot mint Coins (283.1179ms)
+✔ authentication, cross-user isolation, secure audio, reports, export and cascading deletion (257.7101ms)
+[assessment-failed] a7782617-55cc-4091-bf7c-9fb4d63f10db invalid_evidence
+✔ evaluation failures retain the answer, reject invented quotes, and recover durable jobs after restart (271.5805ms)
+✔ debate duplicate turns are idempotent and completed session cannot acquire extra rounds (238.902ms)
+✔ classic practice and retries remain available without farming; retired spending cannot change assessments (457.5783ms)
+✔ long valid debate rounds queue their complete transcript without widening single-answer limits (208.3732ms)
+✔ practice rhythm includes rewarded and unrewarded retries, uses local Monday weeks and handles DST (173.306ms)
+✔ comparable analytics keep coaching templates and providers in separate groups (115.4144ms)
+✔ browser sessions use HttpOnly cookies, reject missing mutation origins and expire (102.445ms)
+✔ exported web hosting exposes only dist and rejects malformed URL decoder input (100.7498ms)
+✔ maximum-length Unicode answers get bounded exact quotes without inventing sentence structure (129.451ms)
+✔ evidence beyond the saved answer is rejected even when slice would truncate it (0.6426ms)
+✔ empty drafts are rejected while unusable repetitions receive honest N/A feedback (140.6361ms)
+✔ static assets do not consume the API rate budget, while API bursts remain limited (392.735ms)
+✔ today news endpoint requires authentication and uses each account’s saved timezone (102.9069ms)
+✔ local background worker completes a queued practice without manual polling work (128.3705ms)
+✔ real daily API flow reading-first, retries, export and restart (483.954ms)
+✔ real daily API flow speaking-first, retries, export and restart (289.4937ms)
+✔ daily processing pins the receipt day, and a missed day preserves earned progress (221.2077ms)
+✔ reading validates ownership and attestation; Read & Reflect earns shared progress separately from the daily checklist (244.33ms)
+✔ retired garden actions and optional avatar care cannot remove earned learning progress (271.8109ms)
+✔ the production guest limit remains 30 per hour despite the isolated browser-test override (246.7658ms)
+✔ job polling recovers delayed local scheduling without duplicate daily rewards (207.1318ms)
+✔ enrollment preserves imported historical XP and garden artwork without retroactive daily credit (194.6732ms)
+✔ care helpers use exact elapsed-time thresholds, including a daylight-saving boundary (1.2043ms)
+✔ historical expired plants retain deadlines and artwork across a long absence and restart (376.9705ms)
+✔ old plants without a deadline are preserved without a new automatic care period (189.7121ms)
+✔ paused archives cannot be restored, duplicated or deleted by old clients (215.3133ms)
+✔ legacy watering request receipts remain historical and never replay against Coins (194.4191ms)
+✔ legacy lifecycle exports are owned and account deletion cascades archived private records (207.4062ms)
+✔ historical layout helpers retain valid positions for exported garden data (0.7998ms)
+✔ legacy gardens remain byte-for-byte historical while only Seeds convert once (260.5589ms)
+✔ retired garden plant rejects owner, stranger and duplicate mutations without spending (136.6136ms)
+✔ retired garden move rejects owner, stranger and duplicate mutations without spending (205.0617ms)
+✔ retired garden water rejects owner, stranger and duplicate mutations without spending (203.5907ms)
+✔ retired garden decorate rejects owner, stranger and duplicate mutations without spending (201.407ms)
+✔ retired garden archive rejects owner, stranger and duplicate mutations without spending (204.5026ms)
+✔ retired garden restore rejects owner, stranger and duplicate mutations without spending (190.0223ms)
+✔ retired garden clear rejects owner, stranger and duplicate mutations without spending (191.7572ms)
+✔ retired garden replant rejects owner, stranger and duplicate mutations without spending (201.4093ms)
+✔ retirement rejects malformed and maximum legacy drawings without saving or spending (182.1319ms)
+✔ saved artwork and positions survive account export and remain private across login (200.7052ms)
+ℹ tests 43
+ℹ suites 0
+ℹ pass 43
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4941.8789

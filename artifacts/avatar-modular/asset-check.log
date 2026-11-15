@@ -1,0 +1,160 @@
+TAP version 13
+# Subtest: hair, hats and facial accessories stay registered to the head in every supported frame
+ok 1 - hair, hats and facial accessories stay registered to the head in every supported frame
+  ---
+  duration_ms: 2542.0424
+  type: 'test'
+  ...
+# Subtest: every hairstyle covers the upper skull, including all hat combinations
+ok 2 - every hairstyle covers the upper skull, including all hat combinations
+  ---
+  duration_ms: 1883.9306
+  type: 'test'
+  ...
+# Subtest: eyewear leaves the central face visible and stays proportional to the adult head
+ok 3 - eyewear leaves the central face visible and stays proportional to the adult head
+  ---
+  duration_ms: 264.0993
+  type: 'test'
+  ...
+# Subtest: painted spectacle lens openings centre over both pupil anchors
+ok 4 - painted spectacle lens openings centre over both pupil anchors
+  ---
+  duration_ms: 28.7633
+  type: 'test'
+  ...
+# Subtest: visible headphone cups are ear-sized and centred instead of covering the cheek
+ok 5 - visible headphone cups are ear-sized and centred instead of covering the cheek
+  ---
+  duration_ms: 75.3084
+  type: 'test'
+  ...
+# Subtest: adult bags retain torso-relative scale and hip placement during walking
+ok 6 - adult bags retain torso-relative scale and hip placement during walking
+  ---
+  duration_ms: 304.854
+  type: 'test'
+  ...
+# Subtest: all chibi source poses remain busts without lower-body pixels or slots
+ok 7 - all chibi source poses remain busts without lower-body pixels or slots
+  ---
+  duration_ms: 3222.7872
+  type: 'test'
+  ...
+# Subtest: eye-colour overlays stay inside the registered head silhouette
+ok 8 - eye-colour overlays stay inside the registered head silhouette
+  ---
+  duration_ms: 94.9924
+  type: 'test'
+  ...
+# Subtest: compiled atlases preserve one common pixel grid after trimming and packing
+ok 9 - compiled atlases preserve one common pixel grid after trimming and packing
+  ---
+  duration_ms: 978.2514
+  type: 'test'
+  ...
+# Subtest: opaque hats occlude every overlapping accessory in the composed pixels
+ok 10 - opaque hats occlude every overlapping accessory in the composed pixels
+  ---
+  duration_ms: 1687.6048
+  type: 'test'
+  ...
+# Subtest: rear bag straps are hidden by opaque clothing above the hanging pouch
+ok 11 - rear bag straps are hidden by opaque clothing above the hanging pouch
+  ---
+  duration_ms: 9338.5729
+  type: 'test'
+  ...
+# Subtest: all adult bottom waists match the jeans fit and avoid abrupt hip contour steps
+ok 12 - all adult bottom waists match the jeans fit and avoid abrupt hip contour steps
+  ---
+  duration_ms: 809.9652
+  type: 'test'
+  ...
+# Subtest: every adult shoe stays connected to the selected bottom through walking
+ok 13 - every adult shoe stays connected to the selected bottom through walking
+  ---
+  duration_ms: 378.8725
+  type: 'test'
+  ...
+# Subtest: short-sleeve shirts retain their lower torso fabric when the arms move
+ok 14 - short-sleeve shirts retain their lower torso fabric when the arms move
+  ---
+  duration_ms: 629.8733
+  type: 'test'
+  ...
+# Subtest: each trouser calf has one connected painted silhouette without opposite-leg fragments
+ok 15 - each trouser calf has one connected painted silhouette without opposite-leg fragments
+  ---
+  duration_ms: 74.8878
+  type: 'test'
+  ...
+# Subtest: each meal has distinct painted food and a changing eight-frame eating performance
+ok 16 - each meal has distinct painted food and a changing eight-frame eating performance
+  ---
+  duration_ms: 909.5134
+  type: 'test'
+  ...
+# Subtest: onigiri has only its held rice ball and gripping hands, without old bowls or chopsticks
+ok 17 - onigiri has only its held rice ball and gripping hands, without old bowls or chopsticks
+  ---
+  duration_ms: 5.6778
+  type: 'test'
+  ...
+# Subtest: each selected food remains visible with every top and jacket throughout eating
+ok 18 - each selected food remains visible with every top and jacket throughout eating
+  ---
+  duration_ms: 1512.0642
+  type: 'test'
+  ...
+# Subtest: illustrated pack preserves 42 distinct designs and declares adult and bust motion roles
+ok 19 - illustrated pack preserves 42 distinct designs and declares adult and bust motion roles
+  ---
+  duration_ms: 12.9957
+  type: 'test'
+  ...
+# Subtest: atlas images have true RGBA channels, bounded pages and matching frame rectangles
+ok 20 - atlas images have true RGBA channels, bounded pages and matching frame rectangles
+  ---
+  duration_ms: 138.8107
+  type: 'test'
+  ...
+# Subtest: foreign-collection wearables and corrupt saved values cannot be equipped
+ok 21 - foreign-collection wearables and corrupt saved values cannot be equipped
+  ---
+  duration_ms: 0.5395
+  type: 'test'
+  ...
+# Subtest: every wearable resolves both styles and every pose, with hat-aware hair and jacket sleeve ownership
+ok 22 - every wearable resolves both styles and every pose, with hat-aware hair and jacket sleeve ownership
+  ---
+  duration_ms: 110.6366
+  type: 'test'
+  ...
+# Subtest: animation frames change, palette selections stay independent, and frame indices wrap safely
+ok 23 - animation frames change, palette selections stay independent, and frame indices wrap safely
+  ---
+  duration_ms: 4.2374
+  type: 'test'
+  ...
+# Subtest: unsupported motions use idle and chibi never resolves legs, trousers or shoes
+ok 24 - unsupported motions use idle and chibi never resolves legs, trousers or shoes
+  ---
+  duration_ms: 2.3739
+  type: 'test'
+  ...
+# Subtest: meal sleeves own covered arms while gripping hands and short-sleeve bare arms remain visible
+ok 25 - meal sleeves own covered arms while gripping hands and short-sleeve bare arms remain visible
+  ---
+  duration_ms: 17.3929
+  type: 'test'
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 25
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 22843.085
