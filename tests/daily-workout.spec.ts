@@ -53,7 +53,7 @@ async function read(page: Page) {
     .getByRole("textbox", { name: "Your reading observation", exact: true })
     .fill(notes);
   await expect(
-    page.getByRole("button", { name: "Save reading self-review", exact: true }),
+    page.getByRole("button", { name: "Done", exact: true }),
   ).toBeDisabled();
   await page
     .getByRole("checkbox", {
@@ -62,10 +62,10 @@ async function read(page: Page) {
     })
     .click();
   await page
-    .getByRole("button", { name: "Save reading self-review", exact: true })
+    .getByRole("button", { name: "Done", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Reading practice saved", exact: true }),
+    page.getByRole("heading", { name: "Your reading feedback", exact: true }),
   ).toBeVisible();
   await expect(page.getByTestId("reading-reward")).toHaveText("+10 XP");
   await page
@@ -135,7 +135,7 @@ for (const order of ["reading-first", "speaking-first"])
     await page.getByRole("button", { name: "Read aloud", exact: true }).click();
     await expect(
       page.getByRole("heading", {
-        name: "Reading practice saved",
+        name: "Your reading feedback",
         exact: true,
       }),
     ).toBeVisible();
@@ -154,7 +154,7 @@ for (const order of ["reading-first", "speaking-first"])
       })
       .click();
     await page
-      .getByRole("button", { name: "Save reading self-review", exact: true })
+      .getByRole("button", { name: "Done", exact: true })
       .click();
     await expect(page.getByTestId("reading-reward")).toContainText(
       "no duplicate XP",
@@ -209,15 +209,15 @@ test("reading handles a lost submission response, draft reload and denied microp
     { times: 1 },
   );
   await page
-    .getByRole("button", { name: "Save reading self-review", exact: true })
+    .getByRole("button", { name: "Done", exact: true })
     .click();
   await expect(page.getByRole("alert").first()).toBeVisible();
   expect((await state(page)).xp).toBe(10);
   await page
-    .getByRole("button", { name: "Save reading self-review", exact: true })
+    .getByRole("button", { name: "Done", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Reading practice saved", exact: true }),
+    page.getByRole("heading", { name: "Your reading feedback", exact: true }),
   ).toBeVisible();
   expect((await state(page)).xp).toBe(10);
 });
@@ -262,10 +262,10 @@ test("Read Aloud records, uploads privately, replays and restores a saved take",
     .click();
   await screenshot(page, "read-aloud-recorded-mobile.png");
   await page
-    .getByRole("button", { name: "Save reading self-review", exact: true })
+    .getByRole("button", { name: "Done", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Reading practice saved", exact: true }),
+    page.getByRole("heading", { name: "Your reading feedback", exact: true }),
   ).toBeVisible();
   const saved = await state(page);
   const attempt = saved.readAloudAttempts[0];

@@ -24,7 +24,7 @@ for (const size of [{ name: "phone", width: 360, height: 800 }, { name: "desktop
     await page.getByRole("button", { name: "Done reading", exact: true }).click();
     await page.getByRole("textbox", { name: "Your reading observation", exact: true }).fill("I paused at the commas and practised the final sentence with a slower pace.");
     await page.getByRole("checkbox", { name: "I practised this passage and reviewed my reading", exact: true }).click();
-    await page.getByRole("button", { name: "Save reading self-review", exact: true }).click();
+    await page.getByRole("button", { name: "Done", exact: true }).click();
     await expect(page.getByTestId("reading-reward")).toHaveText("+10 XP");
     await page.getByRole("button", { name: "Return to daily workout", exact: true }).click();
     await expect(page.getByTestId("daily-progress")).toHaveText("1/2");

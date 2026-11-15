@@ -1861,10 +1861,10 @@ test("configured WordBloom schedules an evidenced word into reading without extr
     })
     .click();
   await page
-    .getByRole("button", { name: "Save reading self-review", exact: true })
+    .getByRole("button", { name: "Done", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Reading practice saved", exact: true }),
+    page.getByRole("heading", { name: "Your reading feedback", exact: true }),
   ).toBeVisible();
   words = await (
     await page.request.get(`${origin}/api/wordbloom/summary`)
@@ -1911,7 +1911,7 @@ test("optional reading acoustics recover a provider outage and preserve self-rev
     })
     .click();
   await page
-    .getByRole("button", { name: "Save reading self-review", exact: true })
+    .getByRole("button", { name: "Done", exact: true })
     .click();
   const panel = page.getByTestId("reading-speech");
   await expect(
@@ -1961,7 +1961,7 @@ test("optional reading acoustics recover a provider outage and preserve self-rev
     selected.getByRole("button", { name: "Pause playback", exact: true }),
   ).toBeVisible();
   await panel
-    .getByText("Optional acoustic feedback", { exact: true })
+    .getByText("Speech feedback", { exact: true })
     .scrollIntoViewIfNeeded();
   await page.screenshot({
     path: "docs/screenshots/speech/reading-feedback-mobile.png",
@@ -1972,7 +1972,7 @@ test("optional reading acoustics recover a provider outage and preserve self-rev
   });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await panel
-    .getByText("Optional acoustic feedback", { exact: true })
+    .getByText("Speech feedback", { exact: true })
     .scrollIntoViewIfNeeded();
   await page.screenshot({
     path: "docs/screenshots/speech/reading-feedback-desktop.png",
@@ -2036,7 +2036,7 @@ test("speaking vocabulary receives separate provisional pronunciation evidence d
     })
     .click();
   await page
-    .getByRole("button", { name: "Save reading self-review", exact: true })
+    .getByRole("button", { name: "Done", exact: true })
     .click();
   const panel = page.getByTestId("reading-speech");
   await panel

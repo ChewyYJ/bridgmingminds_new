@@ -60,10 +60,10 @@ async function finishReading(page: Page) {
     })
     .click();
   await page
-    .getByRole("button", { name: "Save reading self-review", exact: true })
+    .getByRole("button", { name: "Done", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Reading practice saved", exact: true }),
+    page.getByRole("heading", { name: "Your reading feedback", exact: true }),
   ).toBeVisible();
 }
 async function capture(page: Page, file: string) {

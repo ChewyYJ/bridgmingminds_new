@@ -18,13 +18,19 @@ interface SpeechJob {
     words: { wordId: string; observationStatus: string; action: string }[];
   };
 }
-export function ReadingSpeech({ attempt }: { attempt: ReadAloudAttempt }) {
+export function ReadingSpeech({
+  attempt,
+  feedbackRequested = false,
+}: {
+  attempt: ReadAloudAttempt;
+  feedbackRequested?: boolean;
+}) {
   const { state } = useApp();
   const uid = state!.profile.id;
   const [job, setJob] = useState<SpeechJob | null>(null);
   const [locales, setLocales] = useState<string[]>([]);
   const [locale, setLocale] = useState<"en-US" | "en-GB">("en-GB");
-  const [consented, setConsented] = useState(false);
+  const [consented, setConsented] = useState(feedbackRequested);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<number | null>(null);
@@ -151,16 +157,21 @@ export function ReadingSpeech({ attempt }: { attempt: ReadAloudAttempt }) {
   annotated.push(attempt.passage.text.slice(cursor));
   return (
     <View testID="reading-speech" style={{ gap: 12 }}>
-      <Text style={T.h3}>Optional acoustic feedback</Text>
+      <Text style={T.h3}>
+        {feedbackRequested || result || pending
+          ? "Speech feedback"
+          : "Optional speech feedback"}
+      </Text>
       <Text style={T.small}>
-        Your self-review is saved. This optional assessment does not change XP,
-        streaks or plant mastery.
+        {feedbackRequested || result || pending
+          ? "Feedback on your recorded reading."
+          : "Assess your recording for pronunciation and fluency feedback."}
       </Text>
       <ErrorNote message={error || job?.error?.message || ""} />
       {!result && !locales.length && !pending ? (
         <Text style={T.body}>
-          Acoustic assessment is not configured. Your self-review remains
-          available with no speech scores.
+          Speech feedback is unavailable right now. Your recording and
+          observation are saved.
         </Text>
       ) : null}
       {!result && locales.length > 0 && !pending ? (

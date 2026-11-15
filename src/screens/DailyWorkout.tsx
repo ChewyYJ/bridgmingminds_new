@@ -210,8 +210,7 @@ function ChallengeHub({
                 borderRadius: 20,
                 backgroundColor: C.paper,
                 borderWidth: 1,
-                borderColor:
-                  focusedActivity === item.id ? C.forest : C.border,
+                borderColor: focusedActivity === item.id ? C.forest : C.border,
                 opacity: pressed || (busy && busy !== item.id) ? 0.65 : 1,
                 gap: 18,
               })}
@@ -243,7 +242,12 @@ function ChallengeHub({
               </View>
               <View style={{ gap: 5, flex: 1 }}>
                 <Text
-                  style={{ fontFamily: "DMBold", color: C.ink, fontSize: wide ? 24 : 21, lineHeight: 30 }}
+                  style={{
+                    fontFamily: "DMBold",
+                    color: C.ink,
+                    fontSize: wide ? 24 : 21,
+                    lineHeight: 30,
+                  }}
                 >
                   {item.title}
                 </Text>
@@ -326,6 +330,12 @@ export function ReadAloud() {
   const [recording, setRecording] = useState(false);
   const [review, setReview] = useState(false);
   const [audio, setAudio] = useState<{ id: string; uri: string } | null>(null);
+  const [speechLocales, setSpeechLocales] = useState<string[] | null>(null);
+  const [speechLocale, setSpeechLocale] = useState<"en-GB" | "en-US" | null>(
+    null,
+  );
+  const [speechConsent, setSpeechConsent] = useState(false);
+  const [speechRequested, setSpeechRequested] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<ReadAloudAttempt | null>(null);
@@ -334,6 +344,25 @@ export function ReadAloud() {
   const requestKey = useRef<string | null>(null);
   const draftWrites = useRef(Promise.resolve());
   const controller = useRef<AbortController | null>(null);
+  useEffect(() => {
+    const abort = new AbortController();
+    void api<{ locales: { locale: string; status: string }[] }>(
+      "/read-aloud/speech-capabilities",
+      { signal: abort.signal },
+    )
+      .then((capability) => {
+        if (!abort.signal.aborted && isDraftOwner(uid))
+          setSpeechLocales(
+            capability.locales
+              .filter((item) => item.status === "available")
+              .map((item) => item.locale),
+          );
+      })
+      .catch(() => {
+        if (!abort.signal.aborted && isDraftOwner(uid)) setSpeechLocales([]);
+      });
+    return () => abort.abort();
+  }, [uid]);
   useEffect(() => {
     const abort = new AbortController();
     controller.current = abort;
@@ -346,7 +375,10 @@ export function ReadAloud() {
         setResult(next.latestAttempt || null);
         if (!next.latestAttempt) {
           const draft = await loadDraft(`read-aloud:${next.id}`);
-          if (!abort.signal.aborted && isDraftOwner(uid)) { setNotes(draft); setReview(Boolean(draft)); }
+          if (!abort.signal.aborted && isDraftOwner(uid)) {
+            setNotes(draft);
+            setReview(Boolean(draft));
+          }
         }
       })
       .catch((e) => {
@@ -425,6 +457,33 @@ export function ReadAloud() {
         },
       );
       if (!isDraftOwner(uid)) return;
+      if (
+        audio &&
+        speechConsent &&
+        speechLocale &&
+        speechLocales?.includes(speechLocale)
+      ) {
+        setSpeechRequested(true);
+        try {
+          await api(`/read-aloud/attempts/${saved.id}/speech-assessment`, {
+            method: "POST",
+            body: {
+              locale: speechLocale,
+              prosody: false,
+              processingConsent: true,
+            },
+            signal: controller.current?.signal,
+          });
+        } catch (cause) {
+          if (isDraftOwner(uid))
+            setError(
+              cause instanceof Error
+                ? cause.message
+                : "Your reading is saved. Please retry speech feedback below.",
+            );
+        }
+      }
+      if (!isDraftOwner(uid) || controller.current?.signal.aborted) return;
       setResult(saved);
       setAttemptAgain(false);
       await draftWrites.current;
@@ -496,18 +555,28 @@ export function ReadAloud() {
           {result && !attemptAgain ? (
             <Card style={{ gap: 14 }}>
               <Text accessibilityRole="header" style={T.h2}>
-                Reading practice saved
-              </Text>
-              <Text selectable style={T.body}>
-                {result.text}
+                Your reading feedback
               </Text>
               {result.audioId ? (
                 <PrivateRecordingPlayback id={result.audioId} />
               ) : null}
-              <Text style={T.body}>{result.evaluation.next_step}</Text>
               {result.audioId ? (
-                <ReadingSpeech key={result.id} attempt={result} />
+                <ReadingSpeech
+                  key={result.id}
+                  attempt={result}
+                  feedbackRequested={speechRequested}
+                />
               ) : null}
+              <View style={{ gap: 6 }}>
+                <Text style={T.h3}>Practice tip</Text>
+                <Text style={T.body}>{result.evaluation.next_step}</Text>
+              </View>
+              <View style={{ gap: 6 }}>
+                <Text style={T.h3}>Your observation</Text>
+                <Text selectable style={T.body}>
+                  {result.text}
+                </Text>
+              </View>
               <Text testID="reading-reward" style={T.h3}>
                 {result.rewards.xp
                   ? `+${result.rewards.xp} XP`
@@ -532,6 +601,9 @@ export function ReadAloud() {
                   setConfirmed(false);
                   setWordReviews({});
                   setAudio(null);
+                  setSpeechConsent(false);
+                  setSpeechLocale(null);
+                  setSpeechRequested(false);
                   requestKey.current = null;
                 }}
               />
@@ -580,7 +652,9 @@ export function ReadAloud() {
               {review ? (
                 <Card style={{ gap: 16 }}>
                   <Text style={T.h2}>Notice one small thing</Text>
-                  <Text style={T.small}>Self-review · no speech scores</Text>
+                  <Text style={T.small}>
+                    Review your reading, then tap Done.
+                  </Text>
                   <View
                     style={{
                       gap: 8,
@@ -591,7 +665,9 @@ export function ReadAloud() {
                   >
                     {audio ? (
                       <>
-                        <Text style={T.small}>Listen back before you reflect.</Text>
+                        <Text style={T.small}>
+                          Listen back before you reflect.
+                        </Text>
                         <AudioPlayback uri={audio.uri} />
                       </>
                     ) : (
@@ -657,11 +733,77 @@ export function ReadAloud() {
                       I read the passage and reviewed my reading.
                     </Text>
                   </Pressable>
+                  {audio && speechLocales?.length ? (
+                    <View style={{ gap: 10 }}>
+                      <Text style={T.h3}>Speech feedback</Text>
+                      <Text style={T.small}>Choose your practice target.</Text>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          flexWrap: "wrap",
+                          gap: 8,
+                        }}
+                      >
+                        {(["en-GB", "en-US"] as const)
+                          .filter((locale) => speechLocales.includes(locale))
+                          .map((locale) => (
+                            <Button
+                              key={locale}
+                              label={
+                                locale === "en-GB" ? "UK English" : "US English"
+                              }
+                              variant="secondary"
+                              selected={speechLocale === locale}
+                              onPress={() => setSpeechLocale(locale)}
+                              disabled={busy}
+                            />
+                          ))}
+                      </View>
+                      <Pressable
+                        accessibilityRole="checkbox"
+                        accessibilityLabel="Include speech feedback from Microsoft Azure"
+                        accessibilityState={{
+                          checked: speechConsent,
+                          disabled: busy,
+                        }}
+                        disabled={busy}
+                        onPress={() => setSpeechConsent(!speechConsent)}
+                        style={{
+                          flexDirection: "row",
+                          gap: 10,
+                          alignItems: "center",
+                          minHeight: 44,
+                        }}
+                      >
+                        <Icon
+                          name={speechConsent ? "check-square" : "square"}
+                        />
+                        <Text style={[T.small, { flex: 1 }]}>
+                          Include speech feedback. Send my recording and passage
+                          to Microsoft Azure for assessment.
+                        </Text>
+                      </Pressable>
+                    </View>
+                  ) : audio ? (
+                    <Text style={T.small}>
+                      {speechLocales === null
+                        ? "Checking speech feedback…"
+                        : "Speech feedback is unavailable right now. Done will save your review and show a practice tip."}
+                    </Text>
+                  ) : null}
                   <Button
-                    label="Save reading self-review"
+                    label="Done"
                     onPress={() => void submit()}
                     loading={busy}
-                    disabled={!confirmed || notes.trim().length < 20}
+                    disabled={
+                      !confirmed ||
+                      notes.trim().length < 20 ||
+                      Boolean(
+                        audio &&
+                        (speechLocales === null ||
+                          (speechConsent && !speechLocale)),
+                      )
+                    }
                   />
                   <Button
                     label="Back to passage"
