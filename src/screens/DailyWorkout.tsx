@@ -581,6 +581,37 @@ export function ReadAloud() {
                 <Card style={{ gap: 16 }}>
                   <Text style={T.h2}>Notice one small thing</Text>
                   <Text style={T.small}>Self-review · no speech scores</Text>
+                  <View
+                    style={{
+                      gap: 8,
+                      padding: 14,
+                      borderRadius: 10,
+                      backgroundColor: C.cream,
+                    }}
+                  >
+                    {audio ? (
+                      <>
+                        <Text style={T.small}>Listen back before you reflect.</Text>
+                        <AudioPlayback uri={audio.uri} />
+                      </>
+                    ) : (
+                      <>
+                        <Text style={T.small}>No recording yet.</Text>
+                        <Button
+                          label="Record to listen back"
+                          icon="mic"
+                          variant="secondary"
+                          disabled={busy}
+                          onPress={() => {
+                            setReview(false);
+                            if (state?.profile.consent?.recording)
+                              setRecording(true);
+                            else void allowRecording();
+                          }}
+                        />
+                      </>
+                    )}
+                  </View>
                   <Field
                     label="Your reading observation"
                     value={notes}
