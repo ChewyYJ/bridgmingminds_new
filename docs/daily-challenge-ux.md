@@ -4,9 +4,9 @@ Updated 15 November 2026 on `person1`.
 
 - Home offers two equal choices: Read aloud and Spin and reflect. Selecting either enrolls a new daily learner, then opens the selected activity. Enrollment failures leave both choices available for retry.
 - Completion, XP, streak and timezone come from the saved daily-workout API state. The UI does not assign its own rewards or pretend an activity is complete.
-- Phone layouts stack the choices; desktop layouts show them side by side. Speaking uses a wider desktop workspace with the prompt and current phase alongside the task.
+- Phone layouts stack the choices; desktop layouts show them side by side. Speaking uses a wider desktop workspace with a compact phase indicator alongside the task.
 - Reading separates the passage from self-review. Recording is optional, can be cancelled after permission denial, and saved observation drafts reopen in review.
-- Speaking retains the timed board, recording, transcript recovery, feedback and optional guiding/script tools. Learners can finish directly from feedback.
+- Speaking retains the timed board, recording, transcript recovery and first-try feedback. Guiding practice and sample scripts are separate optional choices; vocabulary is saved only by selection. See [the updated flow and verification](daily-speaking-flow.md).
 
 ## Verification
 

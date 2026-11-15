@@ -9,6 +9,7 @@ test.use({
     args: [
       "--use-fake-device-for-media-stream",
       "--use-fake-ui-for-media-stream",
+      "--autoplay-policy=no-user-gesture-required",
     ],
   },
 });
@@ -22,6 +23,25 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
 }, info) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
+  // Supply browser audio samples without depending on a physical input device.
+  await page.addInitScript(() => {
+    // UI coverage should not wait on the host's audio-output activation. The
+    // separate live-voice-meter spec verifies actual signal-level behaviour.
+    const resume = AudioContext.prototype.resume;
+    AudioContext.prototype.resume = function () {
+      void resume.call(this).catch(() => undefined);
+      return Promise.resolve();
+    };
+    navigator.mediaDevices.getUserMedia = async () => {
+      const context = new AudioContext();
+      const source = context.createOscillator();
+      const destination = context.createMediaStreamDestination();
+      source.connect(destination);
+      source.start();
+      await context.resume();
+      return destination.stream;
+    };
+  });
   // AI responses are deterministic fixtures; session, board and audio storage use the real local API.
   let completed: Attempt | undefined;
   await page.route("**/api/attempts/*/transcribe", async (route) => {
@@ -84,14 +104,28 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
   });
   await page.route("**/api/attempts/*/guided-response", async (route) => {
     const draft =
-      "AI can help students learn through personalised support. Teachers should check its advice to prevent confusion.";
-    const quotes = ["personalised support", "Teachers should check its advice"];
+      "AI can adapt support to students. Teachers should examine the evidence before trusting its advice.";
+    const quotes = ["AI can adapt support", "Teachers should examine"];
     await route.fulfill({
       json: {
         text: draft,
         provider: "openai",
         model: "ui-fixture",
         createdAt: new Date().toISOString(),
+        vocabulary: ["adapt", "evidence"].map((word) => ({
+          wordId: word,
+          word,
+          meaning:
+            word === "adapt"
+              ? "Change to suit different needs."
+              : "Information supporting a claim.",
+          spans: [
+            {
+              start: draft.indexOf(word),
+              end: draft.indexOf(word) + word.length,
+            },
+          ],
+        })),
         annotations: quotes.map((quote, i) => ({
           start: draft.indexOf(quote),
           end: draft.indexOf(quote) + quote.length,
@@ -100,6 +134,27 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
           explanation: "Connects the learner’s own ideas.",
         })),
       },
+    });
+  });
+  await page.route("**/api/attempts/*/guiding-answer", async (route) => {
+    expect(route.request().postDataJSON()).toEqual({
+      index: 0,
+      answer: "Schools should check AI advice before students rely on it.",
+    });
+    await route.fulfill({
+      json: {
+        status: "answered",
+        feedback: "You answered the question with a clear precaution.",
+        next_step: "Explain how teachers could check it.",
+        evidence_quote: "Schools should check AI advice",
+      },
+    });
+  });
+  let savedWords: string[] = [];
+  await page.route("**/api/attempts/*/vocabulary", async (route) => {
+    savedWords = route.request().postDataJSON().wordIds;
+    await route.fulfill({
+      json: { words: savedWords.map((wordId) => ({ wordId })) },
     });
   });
   await page.goto(base);
@@ -135,14 +190,23 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
   ).toHaveValue("Personalised support");
   await page.getByRole("button", { name: "Draw", exact: true }).click();
   const canvas = (await page.getByTestId("daily-board-canvas").boundingBox())!;
-  const drawingSaved = page.waitForResponse((res) => res.url().includes("/brainstorm") && res.request().postDataJSON()?.strokes?.length === 1 && res.ok());
+  const drawingSaved = page.waitForResponse(
+    (res) =>
+      res.url().includes("/brainstorm") &&
+      res.request().postDataJSON()?.strokes?.length === 1 &&
+      res.ok(),
+  );
   await page.mouse.move(canvas.x + 15, canvas.y + 150);
   await page.mouse.down();
   await page.mouse.move(canvas.x + 60, canvas.y + 180, { steps: 8 });
   await page.mouse.up();
   await drawingSaved;
-  await page.getByRole("button", { name: "Undo board change", exact: true }).click();
-  await page.getByRole("button", { name: "Redo board change", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Undo board change", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Redo board change", exact: true })
+    .click();
   await page.getByRole("button", { name: "Edit notes", exact: true }).click();
   await page.screenshot({ path: info.outputPath("02-board.png") });
   await page.getByRole("button", { name: "Clear", exact: true }).click();
@@ -165,7 +229,7 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
     .click();
   await expect(
     page.getByRole("button", { name: "Finish recording", exact: true }),
-  ).toBeEnabled();
+  ).toBeEnabled({ timeout: 15000 });
   await page
     .getByRole("button", { name: "Finish recording", exact: true })
     .click();
@@ -174,6 +238,9 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
     .click();
   await expect(page.getByTestId("daily-screen-feedback")).toBeVisible();
   await page.screenshot({ path: info.outputPath("05-feedback.png") });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.screenshot({ path: info.outputPath("05-feedback-desktop.png") });
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("tab", { name: "Strengths", exact: true }).click();
   await expect(
     page.getByText("Reasoning: You connect your reason to your view."),
@@ -184,17 +251,66 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
   await expect(
     page.getByText("Reasoning: Explore another perspective."),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Skip practice", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Skip and finish", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Challenge Complete!", exact: true }),
+  ).toBeVisible();
+  expect(savedWords).toEqual([]);
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: "Practise guiding questions",
+      exact: true,
+    })
+    .click();
   await page.screenshot({ path: info.outputPath("06-guide.png") });
-  await page.getByRole("button", { name: "Skip for Now", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Practise question 1", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Type instead", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "Answer question 1", exact: true })
+    .fill("Schools should check AI advice before students rely on it.");
+  await page
+    .getByRole("button", { name: "Check my answer", exact: true })
+    .click();
+  await expect(
+    page.getByText("You answered the question with a clear precaution."),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page
+    .getByRole("button", { name: "View sample script", exact: true })
+    .click();
   await expect(
     page.getByText(
-      "AI can help students learn through personalised support. Teachers should check its advice to prevent confusion.",
+      "AI can adapt support to students. Teachers should examine the evidence before trusting its advice.",
       { exact: true },
     ),
   ).toBeVisible();
   await page.screenshot({ path: info.outputPath("07-script.png") });
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.screenshot({ path: info.outputPath("07-script-desktop.png") });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    page.getByRole("button", {
+      name: "Save selected words",
+      exact: true,
+    }),
+  ).toBeDisabled();
+  await page.getByRole("checkbox", { name: "Save adapt", exact: true }).click();
+  await page.reload();
+  await expect(
+    page.getByRole("checkbox", { name: "Save adapt", exact: true }),
+  ).toBeChecked();
+  await page
+    .getByRole("button", { name: "Save selected words", exact: true })
+    .click();
+  expect(savedWords).toEqual(["adapt"]);
   await expect(
     page.getByRole("heading", { name: "Challenge Complete!", exact: true }),
   ).toBeVisible();

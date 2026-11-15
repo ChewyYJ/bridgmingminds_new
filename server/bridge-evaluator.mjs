@@ -418,7 +418,15 @@ WordBloom is optional and integrated, never a separate required activity. If wor
     response.model.length <= 200
       ? response.model
       : config.textModel;
-  const checked = validateBridge(raw, attempt, session, model, "openai");
+  let checked;
+  try {
+    checked = validateBridge(raw, attempt, session, model, "openai");
+  } catch (error) {
+    // An optional map must not discard independently validated first-attempt feedback.
+    if (error.assessmentReason !== "invalid_graph") throw error;
+    checked = validateBridge({ ...raw, argument_graph: { nodes: [], edges: [] } }, attempt, session, model, "openai");
+    checked.verification_flags.unshift("The thought map could not be validated and was omitted. Feedback was validated separately.");
+  }
   if (!options.wordBloomContext?.enabled) checked.wordbloom = { candidates: [], uses: [] };
   return checked;
 }

@@ -20,6 +20,8 @@ import { createDailyWorkoutService } from "./daily-workout.mjs";
 import { installReadAloud } from "./read-aloud.mjs";
 import { evaluateBridge } from "./bridge-evaluator.mjs";
 import { createWordBloomService } from "./wordbloom.mjs";
+import { evaluateGuidingAnswer } from "./guiding-answer.mjs";
+import { getThoughtGuide } from "../shared/thought-guide.mjs";
 import { createLearnerProfile, LEARNER_POLICY } from "./learner-profile.mjs";
 import {
   evaluate,
@@ -1221,20 +1223,50 @@ export function createApp(options = {}) {
         );
       const input = parseGuidedResponseInput(req.body);
       const session = await getSession(attempt.sessionId, req.userId);
+      const vocabulary = input.daily ? await wordBloom.context(req.userId) : null;
       const draft = await guidedResponses.generate({
         userId: req.userId,
         attempt,
         session,
         input,
+        vocabulary: vocabulary?.catalogue.filter((word) => !vocabulary.knownWordIds.includes(word.id)) || [],
       });
       // A request may finish after sign-out, session expiry or account deletion.
       // Recheck the actual authentication token, not just the captured user ID.
       if (closed || (await resolveAuth(req)) !== req.userId)
         throw failure(401, "Please sign in again to view this draft.");
       await getAttempt(req.params.id, req.userId);
+      if (input.daily) await transaction(db, async () => {
+        await db.lockUser(req.userId);
+        const current = await getAttempt(attempt.id, req.userId);
+        current.dailyScript = draft;
+        await saveAttempt(current);
+      });
       res.json(draft);
     }),
   );
+  app.post("/api/attempts/:id/vocabulary", mutate(async (req, res) => {
+    const { wordIds } = z.strictObject({ wordIds: z.array(z.string().min(1).max(60)).min(1).max(3) }).parse(req.body);
+    res.json(await wordBloom.saveSelected(req.userId, req.params.id, wordIds));
+  }));
+  app.post("/api/attempts/:id/guiding-answer", wrap(async (req, res) => {
+    const { index, answer } = z.strictObject({ index: z.number().int().min(0).max(2), answer: z.string().trim().min(1).max(2000) }).parse(req.body);
+    const attempt = await getAttempt(req.params.id, req.userId);
+    if (attempt.status !== "completed") throw failure(409, "Finish your first response before practising guiding questions.");
+    const question = getThoughtGuide(attempt.mode, attempt.evaluation)[index].question;
+    const session = await getSession(attempt.sessionId, req.userId);
+    await limit(`guiding-answer:${req.userId}`, 6);
+    await usage.allowRequest(req.userId, { sessionId: session.id });
+    const feedback = await evaluateGuidingAnswer({ question, answer, original: attempt.text, config: providerConfig });
+    if (closed || (await resolveAuth(req)) !== req.userId) throw failure(401, "Please sign in again.");
+    await transaction(db, async () => {
+      await db.lockUser(req.userId);
+      const current = await getAttempt(attempt.id, req.userId);
+      current.guidingPractice = { ...current.guidingPractice, [index]: { question, answer, feedback } };
+      await saveAttempt(current);
+    });
+    res.json(feedback);
+  }));
   app.patch(
     "/api/attempts/:id/transcript",
     mutate(async (req, res) => {
@@ -1454,7 +1486,7 @@ export function createApp(options = {}) {
           await saveAttempt(current);
           await learner.record(job.user_id, current, session, evaluation);
           current.rewards = await grantRewards(job.user_id, current, session);
-          current.wordBloom = await wordBloom.processAttempt(job.user_id, current, evaluation);
+          current.wordBloom = await wordBloom.processAttempt(job.user_id, current, evaluation, { discover: !session.dailySpeakingJourney });
           current.completedAt = now();
           await saveAttempt(current);
           const latestSession = await getSession(session.id, job.user_id);

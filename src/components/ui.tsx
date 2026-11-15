@@ -37,8 +37,8 @@ export const T = StyleSheet.create({
     color: C.muted,
     textTransform: "uppercase",
   },
-  title: { fontFamily: "Lora", fontSize: 34, color: C.ink, lineHeight: 44 },
-  h2: { fontFamily: "Lora", fontSize: 23, color: C.ink, lineHeight: 31 },
+  title: { fontFamily: "DMBold", fontSize: 30, color: C.ink, lineHeight: 38 },
+  h2: { fontFamily: "DMBold", fontSize: 22, color: C.ink, lineHeight: 30 },
   h3: { fontFamily: "DMBold", fontSize: 17, color: C.ink, lineHeight: 24 },
 });
 export function Icon({

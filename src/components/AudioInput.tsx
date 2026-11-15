@@ -604,7 +604,7 @@ const dailyAudio = StyleSheet.create({
   button: {
     borderRadius: 28,
     minHeight: 50,
-    backgroundColor: "#242424",
+    backgroundColor: C.forest,
     alignSelf: "stretch",
     alignItems: "center",
     justifyContent: "center",

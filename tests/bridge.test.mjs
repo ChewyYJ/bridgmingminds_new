@@ -309,6 +309,19 @@ test("provider transport separates instructions from user data and validates act
   assert.equal(captured.max_completion_tokens, 6000);
 });
 
+test("an invalid optional graph cannot erase otherwise validated first-try feedback", async (t) => {
+  const raw = bridgeFixture(text);
+  raw.argument_graph.edges.push({ id: "bad", source: "missing-id", target: "missing-id", relation: "supports" });
+  t.mock.method(globalThis, "fetch", async () => Response.json({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify(raw) } }] }));
+  const result = await evaluateBridge(attempt, session, { apiKey: "offline-fixture" });
+  assert.equal(result.provider, "openai");
+  assert.equal(result.feedback.strength, raw.feedback.strength);
+  assert.deepEqual(result.thought_map.nodes, []);
+  assert.match(result.verification_flags[0], /map could not be validated/);
+  raw.feedback.evidence_quotes = ["This quote was invented."];
+  await assert.rejects(evaluateBridge(attempt, session, { apiKey: "offline-fixture" }));
+});
+
 for (const [label, response, reason] of [
   ["refusal", { choices: [{ message: { refusal: "Synthetic refusal" } }] }, "provider_refusal"],
   ["truncation", { choices: [{ finish_reason: "length", message: { content: "{}" } }] }, "output_incomplete"],

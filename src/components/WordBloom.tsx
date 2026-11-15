@@ -133,7 +133,10 @@ function WordBloomPanel({
               {!progress ? (
                 <>
                   <Text selectable style={T.body}>
-                    From your response: “{word.source.span.quote}”
+                    {word.source.kind === "selected_sample"
+                      ? "From your sample script"
+                      : "From your response"}
+                    : “{word.source.span.quote}”
                   </Text>
                   <Text style={T.small}>{word.source.reason}</Text>
                 </>

@@ -34,7 +34,7 @@ import {
 import AudioInput, { type RecordedAudio } from "../components/AudioInput";
 import { DailyBoard, createDailyBoard } from "../components/DailyBoard";
 import { ThoughtMapView } from "../components/ThoughtMap";
-import { Icon } from "../components/ui";
+import { C, Icon } from "../components/ui";
 import Svg, { Path } from "react-native-svg";
 
 type Step =
@@ -45,8 +45,15 @@ type Step =
   | "transcript"
   | "feedback"
   | "guide"
+  | "sample-offer"
   | "script"
   | "complete";
+interface GuideFeedback {
+  status: "answered" | "partly_answered" | "not_answered";
+  feedback: string;
+  next_step: string;
+  evidence_quote: string;
+}
 interface Draft {
   version: 1;
   step: Step;
@@ -56,7 +63,9 @@ interface Draft {
   answers: string[];
   script: GuidedResponseDraft | null;
   submissionKey: string;
-  words?: WordBloomSummary["words"];
+  guideFeedback?: (GuideFeedback | null)[];
+  selectedWordIds?: string[];
+  savedWordIds?: string[];
 }
 function unique() {
   return `daily-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
@@ -102,9 +111,16 @@ export function DailySpeaking({
   const [showMap, setShowMap] = useState(false);
   const [answers, setAnswers] = useState(["", "", ""]);
   const [guideIndex, setGuideIndex] = useState<number | null>(null);
+  const [guideTyping, setGuideTyping] = useState(false);
+  const [expandedGuide, setExpandedGuide] = useState<number | null>(null);
   const [script, setScript] = useState<GuidedResponseDraft | null>(null);
-  const [vocab, setVocab] = useState(false);
-  const [words, setWords] = useState<WordBloomSummary["words"]>([]);
+  const [guideFeedback, setGuideFeedback] = useState<(GuideFeedback | null)[]>([
+    null,
+    null,
+    null,
+  ]);
+  const [selectedWordIds, setSelectedWordIds] = useState<string[]>([]);
+  const [savedWordIds, setSavedWordIds] = useState<string[]>([]);
   const submissionKey = useRef(unique());
   const sessionKey = useRef(unique());
   const lock = useRef(false);
@@ -142,7 +158,9 @@ export function DailySpeaking({
           setAttempt(saved.attempt);
           setAnswers(saved.answers);
           setScript(saved.script);
-          setWords(saved.words || []);
+          setGuideFeedback(saved.guideFeedback || [null, null, null]);
+          setSelectedWordIds(saved.selectedWordIds || []);
+          setSavedWordIds(saved.savedWordIds || []);
           submissionKey.current = saved.submissionKey;
           setTranscript(saved.attempt?.text || "");
           setStep(
@@ -193,7 +211,9 @@ export function DailySpeaking({
       script,
       step,
       submissionKey: submissionKey.current,
-      words,
+      guideFeedback,
+      selectedWordIds,
+      savedWordIds,
     };
     void saveDraft(storage, JSON.stringify(draft)).catch(() => {
       if (mounted.current)
@@ -201,7 +221,19 @@ export function DailySpeaking({
           "This device couldn’t save your draft. Keep this screen open.",
         );
     });
-  }, [ready, session, board, attempt, answers, script, step, storage, words]);
+  }, [
+    ready,
+    session,
+    board,
+    attempt,
+    answers,
+    script,
+    step,
+    storage,
+    guideFeedback,
+    selectedWordIds,
+    savedWordIds,
+  ]);
 
   const sessionId = session?.id;
   useEffect(() => {
@@ -416,11 +448,58 @@ export function DailySpeaking({
       setAnswers((items) =>
         items.map((value, i) => (i === guideIndex ? result.text : value)),
       );
+      setScript(null);
+      setSelectedWordIds([]);
+      setGuideFeedback((items) =>
+        items.map((value, i) => (i === guideIndex ? null : value)),
+      );
       setGuideIndex(null);
+      await assessGuide(guideIndex, result.text);
     } catch (cause) {
       setError(message(cause));
     } finally {
       lock.current = false;
+      setBusy(false);
+    }
+  }
+  async function assessGuide(index: number, answer = answers[index]) {
+    if (!attempt) return;
+    const result = await api<GuideFeedback>(
+      `/attempts/${attempt.id}/guiding-answer`,
+      { method: "POST", body: { index, answer } },
+    );
+    setGuideFeedback((items) =>
+      items.map((value, i) => (i === index ? result : value)),
+    );
+    setExpandedGuide(index);
+  }
+  async function retryGuide(index: number) {
+    setBusy(true);
+    setError("");
+    try {
+      await assessGuide(index);
+    } catch (cause) {
+      setError(message(cause));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function saveWords() {
+    if (!attempt || busy || !selectedWordIds.length) return;
+    setBusy(true);
+    setError("");
+    try {
+      const summary = await api<WordBloomSummary>(
+        `/attempts/${attempt.id}/vocabulary`,
+        { method: "POST", body: { wordIds: selectedWordIds } },
+      );
+      setSavedWordIds(summary.words.map((word) => word.wordId));
+      setSelectedWordIds([]);
+      await refresh();
+      setStep("complete");
+    } catch (cause) {
+      setError(message(cause));
+    } finally {
       setBusy(false);
     }
   }
@@ -436,10 +515,9 @@ export function DailySpeaking({
         {
           method: "POST",
           body: {
+            daily: true,
             questions,
-            answers: answers.some((v) => v.trim())
-              ? answers
-              : [attempt.text, "", ""],
+            answers,
           },
         },
       );
@@ -448,16 +526,7 @@ export function DailySpeaking({
           "The sample script couldn’t be checked. Please try again.",
         );
       setScript(result);
-      const summary = await api<WordBloomSummary>("/wordbloom/summary").catch(
-        () => null,
-      );
-      setWords(
-        summary?.words
-          .filter((word) =>
-            attempt.wordBloom?.discoveredWordIds.includes(word.id),
-          )
-          .slice(0, 3) || [],
-      );
+      setSelectedWordIds([]);
     } catch (cause) {
       setError(message(cause));
     } finally {
@@ -489,7 +558,12 @@ export function DailySpeaking({
     else if (step === "board") setStep("entry");
     else if (step === "speak") setStep("entry");
     else if (step === "guide" && guideIndex !== null) setGuideIndex(null);
-    else if (step === "guide" || step === "script" || step === "complete")
+    else if (
+      step === "guide" ||
+      step === "script" ||
+      step === "sample-offer" ||
+      step === "complete"
+    )
       setStep("feedback");
     else void leave();
   }
@@ -497,12 +571,13 @@ export function DailySpeaking({
   const feedback = evaluation?.feedback;
   const title = (
     {
-      board: "Prepare Your Answer",
-      speak: "Speak Your Response",
-      feedback: "Your Feedback",
-      guide: "Guiding Questions",
-      script: "Your Improved Script",
-      transcript: "Review Your Transcript",
+      board: "Gather your ideas",
+      speak: "Your one-minute pitch",
+      feedback: "Your feedback",
+      guide: "Go a little deeper",
+      script: "Your sample script",
+      "sample-offer": "See another way to say it",
+      transcript: "Check your words",
     } as Partial<Record<Step, string>>
   )[step];
   const rewards = attempt?.rewards;
@@ -523,14 +598,14 @@ export function DailySpeaking({
         <View
           style={{
             width: "100%",
-            maxWidth: 1000,
+            maxWidth: 900,
             flexDirection: wide ? "row" : "column",
             gap: 32,
             alignItems: "flex-start",
           }}
         >
           {wide ? (
-            <View style={{ width: 260, paddingTop: 30, gap: 24 }}>
+            <View style={{ width: 180, paddingTop: 24, gap: 24 }}>
               <Pressable
                 accessibilityRole="button"
                 disabled={busy || capturing}
@@ -545,10 +620,6 @@ export function DailySpeaking({
                 <Icon name="arrow-left" size={18} />
                 <Text style={s.small}>Daily challenge</Text>
               </Pressable>
-              <Text style={{ ...s.title, textAlign: "left", fontSize: 30 }}>
-                A thought worth exploring.
-              </Text>
-              <Text style={s.body}>{session?.prompt.question}</Text>
               {["Plan", "Speak", "Reflect"].map((label, i) => (
                 <View
                   key={label}
@@ -572,6 +643,7 @@ export function DailySpeaking({
                             [
                               "feedback",
                               "guide",
+                              "sample-offer",
                               "script",
                               "complete",
                             ].includes(step))
@@ -637,7 +709,7 @@ export function DailySpeaking({
                   <Text style={s.copy}>
                     {dailyCompleted
                       ? "Done today. Keep exploring."
-                      : "Plan your ideas. Speak your mind."}
+                      : "45 seconds to plan. One minute to speak."}
                   </Text>
                 </View>
                 <View style={s.topicCard}>
@@ -664,9 +736,7 @@ export function DailySpeaking({
             )}
             {step === "board" && board && (
               <>
-                <Text style={s.copy}>
-                  A point, a reason, an example. You have 45 seconds.
-                </Text>
+                <Text style={s.copy}>A point. A reason. An example.</Text>
                 <View style={s.timerPill}>
                   <Icon name="clock" color="#242424" size={17} />
                   <Text style={s.name}>
@@ -689,7 +759,7 @@ export function DailySpeaking({
               <>
                 <View style={s.center}>
                   <Text accessibilityRole="header" style={s.title}>
-                    Speak Your Response
+                    Your one-minute pitch
                   </Text>
                   <Text style={s.copy}>One minute. In your own words.</Text>
                 </View>
@@ -790,6 +860,7 @@ export function DailySpeaking({
                       key={name}
                       accessibilityRole="tab"
                       accessibilityState={{ selected: tab === name }}
+                      aria-selected={tab === name}
                       onPress={() => setTab(name)}
                       style={[s.tab, tab === name && s.tabActive]}
                     >
@@ -802,10 +873,7 @@ export function DailySpeaking({
                   ))}
                 </View>
                 <View
-                  style={[
-                    s.card,
-                    { alignItems: "center", gap: 9, paddingVertical: 22 },
-                  ]}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
                 >
                   {typeof evaluation.overall_score === "number" ? (
                     <Text style={s.score}>
@@ -814,57 +882,50 @@ export function DailySpeaking({
                     </Text>
                   ) : (
                     <>
-                      <Icon name="check-circle" size={32} color="#555" />
-                      <Text style={s.heading}>
-                        {evaluation.provider === "local"
-                          ? "Response saved"
-                          : "Feedback ready"}
-                      </Text>
+                      <Icon name="check-circle" size={16} color={C.forest} />
                     </>
                   )}
                   <Text style={s.small}>
                     {evaluation.provider === "local"
-                      ? "Self-review · no scores"
-                      : "Provisional BRIDGE feedback"}
+                      ? "Saved · AI feedback unavailable"
+                      : "First try · AI feedback"}
                   </Text>
                 </View>
                 {tab !== "Areas to Improve" ? (
                   <FeedbackLine
                     icon="star"
+                    label={tab === "Overall" ? "What worked" : undefined}
                     text={feedback?.strength || evaluation.key_takeaway}
                   />
                 ) : null}
                 {tab !== "Strengths" ? (
                   <FeedbackLine
                     icon="target"
+                    label={tab === "Overall" ? "Try next" : undefined}
                     text={feedback?.priority_gap || evaluation.retry_prompt}
                   />
                 ) : null}
-                {tab === "Overall" ? (
-                  <FeedbackLine
-                    icon="trending-up"
-                    text={feedback?.next_question || evaluation.retry_prompt}
-                  />
-                ) : (
-                  evaluation.dimensions
-                    .filter((d) =>
-                      tab === "Strengths" ? d.strength : d.improvement,
-                    )
-                    .map((d) => (
-                      <FeedbackLine
-                        key={d.key}
-                        icon="check"
-                        text={`${d.label || d.key}: ${tab === "Strengths" ? d.strength : d.improvement}`}
-                      />
-                    ))
-                )}
+                {tab !== "Overall"
+                  ? evaluation.dimensions
+                      .filter((d) =>
+                        tab === "Strengths" ? d.strength : d.improvement,
+                      )
+                      .map((d) => (
+                        <FeedbackLine
+                          key={d.key}
+                          icon="check"
+                          text={`${d.label || d.key}: ${tab === "Strengths" ? d.strength : d.improvement}`}
+                        />
+                      ))
+                  : null}
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => setShowMap(!showMap)}
+                  aria-expanded={showMap}
                   style={s.disclosure}
                 >
                   <Icon name="git-branch" color="#242424" size={18} />
-                  <Text style={s.name}>Your Thought Map</Text>
+                  <Text style={[s.name, { flex: 1 }]}>Thought map</Text>
                   <Icon
                     name={showMap ? "chevron-up" : "chevron-down"}
                     color="#242424"
@@ -881,48 +942,115 @@ export function DailySpeaking({
                     A map wasn’t available for this response.
                   </Text>
                 ) : null}
-                <Action label="Continue" onPress={() => setStep("guide")} />
-              <Action label="Finish practice" secondary onPress={() => setStep("complete")} />
+                <Action
+                  label="Practise guiding questions"
+                  icon="mic"
+                  onPress={() => setStep("guide")}
+                />
+                <Action
+                  label="Skip practice"
+                  secondary
+                  onPress={() => setStep("sample-offer")}
+                />
               </>
             )}
             {step === "guide" && (
               <>
+                {busy ? <View style={s.center}><ActivityIndicator color={C.forest} /><Text style={s.small}>Checking your answer…</Text></View> : null}
                 <Text style={s.copy}>
-                  Practise these questions to strengthen{`\n`}your response.
+                  Choose a question. Build on your first answer.
                 </Text>
                 {guideIndex === null ? (
                   <>
                     {questions.map((q, i) => (
-                      <Pressable
-                        key={q.question}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Practise question ${i + 1}`}
-                        onPress={() => setGuideIndex(i)}
-                        style={[s.card, s.question]}
-                      >
-                        <View style={s.number}>
-                          <Text style={s.name}>{i + 1}</Text>
-                        </View>
-                        <Text style={[s.body, { flex: 1 }]}>{q.question}</Text>
+                      <View key={q.question} style={{ gap: 10 }}>
+                        <Pressable
+                          accessibilityRole="button"
+                          disabled={busy}
+                          accessibilityLabel={`Practise question ${i + 1}`}
+                          onPress={() => {
+                            setGuideIndex(i);
+                            setGuideTyping(false);
+                          }}
+                          style={[s.card, s.question]}
+                        >
+                          <View style={s.number}>
+                            <Text style={s.name}>{i + 1}</Text>
+                          </View>
+                          <Text style={[s.body, { flex: 1 }]}>
+                            {q.question}
+                          </Text>
+                          {answers[i] ? (
+                            <Icon name="check" size={17} color="#555" />
+                          ) : null}
+                        </Pressable>
                         {answers[i] ? (
-                          <Icon name="check" size={17} color="#555" />
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`Review answer ${i + 1}`}
+                            onPress={() =>
+                              setExpandedGuide(expandedGuide === i ? null : i)
+                            }
+                            style={s.reviewLink}
+                          >
+                            <Text style={s.small}>
+                              {guideFeedback[i]
+                                ? "View feedback"
+                                : "Answer saved"}
+                            </Text>
+                            <Icon
+                              name={
+                                expandedGuide === i
+                                  ? "chevron-up"
+                                  : "chevron-down"
+                              }
+                              size={14}
+                            />
+                          </Pressable>
                         ) : null}
-                      </Pressable>
+                        {answers[i] && expandedGuide === i ? (
+                          <View style={s.card}>
+                            {guideFeedback[i] ? (
+                              <>
+                                <Text style={s.name}>
+                                  {
+                                    {
+                                      answered: "Answered the question",
+                                      partly_answered: "Partly answered",
+                                      not_answered: "Question not yet answered",
+                                    }[guideFeedback[i]!.status]
+                                  }
+                                </Text>
+                                <Text style={s.body}>
+                                  {guideFeedback[i]!.feedback}
+                                </Text>
+                                <Text style={s.body}>
+                                  {guideFeedback[i]!.next_step}
+                                </Text>
+                                <Text style={s.small}>
+                                  AI feedback · provisional
+                                </Text>
+                              </>
+                            ) : (
+                              <Action
+                                label={`Check answer ${i + 1}`}
+                                secondary
+                                disabled={busy}
+                                onPress={() => void retryGuide(i)}
+                              />
+                            )}
+                          </View>
+                        ) : null}
+                      </View>
                     ))}
-                    <Action
-                      label="Practise Guiding Questions"
-                      icon="mic"
-                      onPress={() => setGuideIndex(0)}
-                    />
                     <Pressable
                       accessibilityRole="button"
-                      onPress={() => void generateScript()}
+                      disabled={busy}
+                      onPress={() => setStep("sample-offer")}
                       style={s.quiet}
                     >
                       <Text style={s.body}>
-                        {answers.some(Boolean)
-                          ? "Create My Improved Script"
-                          : "Skip for Now"}
+                        {answers.some(Boolean) ? "Continue" : "Skip practice"}
                       </Text>
                     </Pressable>
                   </>
@@ -931,13 +1059,57 @@ export function DailySpeaking({
                     <Text style={s.topic}>
                       {questions[guideIndex].question}
                     </Text>
-                    <AudioInput
-                      key={guideIndex}
-                      appearance="daily"
-                      onRecorded={guideRecording}
-                      onCancel={() => setGuideIndex(null)}
-                      onCaptureActive={setCapturing}
-                      busy={busy}
+                    {!guideTyping ? (
+                      <AudioInput
+                        key={guideIndex}
+                        appearance="daily"
+                        onRecorded={guideRecording}
+                        onCancel={() => setGuideIndex(null)}
+                        onCaptureActive={setCapturing}
+                        busy={busy}
+                      />
+                    ) : (
+                      <>
+                        <TextInput
+                          accessibilityLabel={`Answer question ${guideIndex + 1}`}
+                          multiline
+                          value={answers[guideIndex]}
+                          placeholder="Your thoughts…"
+                          style={s.input}
+                          editable={!busy && !capturing}
+                          onChangeText={(text) => {
+                            setAnswers((items) =>
+                              items.map((value, i) =>
+                                i === guideIndex ? text : value,
+                              ),
+                            );
+                            setGuideFeedback((items) =>
+                              items.map((value, i) =>
+                                i === guideIndex ? null : value,
+                              ),
+                            );
+                            setScript(null);
+                          }}
+                          maxLength={2000}
+                        />
+                        <Action
+                          label="Check my answer"
+                          disabled={
+                            busy || capturing || !answers[guideIndex].trim()
+                          }
+                          onPress={() => {
+                            const index = guideIndex;
+                            setGuideIndex(null);
+                            void retryGuide(index);
+                          }}
+                        />
+                      </>
+                    )}
+                    <Action
+                      label={guideTyping ? "Record instead" : "Type instead"}
+                      secondary
+                      disabled={busy || capturing}
+                      onPress={() => setGuideTyping(!guideTyping)}
                     />
                     <Pressable
                       accessibilityRole="button"
@@ -951,12 +1123,28 @@ export function DailySpeaking({
                 )}
               </>
             )}
-            {step === "script" && (
+            {step === "sample-offer" && (
               <>
                 <Text style={s.copy}>
-                  A sample response based on your answer,{`\n`}with your ideas
-                  expressed more clearly.
+                  Your ideas, expressed more clearly. Up to 3 useful new words.
                 </Text>
+                <Action
+                  label="View sample script"
+                  disabled={busy}
+                  onPress={() =>
+                    script ? setStep("script") : void generateScript()
+                  }
+                />
+                <Action
+                  label="Skip and finish"
+                  secondary
+                  onPress={() => setStep("complete")}
+                />
+              </>
+            )}
+            {step === "script" && (
+              <>
+                <Text style={s.copy}>Based on what you said.</Text>
                 {busy ? (
                   <ActivityIndicator color="#242424" style={{ margin: 50 }} />
                 ) : script ? (
@@ -971,37 +1159,79 @@ export function DailySpeaking({
                     onPress={() => void generateScript()}
                   />
                 )}
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => setVocab(!vocab)}
-                  style={s.disclosure}
-                >
-                  <Icon name="book-open" color="#242424" size={20} />
-                  <Text style={[s.name, { flex: 1 }]}>
-                    New Vocabulary ({words.length})
-                  </Text>
-                  <Icon
-                    name={vocab ? "chevron-up" : "chevron-down"}
-                    size={20}
-                    color="#242424"
-                  />
-                </Pressable>
-                {vocab ? (
-                  words.length ? (
-                    words.map((word) => (
-                      <View key={word.id} style={s.card}>
-                        <Text style={s.name}>{word.word}</Text>
-                        <Text style={s.body}>{word.meaning}</Text>
-                      </View>
-                    ))
-                  ) : (
-                    <Text style={s.small}>
-                      No new WordBloom words were added for this response.
+                {script ? (
+                  <>
+                    <Text style={s.name}>
+                      New vocabulary ({script.vocabulary?.length || 0})
                     </Text>
-                  )
+                    <Text style={s.small}>
+                      Pick words for Read Aloud practice.
+                    </Text>
+                    {(script.vocabulary || []).map((word) => {
+                      const saved = savedWordIds.includes(word.wordId);
+                      const selected = selectedWordIds.includes(word.wordId);
+                      return (
+                        <Pressable
+                          key={word.wordId}
+                          accessibilityRole="checkbox"
+                          accessibilityLabel={`Save ${word.word}`}
+                          aria-checked={saved || selected}
+                          accessibilityState={{
+                            checked: saved || selected,
+                            disabled: busy || saved,
+                          }}
+                          disabled={busy || saved}
+                          style={[
+                            s.card,
+                            selected && { borderColor: "#345b48" },
+                          ]}
+                          onPress={() =>
+                            setSelectedWordIds((ids) =>
+                              selected
+                                ? ids.filter((id) => id !== word.wordId)
+                                : [...ids, word.wordId],
+                            )
+                          }
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              gap: 10,
+                            }}
+                          >
+                            <Icon
+                              name={
+                                saved || selected ? "check-square" : "square"
+                              }
+                              size={20}
+                              color="#345b48"
+                            />
+                            <Text style={s.name}>
+                              {word.word}
+                              {saved ? " · Saved" : ""}
+                            </Text>
+                          </View>
+                          <Text style={s.body}>{word.meaning}</Text>
+                        </Pressable>
+                      );
+                    })}
+                    {!script.vocabulary?.length ? (
+                      <Text style={s.small}>
+                        No new words are needed for this sample.
+                      </Text>
+                    ) : (
+                      <Action
+                        label="Save selected words"
+                        disabled={busy || !selectedWordIds.length}
+                        onPress={() => void saveWords()}
+                      />
+                    )}
+                  </>
                 ) : null}
                 <Action
-                  label="Continue"
+                  label="Skip and finish"
+                  secondary
                   disabled={busy}
                   onPress={() => setStep("complete")}
                 />
@@ -1044,6 +1274,12 @@ export function DailySpeaking({
                 <Text style={s.small}>
                   {rewards?.reason || "Rewards recognise your participation."}
                 </Text>
+                {savedWordIds.length ? (
+                  <Text style={s.copy}>
+                    Your selected words are saved for future Read Aloud
+                    practice.
+                  </Text>
+                ) : null}
                 <Action label="Continue" onPress={() => void leave()} />
               </>
             )}
@@ -1057,7 +1293,15 @@ export function DailySpeaking({
 function ScriptText({ script }: { script: GuidedResponseDraft }) {
   let cursor = 0;
   const fragments: React.ReactNode[] = [];
-  for (const annotation of script.annotations.slice(0, 3)) {
+  const highlights = (script.vocabulary || [])
+    .flatMap((word) =>
+      word.spans.map((span) => ({
+        ...span,
+        quote: script.text.slice(span.start, span.end),
+      })),
+    )
+    .sort((a, b) => a.start - b.start);
+  for (const annotation of highlights) {
     fragments.push(script.text.slice(cursor, annotation.start));
     fragments.push(
       <Text key={annotation.start} style={{ backgroundColor: "#ede6dd" }}>
@@ -1127,11 +1371,22 @@ function Status({
     </View>
   );
 }
-function FeedbackLine({ icon, text }: { icon: string; text: string }) {
+function FeedbackLine({
+  icon,
+  text,
+  label,
+}: {
+  icon: string;
+  text: string;
+  label?: string;
+}) {
   return (
     <View style={s.feedbackLine}>
       <Icon name={icon} color="#555" size={19} />
-      <Text style={[s.body, { flex: 1, fontSize: 14 }]}>{text}</Text>
+      <View style={{ flex: 1, gap: 6 }}>
+        {label ? <Text style={s.name}>{label}</Text> : null}
+        <Text style={[s.body, { fontSize: 14 }]}>{text}</Text>
+      </View>
     </View>
   );
 }
@@ -1154,13 +1409,13 @@ function Reward({
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#fff" },
+  root: { flex: 1, backgroundColor: C.cream },
   scroll: {
     flexGrow: 1,
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: C.cream,
     paddingHorizontal: 12,
-    paddingVertical: 16,
+    paddingVertical: 24,
   },
   phone: {
     width: "100%",
@@ -1168,8 +1423,8 @@ const s = StyleSheet.create({
     minHeight: 460,
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#edf0e9",
-    borderRadius: 20,
+    borderColor: "#e8ebe5",
+    borderRadius: 24,
     padding: 24,
     gap: 20,
   },
@@ -1192,14 +1447,14 @@ const s = StyleSheet.create({
     fontFamily: "DMBold",
     fontSize: 20,
     lineHeight: 26,
-    color: "#111",
+    color: C.ink,
     textAlign: "center",
   },
   title: {
     fontFamily: "DMBold",
     fontSize: 24,
     lineHeight: 30,
-    color: "#111",
+    color: C.ink,
     textAlign: "center",
   },
   center: { alignItems: "center", gap: 14 },
@@ -1265,7 +1520,7 @@ const s = StyleSheet.create({
   action: {
     minHeight: 48,
     borderRadius: 28,
-    backgroundColor: "#242424",
+    backgroundColor: C.forest,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -1273,7 +1528,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  actionSecondary: { backgroundColor: "#f5f5f5" },
+  actionSecondary: { backgroundColor: "transparent" },
   actionText: {
     fontFamily: "DMBold",
     fontSize: 14,
@@ -1292,12 +1547,11 @@ const s = StyleSheet.create({
   },
   card: {
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: "#e8ebe5",
     borderRadius: 17,
     padding: 17,
     backgroundColor: "#fff",
     gap: 10,
-    boxShadow: "0 2px 4px #00000004",
   },
   status: {
     flexDirection: "row",
@@ -1316,7 +1570,7 @@ const s = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 5,
   },
-  tabActive: { backgroundColor: "#242424" },
+  tabActive: { backgroundColor: C.forest },
   tabText: {
     fontFamily: "DMMedium",
     fontSize: 11,
@@ -1324,7 +1578,19 @@ const s = StyleSheet.create({
     textAlign: "center",
   },
   score: { fontFamily: "DMBold", fontSize: 38, color: "#111" },
-  feedbackLine: { flexDirection: "row", gap: 15, alignItems: "flex-start" },
+  feedbackLine: {
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "flex-start",
+    paddingVertical: 12,
+  },
+  reviewLink: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 6,
+  },
   disclosure: {
     flexDirection: "row",
     alignItems: "center",

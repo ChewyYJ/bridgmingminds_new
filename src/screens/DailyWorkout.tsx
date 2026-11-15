@@ -72,10 +72,6 @@ export function DailyPlanIntro({ onStart }: { onStart?: () => void }) {
         busy={busy}
       />
       <ErrorNote message={error} />
-      <Text style={{ ...T.small, textAlign: "center" }}>
-        Starting switches to daily rewards. Your garden and saved work stay with
-        you.
-      </Text>
     </View>
   );
 }
@@ -124,11 +120,6 @@ function ChallengeHub({
       testID="daily-hub"
     >
       <View style={{ gap: 9 }}>
-        <Text
-          style={{ ...T.small, letterSpacing: 1.4, textTransform: "uppercase" }}
-        >
-          A little practice, every day
-        </Text>
         <View
           style={{
             flexDirection: "row",
@@ -214,13 +205,13 @@ function ChallengeHub({
               onPress={item.action}
               style={({ pressed }) => ({
                 flex: wide ? 1 : undefined,
-                minHeight: wide ? 290 : 190,
+                minHeight: wide ? 248 : 176,
                 padding: wide ? 28 : 22,
-                borderRadius: 25,
-                backgroundColor: item.color,
-                borderWidth: 2,
+                borderRadius: 20,
+                backgroundColor: C.paper,
+                borderWidth: 1,
                 borderColor:
-                  focusedActivity === item.id ? C.forest : "transparent",
+                  focusedActivity === item.id ? C.forest : C.border,
                 opacity: pressed || (busy && busy !== item.id) ? 0.65 : 1,
                 gap: 18,
               })}
@@ -237,7 +228,7 @@ function ChallengeHub({
                     width: 48,
                     height: 48,
                     borderRadius: 16,
-                    backgroundColor: "#ffffffb0",
+                    backgroundColor: "#eef2e8",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -252,7 +243,7 @@ function ChallengeHub({
               </View>
               <View style={{ gap: 5, flex: 1 }}>
                 <Text
-                  style={{ ...T.h3, fontSize: wide ? 26 : 22, lineHeight: 32 }}
+                  style={{ fontFamily: "DMBold", color: C.ink, fontSize: wide ? 24 : 21, lineHeight: 30 }}
                 >
                   {item.title}
                 </Text>
@@ -293,7 +284,6 @@ function ChallengeHub({
         >
           <Text style={T.small}>{daily.streak.current} day streak</Text>
           <Text style={T.small}>{daily.xp} XP today</Text>
-          <Text style={T.small}>{daily.timezone}</Text>
         </View>
       ) : null}
       <View

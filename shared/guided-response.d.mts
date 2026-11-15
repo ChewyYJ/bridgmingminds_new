@@ -1,4 +1,10 @@
 export interface GuidedResponseDraft {
+  vocabulary?: {
+    wordId: string;
+    word: string;
+    meaning: string;
+    spans: { start: number; end: number }[];
+  }[];
   text: string;
   annotations: {
     start: number;
