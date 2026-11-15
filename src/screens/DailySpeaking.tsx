@@ -1413,6 +1413,7 @@ const s = StyleSheet.create({
   scroll: {
     flexGrow: 1,
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: C.cream,
     paddingHorizontal: 12,
     paddingVertical: 24,
@@ -1420,7 +1421,6 @@ const s = StyleSheet.create({
   phone: {
     width: "100%",
     maxWidth: 680,
-    minHeight: 460,
     backgroundColor: C.paper,
     borderWidth: 1,
     borderColor: C.border,

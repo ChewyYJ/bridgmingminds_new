@@ -233,17 +233,17 @@ export default function App() {
             ref={pageScroll}
             scrollEnabled={!gardenInteracting}
             key={pathname + JSON.stringify(params)}
-            style={{ flex: 1, ...(dailySpeaking ? { backgroundColor: "#fff" } : {}) }}
+            style={{ flex: 1, ...(dailySpeaking ? { backgroundColor: C.cream } : {}) }}
             contentContainerStyle={{
               padding: dailySpeaking ? 0 : desktop ? 34 : 20,
               paddingTop: dailySpeaking ? 0 : immersive ? 22 : desktop ? 32 : 23,
               paddingBottom: dailySpeaking ? 0 : 40,
-              ...(dailySpeaking ? { backgroundColor: "#fff", flexGrow: 1 } : {}),
+              ...(dailySpeaking ? { backgroundColor: C.cream, flexGrow: 1 } : {}),
               alignItems: "center",
             }}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={{ width: "100%", maxWidth: immersive ? 1050 : 1280 }}>
+            <View style={{ width: "100%", maxWidth: immersive ? 1050 : 1280, ...(dailySpeaking ? { flexGrow: 1 } : {}) }}>
               {page === "read-aloud" ? (
                 <ReadAloud key={state.profile.id} />
               ) : page === "home" ? (
