@@ -285,6 +285,12 @@ export interface Article {
 export interface Session {
   learningFocus?: { recommendationId: string; dimension: string; label: string; instruction: string; policyVersion: string };
   assessmentFramework?: "bridge-v1";
+  dailySpeakingJourney?: {
+    version: "daily-speaking-v1";
+    day: string;
+    timezone: string;
+    brainstorm?: BrainstormBoard;
+  };
   id: string;
   mode: Mode;
   prompt: Prompt;
@@ -294,6 +300,20 @@ export interface Session {
   turns: { id: string; speaker: "user" | "ai"; text: string; round: number }[];
   status: string;
   summary?: string;
+}
+export interface BrainstormPoint { x: number; y: number }
+export interface BrainstormStroke { id: string; points: BrainstormPoint[] }
+export interface BrainstormNote { id: string; text: string; x: number; y: number }
+export interface BrainstormConnector { id: string; from: string; to: string }
+export interface BrainstormBoard {
+  version: "daily-whiteboard-v1";
+  startedAt: string;
+  expiresAt: string;
+  completedAt?: string;
+  strokes: BrainstormStroke[];
+  notes: BrainstormNote[];
+  connectors: BrainstormConnector[];
+  snapshot: { version: 1; savedAt: string; elementCount: number };
 }
 export interface ThoughtMapNode {
   id: string;

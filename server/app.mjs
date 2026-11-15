@@ -1065,6 +1065,14 @@ export function createApp(options = {}) {
         ...(learningFocus ? { learningFocus } : {}),
         ...(data.mode === "spin_speak" && parse((await getUser(req.userId)).profile).dailyWorkout ? { assessmentFramework: "bridge-v1" } : {}),
       };
+      if (data.mode === "spin_speak" && parse((await getUser(req.userId)).profile).dailyWorkout) {
+        const daily = await dailyWorkout.today(req.userId);
+        session.dailySpeakingJourney = {
+          version: "daily-speaking-v1",
+          day: daily.day,
+          timezone: daily.timezone,
+        };
+      }
       await db
         .prepare("INSERT INTO sessions VALUES(?,?,?,?,?)")
         .run(
@@ -1083,6 +1091,29 @@ export function createApp(options = {}) {
       res.json(await getSession(req.params.id, req.userId)),
     ),
   );
+  app.put(
+    "/api/sessions/:id/brainstorm",
+    mutate(async (req, res) => {
+      const point = z.object({ x: z.number().finite().min(-20).max(2000), y: z.number().finite().min(-20).max(2000) }).strict();
+      const board = z.object({
+        version: z.literal("daily-whiteboard-v1"),
+        startedAt: z.string().datetime(), expiresAt: z.string().datetime(), completedAt: z.string().datetime().optional(),
+        strokes: z.array(z.object({ id: z.string().max(80), points: z.array(point).min(2).max(1500) }).strict()).max(120),
+        notes: z.array(z.object({ id: z.string().max(80), text: z.string().max(240), x: z.number().finite().min(-20).max(2000), y: z.number().finite().min(-20).max(2000) }).strict()).max(40),
+        connectors: z.array(z.object({ id: z.string().max(80), from: z.string().max(80), to: z.string().max(80) }).strict()).max(80),
+        snapshot: z.object({ version: z.literal(1), savedAt: z.string().datetime(), elementCount: z.number().int().min(0).max(240) }).strict(),
+      }).strict().parse(req.body);
+      const session = await getSession(req.params.id, req.userId);
+      if (!session.dailySpeakingJourney || session.mode !== "spin_speak")
+        throw failure(400, "This brainstorm board belongs to a daily speaking challenge.");
+      const noteIds = new Set(board.notes.map((note) => note.id));
+      if (board.connectors.some((edge) => !noteIds.has(edge.from) || !noteIds.has(edge.to)))
+        throw failure(400, "A board link refers to a missing idea note.");
+      session.dailySpeakingJourney.brainstorm = board;
+      await saveSession(session);
+      res.json(session);
+    }),
+  );
   app.post(
     "/api/attempts",
     mutate(async (req, res) => {
@@ -1100,6 +1131,8 @@ export function createApp(options = {}) {
       const session = await getSession(data.sessionId, req.userId);
       if (session.mode === "read_aloud")
         throw failure(400, "Submit this reading through its Read Aloud self-review screen.");
+      if (session.dailySpeakingJourney && (data.responseType !== "audio" || !data.audioId))
+        throw failure(400, "Daily Challenge responses are submitted as a recording.");
       if (data.responseType === "text") textSchema.parse(data.text);
       if (data.audioId)
         await audioRoutes.assertOwnAudio(data.audioId, req.userId);
