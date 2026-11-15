@@ -17,6 +17,7 @@ import {
   useAudioRecorderState,
 } from "expo-audio";
 import { Button, C, ErrorNote, Icon, T } from "./ui";
+import { LiveVoiceMeter } from "./LiveVoiceMeter";
 
 export interface RecordedAudio {
   uri: string;
@@ -364,7 +365,6 @@ export default function AudioInput({
     }
   }
 
-  const level = Math.max(0, Math.min(1, ((state.metering ?? -55) + 60) / 60));
   if (appearance === "daily")
     return (
       <View style={{ alignItems: "center", gap: 24, width: "100%" }}>
@@ -426,19 +426,11 @@ export default function AudioInput({
                 ? "01:00"
                 : `00:${String(60 - elapsed).padStart(2, "0")}`}
             </Text>
-            <View style={dailyAudio.wave}>
-              {[8, 12, 18, 13, 28, 46, 28, 19, 14, 10, 6].map((height, i) => (
-                <View
-                  key={i}
-                  style={{
-                    width: 6,
-                    borderRadius: 4,
-                    backgroundColor: "#c4c4c4",
-                    height: phase === "recording" ? 6 + level * height : height,
-                  }}
-                />
-              ))}
-            </View>
+            <LiveVoiceMeter
+              key={phase}
+              recorder={recorder}
+              active={phase === "recording"}
+            />
             <Text style={dailyAudio.hint}>
               {working
                 ? "Preparing microphone…"
@@ -462,7 +454,15 @@ export default function AudioInput({
             ) : null}
           </>
         )}
-        <Pressable accessibilityRole="button" accessibilityLabel="Cancel recording" disabled={working || busy} onPress={() => void discard(true)} style={dailyAudio.secondary}><Text style={dailyAudio.hint}>Cancel recording</Text></Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Cancel recording"
+          disabled={working || busy}
+          onPress={() => void discard(true)}
+          style={dailyAudio.secondary}
+        >
+          <Text style={dailyAudio.hint}>Cancel recording</Text>
+        </Pressable>
       </View>
     );
   return (
@@ -532,30 +532,11 @@ export default function AudioInput({
           >
             0:{String(60 - elapsed).padStart(2, "0")}
           </Text>
-          <View
-            accessibilityLabel={
-              phase === "recording"
-                ? "Recording in progress"
-                : "Recording paused"
-            }
-            style={s.wave}
-          >
-            {Array.from({ length: 25 }, (_, i) => (
-              <View
-                key={i}
-                style={{
-                  flex: 1,
-                  borderRadius: 4,
-                  backgroundColor: C.forest,
-                  height:
-                    phase === "recording"
-                      ? 8 + level * (16 + ((i * 13) % 40))
-                      : 8,
-                  opacity: 0.45 + (i % 3) * 0.18,
-                }}
-              />
-            ))}
-          </View>
+          <LiveVoiceMeter
+            key={phase}
+            recorder={recorder}
+            active={phase === "recording"}
+          />
           <View style={s.row}>
             <Button
               label={phase === "paused" ? "Resume" : "Pause"}
@@ -620,13 +601,6 @@ const dailyAudio = StyleSheet.create({
   },
   timer: { fontFamily: "DMBold", fontSize: 28, color: "#181818" },
   hint: { fontFamily: "DM", fontSize: 14, color: "#555", textAlign: "center" },
-  wave: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    height: 48,
-  },
   button: {
     borderRadius: 28,
     minHeight: 50,
@@ -686,12 +660,4 @@ const s = StyleSheet.create({
     justifyContent: "center",
   },
   timer: { fontFamily: "Lora", fontSize: 60, lineHeight: 76, color: C.forest },
-  wave: {
-    flexDirection: "row",
-    gap: 3,
-    height: 64,
-    width: "100%",
-    maxWidth: 230,
-    alignItems: "center",
-  },
 });
