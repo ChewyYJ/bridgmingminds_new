@@ -4,7 +4,7 @@
     "slug": "mind-garden",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/mindgarden-icon.png",
+    "icon": "./assets/brand/bridgingminds-icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
@@ -12,15 +12,15 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/mindgarden-adaptive.png",
-        "monochromeImage": "./assets/mindgarden-monochrome.png",
-        "backgroundColor": "#FAF8F2"
+        "foregroundImage": "./assets/brand/bridgingminds-adaptive.png",
+        "monochromeImage": "./assets/brand/bridgingminds-monochrome.png",
+        "backgroundColor": "#FAF8F5"
       },
       "predictiveBackGestureEnabled": false,
       "package": "app.mindgarden.practice"
     },
     "web": {
-      "favicon": "./assets/mindgarden-icon.png",
+      "favicon": "./assets/brand/bridgingminds-favicon.png",
       "output": "single"
     },
     "plugins": [

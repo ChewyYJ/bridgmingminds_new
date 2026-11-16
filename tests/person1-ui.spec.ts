@@ -189,61 +189,30 @@ test("daily reference UI: board persistence, recording, feedback tabs, optional 
     .getByRole("textbox", { name: "Your name", exact: true })
     .fill("YeeJing");
   await page
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   await page
-    .getByRole("button", { name: "Spin and reflect", exact: true })
+    .getByRole("button", { name: "Spin & Speak", exact: true })
     .click();
   await expect(page.getByTestId("daily-screen-entry")).toBeVisible();
   await expect(page.getByText("Loading today’s question…")).toHaveCount(0);
   await page.screenshot({ path: info.outputPath("01-entry.png") });
   await page
-    .getByRole("button", { name: "Start brainstorming", exact: true })
+    .getByRole("button", { name: "Plan your response", exact: true })
     .click();
-  await page
-    .getByRole("textbox", { name: "Benefits note", exact: true })
-    .fill("Personalised support");
-  const synced = page.waitForResponse(
-    (res) =>
-      res.url().includes("/brainstorm") &&
-      res.request().method() === "PUT" &&
-      res.ok(),
-  );
+  const notes = "Personalised support\nUnequal access\n" + "Teachers should help students check and understand the advice. ".repeat(5);
+  const synced = page.waitForResponse((res) => res.url().includes("/brainstorm") && res.request().postDataJSON()?.planningBoard?.notepad === notes && res.ok());
+  await page.getByRole("textbox", { name: "Your ideas", exact: true }).fill(notes);
   await synced;
   await page.reload();
-  await expect(
-    page.getByRole("textbox", { name: "Benefits note", exact: true }),
-  ).toHaveValue("Personalised support");
-  await page.getByRole("textbox", { name: "Concerns note", exact: true }).fill("Unequal access");
-  await page.getByRole("button", { name: "Draw", exact: true }).click();
-  const canvas = (await page.getByTestId("daily-board-canvas").boundingBox())!;
-  const drawingSaved = page.waitForResponse(
-    (res) =>
-      res.url().includes("/brainstorm") &&
-      res.request().postDataJSON()?.strokes?.length === 1 &&
-      res.ok(),
-  );
-  await page.mouse.move(canvas.x + 15, canvas.y + 150);
-  await page.mouse.down();
-  await page.mouse.move(canvas.x + 60, canvas.y + 180, { steps: 8 });
-  await page.mouse.up();
-  await drawingSaved;
-  await page
-    .getByRole("button", { name: "Undo board change", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Redo board change", exact: true })
-    .click();
-  await page.getByRole("button", { name: "Edit notes", exact: true }).click();
-  await page.screenshot({ path: info.outputPath("02-board.png") });
-  await page.getByRole("button", { name: "Clear", exact: true }).click();
-  await page.getByRole("button", { name: "Cancel", exact: true }).click();
-  await expect(
-    page.getByRole("textbox", { name: "Benefits note", exact: true }),
-  ).toHaveValue("Personalised support");
-  await page
-    .getByRole("button", { name: "Done brainstorming", exact: true })
-    .click();
+  await expect(page.getByRole("textbox", { name: "Your ideas", exact: true })).toHaveValue(notes);
+  await expect(page.getByRole("button", { name: "Draw", exact: true })).toHaveCount(0);
+  await page.screenshot({ path: info.outputPath("02-board.png"), fullPage: true });
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page.getByRole("button", { name: "Plan your response", exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "Your ideas", exact: true })).toHaveValue(notes);
+  await page.getByRole("button", { name: "Ready to speak", exact: true }).click();
+  await expect(page.getByTestId("speaking-notes")).toContainText("Unequal access");
   await page
     .getByRole("button", { name: "Allow Private Recording", exact: true })
     .click();

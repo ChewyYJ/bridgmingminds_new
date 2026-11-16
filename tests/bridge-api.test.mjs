@@ -4,6 +4,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createApp } from "../server/app.mjs";
+import { createPlanningBoard } from "../shared/planning-board.mjs";
 import { bridgeFixture } from "./helpers/bridge-fixture.mjs";
 
 const answer =
@@ -235,4 +236,36 @@ test("planning notes and map evidence persist across retries and restart", async
   await f.complete(token, retry);
   await f.restart();
   assert.deepEqual(await f.ok(`/attempts/${original.id}/thought-map`, token), map);
+});
+
+test("spoken reading reflections retain their planning notes across retries", async (t) => {
+  const f = await fixture(t, false);
+  const token = await f.guest();
+  const feed = await f.ok("/articles", token);
+  const article = (Array.isArray(feed) ? feed : feed.articles)[0];
+  const session = await f.ok("/sessions", token, { mode: "read_reflect", articleId: article.id });
+  const audio = await f.ok("/audio", token, Buffer.alloc(100, 1));
+  const planningNotes = "My view\nA reason\nOne example";
+  const planningBoard = {
+    ...createPlanningBoard("My view"), mode: "draw",
+    nodes: [{ id: "a", text: "A reason", shape: "box", x: 0.25, y: 0.3 }, { id: "b", text: "One example", shape: "circle", x: 0.75, y: 0.3 }],
+    links: [{ id: "ab", from: "a", to: "b" }],
+    strokes: [{ id: "stroke", points: [{ x: 10, y: 20 }, { x: 50, y: 60 }] }],
+  };
+  for (const invalid of [
+    { ...planningBoard, links: [{ id: "missing", from: "a", to: "absent" }] },
+    { ...planningBoard, strokes: [{ id: "outside", points: [{ x: -1, y: 0 }, { x: 1, y: 1 }] }] },
+    { ...planningBoard, nodes: [...planningBoard.nodes, planningBoard.nodes[0]] },
+    { ...planningBoard, strokes: Array.from({ length: 5 }, (_, i) => ({ id: String(i), points: Array.from({ length: 320 }, () => ({ x: 10, y: 20 })) })) },
+  ]) assert.equal((await f.request("/attempts", token, { sessionId: session.id, responseType: "audio", audioId: audio.id, planningBoard: invalid })).status, 400);
+  const attempt = await f.submit(token, session, { responseType: "audio", audioId: audio.id, planningBoard });
+  const saved = await f.complete(token, attempt);
+  assert.equal(saved.planningNotes, planningNotes);
+  const retry = await f.submit(token, session, { responseType: "audio", audioId: audio.id, retryOf: attempt.id });
+  assert.equal(retry.planningNotes, planningNotes);
+  assert.deepEqual(retry.planningBoard, planningBoard);
+  await f.restart();
+  const restored = await f.ok(`/attempts/${attempt.id}`, token);
+  assert.equal(restored.planningNotes, planningNotes);
+  assert.deepEqual(restored.planningBoard, planningBoard);
 });

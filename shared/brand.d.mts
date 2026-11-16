@@ -1,8 +1,8 @@
 export const BRAND: {
-  stem: string;
-  leaf: string;
-  forest: string;
-  sage: string;
+  sourceWidth: number;
+  sourceHeight: number;
+  viewBox: string;
+  ink: string;
   gold: string;
   cream: string;
 };

@@ -10,6 +10,7 @@ import Svg, {
   Defs,
   LinearGradient,
   Stop,
+  Image as SvgImage,
 } from "react-native-svg";
 export function Flower({
   x = 0,
@@ -330,12 +331,13 @@ export function BridgingMindsMark({ size = 40 }: { size?: number }) {
       style={{ flexShrink: 0 }}
       width={size}
       height={size}
-      viewBox="0 0 64 64"
+      viewBox={BRAND.viewBox}
+      preserveAspectRatio="xMidYMid meet"
+      accessibilityRole="image"
       accessibilityLabel="BridgingMinds"
+      testID="bridgingminds-logo"
     >
-      <Path d={BRAND.stem} fill={BRAND.forest} />
-      <Path d={BRAND.leaf} fill={BRAND.sage} />
-      <Circle cx="24" cy="12" r="4" fill={BRAND.gold} />
+      <SvgImage href={require("../../assets/brand/approved-logo-source.png")} x={0} y={0} width={BRAND.sourceWidth} height={BRAND.sourceHeight} />
     </Svg>
   );
 }

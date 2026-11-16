@@ -1,0 +1,14 @@
+
+Running 7 tests using 1 worker
+
+(node:14764) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\room-ui.spec.ts:115:5 › dragging furniture validates space, saves across reload, restores tray items and cancels changes (3.1s)
+  ok 2 tests\room-ui.spec.ts:157:5 › furniture shop confirms, cancels and retries a lost receipt without a second debit (2.2s)
+  ok 3 tests\room-ui.spec.ts:199:5 › room drafts recover, stale saves retain edits and another account cannot inherit them (1.7s)
+  ok 4 tests\room-ui.spec.ts:230:5 › 320px room keeps editing controls and inventory reachable without horizontal overflow (1.5s)
+  ok 5 tests\room-ui.spec.ts:255:7 › touch furniture gestures › touch dragging moves placed and tray furniture and saves the arrangement (2.9s)
+  ok 6 tests\room-ui.spec.ts:328:7 › sign out removes this owner's room draft without clearing another owner's draft (1.5s)
+  ok 7 tests\room-ui.spec.ts:328:7 › delete account removes this owner's room draft without clearing another owner's draft (1.5s)
+
+  7 passed (15.6s)

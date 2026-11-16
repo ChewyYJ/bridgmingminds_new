@@ -21,15 +21,33 @@ async function fixture(t) {
   return { app, request, ok, guest };
 }
 
+test('practice preparation route saves the rolled stance, validates notes and enforces ownership', async t => {
+  const f = await fixture(t), token = await f.guest(), other = await f.guest();
+  const input = { requestId: 'api-random-position', topicId: 'school-gardens', opponentId: 'ari', position: 'random' };
+  const session = await f.ok('/debate/sessions', token, input);
+  const path = `/debate/sessions/${session.id}/preparation`;
+  assert.equal((await f.request(path, undefined, { action: 'reveal' })).status, 401);
+  assert.equal((await f.request(path, other, { action: 'reveal' })).status, 404);
+  const revealed = await f.ok(path, token, { action: 'reveal' });
+  assert.equal((await f.ok('/debate/sessions', token, input)).position, session.position);
+  assert.equal((await f.ok(path, token, { action: 'reveal' })).preparation.endsAt, revealed.preparation.endsAt);
+  assert.equal((await f.request(path, token, { action: 'save', position: 'for' })).status, 400);
+  const board = { version: 1, mode: 'notepad', notepad: 'A reason and an example', nodes: [], links: [], strokes: [] };
+  const begun = await f.ok(path, token, { action: 'begin', planningBoard: board });
+  assert.ok(begun.preparation.completedAt);
+  assert.deepEqual((await f.ok(`/debate/sessions/${session.id}`, token)).preparation.planningBoard, board);
+});
+
 test('installed debate routes require authentication and keep sessions, audio and results owner-scoped', async t => {
   const f = await fixture(t), token = await f.guest(), other = await f.guest();
   assert.equal((await f.request('/debate/catalog')).status, 401);
   assert.equal((await f.request('/debate/history')).status, 401);
   const catalog = await f.ok('/debate/catalog', token);
   assert.equal(catalog.providerMode, 'local'); assert.equal(catalog.tournamentAvailable, false);
-  assert.equal(catalog.stages.length, 3); assert.equal(catalog.opponents.length, 3);
+  assert.equal(catalog.stages.length, 3); assert.equal(catalog.opponents.length, 6);
   assert.equal(catalog.tournamentTopics.length, 6);
-  assert.equal(catalog.tournamentOpponents.at(-1).id, catalog.boss.id);
+  assert.deepEqual(catalog.tournamentOpponents.map(opponent => opponent.id), [catalog.boss.id]);
+  assert.equal(catalog.rules.rounds, 1);
   assert.equal(catalog.boss.fictional, true);
   const session = await f.ok('/debate/sessions', token, { requestId: 'api-create-1', mode: 'practice', topicId: catalog.topics[0].id, opponentId: catalog.opponents[0].id, position: 'for' });
   assert.equal((await f.request(`/debate/sessions/${session.id}`, other)).status, 404);

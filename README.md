@@ -1,5 +1,7 @@
 # BridgingMinds
 
+The `ui-polish` integration adds rolled debate positions, saved five-minute preparation and lighter web font delivery while preserving the current Home / Discover / Debate / My Space design. See the [integration decisions and verification](docs/ui-polish-merge.md). The screenshots under `docs/ui-polish/` document the incoming branch's earlier design, not the current interface. Local preview: `npm run dev`, then open http://localhost:8081.
+
 The supplied [BridgingMinds master build reference](docs/reference/master-build-prompt.md) is tracked with an [implementation gap and delivery plan](docs/build-alignment.md). An opt-in **daily workout** connects Read Aloud self-review and Spin & Speak to Home and persisted daily rewards. New daily speaking sessions now use [BRIDGE feedback and Thought Maps](docs/bridge-assessment.md). [Integrated WordBloom](docs/wordbloom.md) now schedules vocabulary into reading with optional self-reports. [Optional acoustic assessment](docs/speech-assessment.md) now has a consented job/feedback path verified with real decoding and offline assessment fixtures; live provider/device validation and calibrated adaptive mastery remain outstanding; the broader roadmap is not complete.
 
 ## Try the new daily workout

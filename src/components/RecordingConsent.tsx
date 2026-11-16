@@ -9,7 +9,7 @@ export function RecordingConsent({
 }: {
   busy: boolean;
   onAllow: () => void;
-  onWrite: () => void;
+  onWrite?: () => void;
 }) {
   const [display, setDisplay] = useState<
     "closed" | "hover" | "focus" | "pinned"
@@ -85,7 +85,7 @@ export function RecordingConsent({
             </Text>
             <Text style={T.small}>
               Microphone access is requested when you tap Record. Change storage
-              in Settings or write instead.
+              in Settings{onWrite ? " or write instead" : ""}.
             </Text>
           </View>
         )}
@@ -96,7 +96,7 @@ export function RecordingConsent({
         loading={busy}
         onPress={onAllow}
       />
-      <Button label="Write instead" variant="ghost" onPress={onWrite} />
+      {onWrite && <Button label="Write instead" variant="ghost" onPress={onWrite} />}
     </View>
   );
 }

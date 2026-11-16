@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { openDatabase } from '../server/database.mjs';
 import { createAIDebateService } from '../server/ai-debate.mjs';
+import { createPlanningBoard } from '../shared/planning-board.mjs';
 import { validateDebateJudge, createDebateProvider } from '../server/debate-judge.mjs';
 import { DEBATE_CRITERIA, DEBATE_STAGES, DEBATE_TOPICS, DEBATE_OPPONENTS, DEBATE_BOSS, SINGAPORE_DEBATE_TOPICS, decideDebateOutcome } from '../shared/debate.mjs';
 
@@ -77,6 +78,79 @@ async function fixture(t, options = {}) {
     },
   };
 }
+
+test('random practice fixes a side once, preserves five-minute preparation and carries notes into battle', async t => {
+  let clock = Date.parse('2026-11-16T10:00:00Z');
+  const f = await fixture(t, { clock: () => clock });
+  const input = { ...createInput, position: 'random' };
+  const rolled = await f.service.create('learner', input);
+  assert.ok(['for', 'against'].includes(rolled.position));
+  assert.equal(rolled.preparation.startedAt, null);
+  const duplicates = await Promise.all([f.service.create('learner', input), f.service.create('learner', input)]);
+  for (const duplicate of duplicates) assert.equal(duplicate.position, rolled.position);
+  await assert.rejects(f.service.preparation('other', rolled.id, { action: 'reveal' }), { status: 404 });
+  await assert.rejects(f.service.preparation('learner', rolled.id, { action: 'begin' }), { code: 'debate_position_unrevealed' });
+  await assert.rejects(f.service.submitTurn('learner', rolled.id, { requestId: 'premature-opening', stage: 'opening', text: argumentsByStage.opening }), { code: 'debate_preparing' });
+  assert.equal(f.calls.replies, 0);
+  const revealed = await f.service.preparation('learner', rolled.id, { action: 'reveal' });
+  assert.equal(Date.parse(revealed.preparation.endsAt) - Date.parse(revealed.preparation.startedAt), 300000);
+  clock += 90000;
+  const board = createPlanningBoard('Claim, reason and example.');
+  const saved = await f.service.preparation('learner', rolled.id, { action: 'save', planningBoard: board });
+  await f.restart();
+  const retry = await f.service.preparation('learner', rolled.id, { action: 'reveal' });
+  assert.equal(retry.position, rolled.position);
+  assert.deepEqual(retry.preparation, saved.preparation);
+  await assert.rejects(f.service.preparation('learner', rolled.id, { action: 'save', planningBoard: { ...board, notepad: 'x'.repeat(2001) } }), { status: 400 });
+  await assert.rejects(f.service.preparation('learner', rolled.id, { action: 'save', endsAt: new Date(clock + 900000).toISOString() }), { status: 400 });
+  const begun = await f.service.preparation('learner', rolled.id, { action: 'begin', planningBoard: board });
+  assert.ok(Date.parse(begun.preparation.completedAt) < Date.parse(begun.preparation.endsAt), 'Starting early is allowed');
+  clock += 300000;
+  assert.deepEqual((await f.service.preparation('learner', rolled.id, { action: 'begin' })).preparation, begun.preparation);
+  assert.deepEqual((await f.service.preparation('learner', rolled.id, { action: 'save', planningBoard: createPlanningBoard('Late write') })).preparation, begun.preparation);
+  const answered = await f.service.submitTurn('learner', rolled.id, { requestId: 'prepared-opening', stage: 'opening', text: argumentsByStage.opening });
+  assert.equal(answered.stage, 'rebuttal');
+  assert.deepEqual(answered.preparation.planningBoard, board);
+  assert.equal(f.calls.replies, 1);
+});
+
+test('single-boss tournament rolls a fixed stance, saves preparation and completes after one judged match', async t => {
+  let clock = Date.parse('2026-11-16T10:00:00Z');
+  const f = await fixture(t, { clock: () => clock });
+  const input = { requestId: 'rolled-boss-cup-1', topicId: SINGAPORE_DEBATE_TOPICS[0].id, position: 'random' };
+  const { run, session } = await f.service.createTournament('learner', input);
+  assert.deepEqual(run.bracket.map(opponent => opponent.id), ['chair-lin']);
+  assert.ok(['for', 'against'].includes(session.position));
+  assert.equal(run.position, session.position);
+  assert.equal(session.preparation.startedAt, null);
+  const duplicate = await f.service.createTournament('learner', input);
+  assert.equal(duplicate.session.id, session.id);
+  assert.equal(duplicate.run.position, run.position);
+  await assert.rejects(f.service.createTournament('learner', { ...input, position: 'for' }), { code: 'debate_request_conflict' });
+  await assert.rejects(f.service.preparation('other', session.id, { action: 'reveal' }), { status: 404 });
+  await assert.rejects(f.service.submitTurn('learner', session.id, { requestId: 'early-boss-opening', stage: 'opening', text: singaporeArgumentsByStage.opening }), { code: 'debate_preparing' });
+  assert.deepEqual(f.calls, { replies: 0, judges: 0, awards: 0 });
+  const revealed = await f.service.preparation('learner', session.id, { action: 'reveal' });
+  const board = createPlanningBoard('Consider access, trade-offs and an affordable trial.');
+  await f.service.preparation('learner', session.id, { action: 'save', planningBoard: board });
+  clock += 90000;
+  await f.restart();
+  const resumed = await f.service.tournament('learner', run.id);
+  assert.equal(resumed.run.position, run.position);
+  assert.equal(resumed.session.position, session.position);
+  assert.deepEqual(resumed.session.preparation.planningBoard, board);
+  const retried = await f.service.preparation('learner', session.id, { action: 'reveal' });
+  assert.equal(retried.preparation.endsAt, revealed.preparation.endsAt);
+  const begun = await f.service.preparation('learner', session.id, { action: 'begin', planningBoard: board });
+  const result = await f.complete(begun, singaporeArgumentsByStage);
+  assert.equal(result.evaluation.outcome, 'win');
+  const completed = await f.service.tournament('learner', run.id);
+  assert.equal(completed.run.status, 'completed');
+  assert.equal(completed.run.matches.length, 1);
+  assert.equal(completed.run.position, session.position);
+  assert.deepEqual(await f.service.finish('learner', session.id), result);
+  assert.deepEqual(f.calls, { replies: 3, judges: 1, awards: 1 });
+});
 
 test('persistent three-stage debate responds to arguments, judges separately and awards once', async t => {
   const f = await fixture(t);
@@ -192,42 +266,33 @@ test('no-key local coaching is labelled, argument-aware, unscored and cannot sta
   await assert.rejects(f.service.createTournament('learner', { requestId: 'tournament-1', topicId: 'school-gardens', position: 'for' }), { code: 'debate_tournament_unavailable' });
 });
 
-test('Singapore cup reaches the fictional final boss and completes only after a validated boss win', async t => {
+test('Singapore cup starts at the boss and completes after one validated match with idempotent rewards', async t => {
   const f = await fixture(t), input = { requestId: 'tournament-1', topicId: 'sg-inclusive-housing', position: 'for' };
   let current = await f.service.createTournament('learner', input);
   assert.equal(current.run.title, 'Singapore Civic Cup');
-  assert.deepEqual(current.run.bracket.map(opponent => opponent.id), ['mina', 'leo', 'chair-lin']);
+  assert.deepEqual(current.run.bracket.map(opponent => opponent.id), ['chair-lin']);
+  assert.equal(f.service.catalog().rules.rounds, 1);
   assert.equal((await f.service.createTournament('learner', input)).run.id, current.run.id);
   await assert.rejects(f.service.advance('learner', current.run.id, { requestId: 'early-advance' }), { code: 'debate_progression' });
-  for (let round = 1; round <= 3; round++) {
-    assert.equal(current.session.round, round);
-    if (round === 3) {
-      assert.equal(current.session.opponent.id, 'chair-lin');
-      assert.equal(current.session.opponent.fictional, true);
-      f.setFailJudge(true);
-      await assert.rejects(f.complete(current.session, singaporeArgumentsByStage), { code: 'debate_invalid_provider_response' });
-      assert.equal((await f.service.tournament('learner', current.run.id)).run.status, 'active');
-      assert.equal(f.calls.awards, 2, 'an invalid boss judgement cannot complete or reward the final');
-      f.setFailJudge(false);
-      await f.service.finish('learner', current.session.id);
-    } else await f.complete(current.session, singaporeArgumentsByStage);
-    current = await f.service.tournament('learner', current.run.id);
-    if (round < 3) {
-      current = await f.service.advance('learner', current.run.id, { requestId: `advance-round-${round}` });
-      const duplicate = await f.service.advance('learner', current.run.id, { requestId: `advance-round-${round}` });
-      assert.equal(duplicate.session.id, current.session.id);
-      await f.restart(); current = await f.service.tournament('learner', current.run.id);
-    }
-  }
-  assert.equal(current.run.status, 'completed'); assert.equal(current.run.matches.length, 3); assert.equal(f.calls.awards, 3);
-  assert.equal(current.run.matches[2].opponentId, 'chair-lin');
+  assert.equal(current.session.round, 1);
+  assert.equal(current.session.opponent.id, 'chair-lin');
+  assert.equal(current.session.opponent.fictional, true);
+  f.setFailJudge(true);
+  await assert.rejects(f.complete(current.session, singaporeArgumentsByStage), { code: 'debate_invalid_provider_response' });
+  assert.equal((await f.service.tournament('learner', current.run.id)).run.status, 'active');
+  assert.equal(f.calls.awards, 0, 'an invalid boss judgement cannot complete or reward the challenge');
+  f.setFailJudge(false);
+  await f.service.finish('learner', current.session.id);
+  current = await f.service.tournament('learner', current.run.id);
+  assert.equal(current.run.status, 'completed'); assert.equal(current.run.matches.length, 1); assert.equal(f.calls.awards, 1);
+  assert.equal(current.run.matches[0].opponentId, 'chair-lin');
   const bossRequests = f.requests.filter(request => JSON.parse(request.messages[1].content).opponent?.boss);
   assert.equal(bossRequests.length, 3);
   assert.equal(JSON.parse(bossRequests[0].messages[1].content).topic.sources[0].url, current.run.topic.sources[0].url);
   assert.match(bossRequests[0].messages[0].content, /fictional, not a public official/);
   await f.restart();
   assert.equal((await f.service.finish('learner', current.session.id)).evaluation.outcome, 'win');
-  assert.equal(f.calls.awards, 3);
+  assert.equal(f.calls.awards, 1);
   await assert.rejects(f.service.advance('learner', current.run.id, { requestId: 'advance-final' }), { code: 'debate_progression' });
 });
 
@@ -237,6 +302,10 @@ test('draws replay the same round, uncertainty never eliminates, and a judged lo
   await f.complete(current.session);
   current = await f.service.advance('learner', current.run.id, { requestId: 'draw-replay-1' });
   assert.equal(current.run.round, 1); assert.equal(current.run.matches.length, 2);
+  assert.equal(current.session.opponent.id, 'chair-lin');
+  const duplicate = await f.service.advance('learner', current.run.id, { requestId: 'draw-replay-1' });
+  assert.equal(duplicate.session.id, current.session.id);
+  assert.equal(duplicate.run.matches.length, 2);
   f.settings.confidence = 'low'; f.settings.userScore = 0; f.settings.aiScore = 4;
   let completed = await f.complete(current.session); assert.equal(completed.evaluation.outcome, 'draw'); assert.equal(completed.evaluation.uncertain, true);
   current = await f.service.advance('learner', current.run.id, { requestId: 'uncertain-replay' }); assert.equal(current.run.round, 1);
@@ -249,9 +318,9 @@ test('draws replay the same round, uncertainty never eliminates, and a judged lo
 test('catalog keeps street practice and adds sourced Singapore topics plus honest no-key boss practice', async t => {
   const f = await fixture(t, { local: true });
   const catalog = f.service.catalog();
-  assert.deepEqual(catalog.opponents.map(opponent => opponent.id), ['mina', 'leo', 'ari']);
+  assert.deepEqual(catalog.opponents.map(opponent => opponent.id), ['mina', 'leo', 'ari', 'safiya', 'daniel', 'kai']);
   assert.equal(catalog.tournamentTopics.length, 6);
-  assert.equal(catalog.tournamentOpponents.at(-1).id, catalog.boss.id);
+  assert.deepEqual(catalog.tournamentOpponents.map(opponent => opponent.id), [catalog.boss.id]);
   assert.equal(catalog.boss.id, DEBATE_BOSS.id);
   for (const topic of catalog.tournamentTopics) {
     assert.equal(topic.region, 'Singapore');
@@ -283,11 +352,13 @@ test('new cups require Singapore topics while saved legacy runs retain their tit
   const run = JSON.parse((await f.db.prepare('SELECT data FROM sessions WHERE id=?').get(current.run.id)).data);
   // Persist a pre-Singapore-cup snapshot, including its original request hash.
   run.title = 'The Common Ground Cup';
-  run.bracket = structuredClone(DEBATE_OPPONENTS);
+  run.bracket = structuredClone(DEBATE_OPPONENTS.slice(0, 3));
   run.topic = { ...DEBATE_TOPICS.find(topic => topic.id === input.topicId), context: 'Historical topic context preserved in this saved run.' };
   run.internal.requestHash = createHash('sha256').update(JSON.stringify(input)).digest('hex');
   const match = JSON.parse((await f.db.prepare('SELECT data FROM sessions WHERE id=?').get(current.session.id)).data);
   match.topic = run.topic;
+  match.opponent = run.bracket[0];
+  run.matches[0].opponentId = match.opponent.id;
   await f.db.prepare('UPDATE sessions SET data=? WHERE id=?').run(JSON.stringify(run), run.id);
   await f.db.prepare('UPDATE sessions SET data=? WHERE id=?').run(JSON.stringify(match), match.id);
   await f.restart();

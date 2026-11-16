@@ -28,7 +28,7 @@ async function screenshot(page: Page, name: string) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 }
 
-test("Singapore tournament uses real validated victories, advances to Chair Lin and preserves the completed boss result", async ({ page }) => {
+test("Singapore tournament starts one Chair Lin challenge and preserves its validated victory", async ({ page }) => {
   const errors: string[] = [];
   const externalRequests: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
@@ -46,6 +46,9 @@ test("Singapore tournament uses real validated victories, advances to Chair Lin 
   await expect(page.getByText("Choose a topic", { exact: true })).toHaveCount(0);
   await expect(page.getByTestId("start-debate-tournament")).toBeEnabled();
   await expect(page.getByText("Singapore Civic Cup", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("tournament-current-boss")).toContainText("Chair Lin · Boss challenge");
+  await expect(page.getByText("One boss · one match. Build your case through opening, rebuttal and closing.", { exact: true })).toBeVisible();
+  await expect(page.getByText("1. Mina", { exact: true })).toHaveCount(0);
   await screenshot(page, "tournament-lobby-mobile");
   await page.setViewportSize({ width: 1440, height: 1000 });
   await screenshot(page, "tournament-lobby-desktop");
@@ -53,53 +56,68 @@ test("Singapore tournament uses real validated victories, advances to Chair Lin 
   await page.getByRole("button", { name: "Read background", exact: true }).click();
   await expect(page.getByRole("link", { name: /URA/ })).toHaveAttribute("href", /ura\.gov\.sg/);
   await page.getByRole("button", { name: "Change match setup", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Argue for", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Argue against", exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Close match setup", exact: true }).click();
+  const created = page.waitForResponse(response => response.url().endsWith("/api/debate/tournaments") && response.request().method() === "POST");
   await page.getByTestId("start-debate-tournament").click();
+  const createdResponse = await created;
+  expect(createdResponse.ok()).toBe(true);
+  expect(createdResponse.request().postDataJSON().position).toBe("random");
 
-  let runId = "";
-  let finalSession: DebateSession | undefined;
-  for (let round = 1; round <= 3; round++) {
-    await expect(page.getByTestId("debate-preparation")).toBeVisible();
-    const history = await get<{ sessions: DebateSession[]; tournaments: DebateTournament[] }>(page, "/debate/history");
-    const run = history.tournaments[0];
-    runId = run.id;
-    expect(run.round).toBe(round);
-    const session = await get<DebateSession>(page, `/debate/sessions/${run.currentSessionId}`);
-    expect(session.opponent.id).toBe(["mina", "leo", "chair-lin"][round - 1]);
-    expect(session.topic.region).toBe("Singapore");
-    if (round === 3) {
-      expect(session.opponent.fictional).toBe(true);
-      await expect(page.getByText("Chair Lin", { exact: true }).first()).toBeVisible();
-      await screenshot(page, "boss-preparation-mobile");
-    }
-    await page.getByTestId("start-debate-opening").click();
-    for (const [stage, text] of Object.entries(answers)) {
-      await expect(page.getByText(`Your turn · ${stage[0].toUpperCase()}${stage.slice(1)}`, { exact: true })).toBeVisible();
-      const input = page.getByRole("textbox", { name: "Your argument", exact: true });
-      await expect(input).toBeEditable();
-      await input.fill(text);
-      if (round === 3 && stage === "opening") await screenshot(page, "boss-match-mobile");
-      await page.getByTestId("submit-debate-turn").click();
-    }
-    await page.getByTestId("finish-debate").click();
-    await expect(page.getByTestId("debate-victory")).toBeVisible();
-    await expect(page.getByText("Victory!", { exact: true })).toBeVisible();
-    finalSession = await get<DebateSession>(page, `/debate/sessions/${session.id}`);
-    expect(finalSession.evaluation?.provider).toBe("openai");
-    expect(finalSession.evaluation?.uncertain).toBe(false);
-    expect(finalSession.evaluation?.outcome).toBe("win");
-    expect(finalSession.evaluation?.totals).toEqual({ user: 18, ai: 12 });
-    for (const criterion of finalSession.evaluation!.criteria) for (const side of ["user", "ai"] as const) {
-      for (const evidence of criterion[side].evidence) {
-        const turn = finalSession.turns.find(turn => turn.id === evidence.turnId);
-        expect(turn?.speaker).toBe(side);
-        expect(turn?.text.slice(evidence.start, evidence.end)).toBe(evidence.quote);
-      }
-    }
-    if (round < 3) {
-      await expect(page.getByRole("button", { name: "Next match", exact: true })).toBeVisible();
-      if (round === 1) await screenshot(page, "victory-mobile");
-      await page.getByRole("button", { name: "Next match", exact: true }).click();
+  await expect(page.getByTestId("debate-preparation")).toBeVisible();
+  const history = await get<{ sessions: DebateSession[]; tournaments: DebateTournament[] }>(page, "/debate/history");
+  const run = history.tournaments[0];
+  const runId = run.id;
+  expect(run.round).toBe(1);
+  expect(run.bracket.map(opponent => opponent.id)).toEqual(["chair-lin"]);
+  const session = await get<DebateSession>(page, `/debate/sessions/${run.currentSessionId}`);
+  expect(session.opponent.id).toBe("chair-lin");
+  expect(session.topic.region).toBe("Singapore");
+  expect(session.opponent.fictional).toBe(true);
+  expect(["for", "against"]).toContain(session.position);
+  expect(run.position).toBe(session.position);
+  expect(session.preparation?.durationSeconds).toBe(300);
+  expect(session.preparation?.completedAt).toBeNull();
+  expect(session.turns).toHaveLength(0);
+  await expect(page.getByTestId("assigned-debate-position")).toHaveText(`Argue ${session.position}`);
+  await expect(page.getByTestId("debate-preparation")).toContainText("Chair Lin");
+  const beforeBattle = await page.request.get(`${base}/__role3_boss/status`, { headers: { "X-Offline-Fixture": "role3-boss-browser-only" } });
+  expect((await beforeBattle.json()).calls).toEqual({ replies: 0, judges: 0, bossReplies: 0 });
+  await page.getByRole("textbox", { name: "Your ideas", exact: true }).fill("Consider access, maintenance and the opportunity cost of land.");
+  await page.getByTestId("save-leave-preparation").click();
+  await page.reload();
+  await page.getByTestId("start-debate-tournament").click();
+  await expect(page.getByTestId("assigned-debate-position")).toHaveText(`Argue ${session.position}`);
+  await expect(page.getByRole("textbox", { name: "Your ideas", exact: true })).toHaveValue("Consider access, maintenance and the opportunity cost of land.");
+  const resumed = await get<DebateSession>(page, `/debate/sessions/${session.id}`);
+  expect(resumed.position).toBe(session.position);
+  expect(resumed.preparation?.endsAt).toBe(session.preparation?.endsAt);
+  await screenshot(page, "boss-preparation-mobile");
+  await page.getByRole("button", { name: "Start battle", exact: true }).click();
+  await expect(page.getByTestId("start-debate-opening")).toHaveCount(0);
+  await expect(page.getByTestId("speaking-notes")).toContainText("Consider access, maintenance");
+  for (const [stage, text] of Object.entries(answers)) {
+    await expect(page.getByText(`Your turn · ${stage[0].toUpperCase()}${stage.slice(1)}`, { exact: true })).toBeVisible();
+    const input = page.getByRole("textbox", { name: "Your argument", exact: true });
+    await expect(input).toBeEditable();
+    await input.fill(text);
+    if (stage === "opening") await screenshot(page, "boss-match-mobile");
+    await page.getByTestId("submit-debate-turn").click();
+  }
+  await page.getByTestId("finish-debate").click();
+  await expect(page.getByTestId("debate-victory")).toBeVisible();
+  await expect(page.getByText("Victory!", { exact: true })).toBeVisible();
+  const finalSession = await get<DebateSession>(page, `/debate/sessions/${session.id}`);
+  expect(finalSession.evaluation?.provider).toBe("openai");
+  expect(finalSession.evaluation?.uncertain).toBe(false);
+  expect(finalSession.evaluation?.outcome).toBe("win");
+  expect(finalSession.evaluation?.totals).toEqual({ user: 18, ai: 12 });
+  for (const criterion of finalSession.evaluation!.criteria) for (const side of ["user", "ai"] as const) {
+    for (const evidence of criterion[side].evidence) {
+      const turn = finalSession.turns.find(turn => turn.id === evidence.turnId);
+      expect(turn?.speaker).toBe(side);
+      expect(turn?.text.slice(evidence.start, evidence.end)).toBe(evidence.quote);
     }
   }
   await expect(page.getByText("Singapore Civic Cup complete", { exact: true })).toBeVisible();
@@ -109,7 +127,7 @@ test("Singapore tournament uses real validated victories, advances to Chair Lin 
   await screenshot(page, "boss-victory-desktop");
   const completed = await get<{ run: DebateTournament; session: DebateSession }>(page, `/debate/tournaments/${runId}`);
   expect(completed.run.status).toBe("completed");
-  expect(completed.run.matches.map(match => match.outcome)).toEqual(["win", "win", "win"]);
+  expect(completed.run.matches.map(match => match.outcome)).toEqual(["win"]);
   expect(completed.run.matches.at(-1)?.opponentId).toBe("chair-lin");
   const before = await get<{ coins: number; xp: number }>(page, "/gamification");
   const repeat = await page.request.post(`${base}/api/debate/sessions/${finalSession!.id}/finish`, { headers, data: {} });
@@ -122,7 +140,7 @@ test("Singapore tournament uses real validated victories, advances to Chair Lin 
   await page.getByRole("button", { name: "View result", exact: true }).first().click();
   await expect(page.getByTestId("debate-victory")).toBeVisible();
   const fixtureStatus = await page.request.get(`${base}/__role3_boss/status`, { headers: { "X-Offline-Fixture": "role3-boss-browser-only" } });
-  expect(await fixtureStatus.json()).toEqual({ fixture: "role3-boss-offline", network: "blocked", calls: { replies: 9, judges: 3, bossReplies: 3 }, unexpected: [] });
+  expect(await fixtureStatus.json()).toEqual({ fixture: "role3-boss-offline", network: "blocked", calls: { replies: 3, judges: 1, bossReplies: 3 }, unexpected: [] });
   expect(externalRequests).toEqual([]);
   expect(errors).toEqual([]);
 });

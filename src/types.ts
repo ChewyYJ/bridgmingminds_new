@@ -1,6 +1,7 @@
+import type { PlanningBoard } from "../shared/planning-board.mjs";
 export type Mode = "spin_speak" | "debate" | "read_reflect";
 export type Page =
-  "home" | "play" | "discover" | "garden" | "profile" | "progress" | "settings" | "avatar" | "food" | "achievements" | "debate" | "debate-street" | "tournament" | "daily-practice";
+  "home" | "play" | "discover" | "garden" | "profile" | "space" | "room" | "progress" | "settings" | "avatar" | "food" | "achievements" | "debate" | "debate-street" | "tournament" | "daily-practice";
 export interface Profile {
   id: string;
   displayName: string;
@@ -117,6 +118,7 @@ export interface Attempt {
   responseType: "text" | "audio";
   selfReflection?: string;
   planningNotes?: string;
+  planningBoard?: PlanningBoard;
   status: "draft" | "queued" | "processing" | "completed" | "failed";
   retryOf?: string;
   audioId?: string;
@@ -396,6 +398,7 @@ export interface BrainstormConnector {
   to: string;
 }
 export interface BrainstormBoard {
+  planningBoard?: PlanningBoard;
   version: "daily-whiteboard-v1";
   startedAt: string;
   expiresAt: string;

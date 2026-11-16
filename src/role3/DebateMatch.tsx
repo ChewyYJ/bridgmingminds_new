@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { IdeasPreview } from "../components/IdeasBoard";
 import { AppState, BackHandler, Platform, Text, View } from "react-native";
 import type { DebateSession, DebateStage } from "../../shared/debate.mjs";
 import { C, T, ErrorNote, Field } from "../components/ui";
@@ -46,7 +47,7 @@ export function DebateMatch({ session, selection, catalog, onSession, onFinish, 
   const [allowed, setAllowed] = useState(!!state?.profile.consent?.recording);
   const [busy, setBusy] = useState(false); const [error, setError] = useState(""); const [note, setNote] = useState("");
   const [hydrated, setHydrated] = useState(false); const [captureActive, setCaptureActive] = useState(false);
-  const [prepared, setPrepared] = useState(session.stage !== "opening" || session.turns.length > 0);
+  const [prepared, setPrepared] = useState(Boolean(session.preparation?.completedAt) || session.stage !== "opening" || session.turns.length > 0);
   const [pending, setPending] = useState(false);
   const [showEarlier, setShowEarlier] = useState(false);
   const [saveState, setSaveState] = useState<"saving" | "saved" | "error">("saving");
@@ -181,9 +182,10 @@ export function DebateMatch({ session, selection, catalog, onSession, onFinish, 
       <Text style={[T.small, { fontFamily: "DMBold" }]}>with</Text>
       <View style={{ alignItems: "center" }}><LayeredAvatar selection={opponentLook(session.opponent)} variant="chibi" animation={waiting ? "speak" : "idle"} facing="left" scale={0.3} /><Text style={T.h3}>{session.opponent.name}</Text></View>
     </View>
-    {session.mode === "tournament" && <Text style={[T.small, { textAlign: "center", backgroundColor: C.sage, borderRadius: 10, padding: 8 }]}>{session.opponent.boss ? "Final match" : "Cup match"} · {session.round} of 3</Text>}
+    {session.mode === "tournament" && <Text style={[T.small, { textAlign: "center", backgroundColor: C.sage, borderRadius: 10, padding: 8 }]}>{session.opponent.boss ? "Boss challenge" : `Saved cup · match ${session.round}`} · Opening, rebuttal, closing</Text>}
     <DebateSteps completed={userTurns} />
     <View style={{ gap: 6 }}><Text accessibilityRole="header" style={[T.h2, { fontSize: 21, lineHeight: 28 }]}>{session.topic.title}</Text><Text style={T.small}>Your stance · {session.position === "for" ? "For" : "Against"}</Text></View>
+    <IdeasPreview board={session.preparation?.planningBoard} />
     <ErrorNote message={error || parentError} />
     {stage && !prepared ? <View style={[R.smallCard, { gap: 12 }]} testID="debate-preparation">
       <Text style={T.h3}>Prepare your opening</Text><Text style={T.body}>One claim. One reason. One example.</Text>

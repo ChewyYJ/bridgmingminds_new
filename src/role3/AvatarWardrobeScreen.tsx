@@ -20,8 +20,8 @@ const categories: { id: AvatarCategory; name: string; optional?: boolean }[] = [
 ];
 type WardrobeDraft = { owner: string; active: AvatarCollection; looks: Partial<Record<AvatarCollection, AvatarSelection>> };
 
-export function AvatarWardrobeScreen({ onBack, onOpenProgress, onOpenSettings, onOpenFood }: {
-  onBack: () => void; onOpenProgress?: () => void; onOpenSettings?: () => void; onOpenFood?: () => void;
+export function AvatarWardrobeScreen({ onBack, onOpenRoom, onOpenSettings, onOpenFood }: {
+  onBack: () => void; onOpenRoom?: () => void; onOpenSettings?: () => void; onOpenFood?: () => void;
 }) {
   const { data, owner, loading, error: loadError, reload, setData } = useGamification();
   const { state } = useApp();
@@ -35,7 +35,7 @@ export function AvatarWardrobeScreen({ onBack, onOpenProgress, onOpenSettings, o
   const [error, setError] = useState(""); const [notice, setNotice] = useState("");
   const lock = useRef(false);
   const busy = operation !== null;
-  if (!data) return <View style={R.page}><AvatarPanelHeader title="My profile" onSettings={onOpenSettings} /><LoadState loading={loading} error={loadError} onRetry={reload} /></View>;
+  if (!data) return <View style={R.page}><AvatarPanelHeader title="My Space" onSettings={onOpenSettings} /><LoadState loading={loading} error={loadError} onRetry={reload} /></View>;
   const equipped = normalizeSelection(data.avatar.selection);
   const selection = draft?.owner === owner ? draft.looks[draft.active] ?? equipped : equipped;
   const owned = new Set(data.avatar.ownedItemIds);
@@ -84,10 +84,10 @@ export function AvatarWardrobeScreen({ onBack, onOpenProgress, onOpenSettings, o
     return <Pressable key={entry.id} accessibilityRole="button" accessibilityLabel={entry.name} accessibilityState={{ selected: active, disabled: busy }} {...(Platform.OS === "web" ? { "aria-pressed": active } : {})} disabled={busy} onPress={() => changeCategory(entry.id)} testID={`wardrobe-category-${entry.id}`} style={{ flex: 1, minWidth: 0, minHeight: 44, justifyContent: "center", alignItems: "center", paddingHorizontal: 4, borderRadius: 10, backgroundColor: active ? C.sage : "transparent" }}><Text style={[T.small, { color: C.ink, fontFamily: active ? "DMBold" : "DM", fontSize: 12 }]}>{entry.name}</Text></Pressable>;
   }
   return <View style={{ gap: 12, width: "100%", maxWidth: 600, alignSelf: "center" }} testID="avatar-wardrobe-screen">
-    <AvatarPanelHeader title="My profile" subtitle={`${state?.profile.displayName || "Your avatar"} · Level ${data.level}`} onSettings={onOpenSettings} onBack={onOpenProgress ? undefined : onBack} />
-    {!!onOpenProgress && <View style={{ flexDirection: "row", padding: 3, backgroundColor: C.cream, borderRadius: 12, borderWidth: 1, borderColor: C.border }}>
+    <AvatarPanelHeader title="My Space" subtitle={`${state?.profile.displayName || "Your avatar"} · Level ${data.level}`} onSettings={onOpenSettings} onBack={onOpenRoom ? undefined : onBack} />
+    {!!onOpenRoom && <View style={{ flexDirection: "row", padding: 3, backgroundColor: C.cream, borderRadius: 12, borderWidth: 1, borderColor: C.border }}>
       <Pressable accessibilityRole="button" accessibilityLabel="Avatar" accessibilityState={{ selected: true }} {...(Platform.OS === "web" ? { "aria-pressed": true } : {})} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center", borderRadius: 9, backgroundColor: C.forest }}><Text style={[T.small, { color: C.paper, fontFamily: "DMBold", fontSize: 14 }]}>Avatar</Text></Pressable>
-      <Pressable accessibilityRole="button" accessibilityLabel="Progress" accessibilityState={{ selected: false }} {...(Platform.OS === "web" ? { "aria-pressed": false } : {})} onPress={onOpenProgress} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center" }}><Text style={[T.small, { color: C.ink, fontSize: 14 }]}>Progress</Text></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel="Room" accessibilityState={{ selected: false }} {...(Platform.OS === "web" ? { "aria-pressed": false } : {})} onPress={onOpenRoom} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center" }}><Text style={[T.small, { color: C.ink, fontSize: 14 }]}>Room</Text></Pressable>
     </View>}
     <View onLayout={event => setStageWidth(event.nativeEvent.layout.width)} style={{ height: 286, borderRadius: 17, overflow: "hidden", alignItems: "center", justifyContent: "flex-end", backgroundColor: C.sage }}>
       <PixelScene scene="room" width={stageWidth} height={286} absolute />

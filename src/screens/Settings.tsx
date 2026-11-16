@@ -279,7 +279,7 @@ export function Settings({
       <Card style={{ gap: 15 }}>
         <Text style={T.h2}>Your data</Text>
         <Text style={T.body}>
-          Export your profile, practice, journal, debates, avatar and Coin history as
+          Export your profile, practice, journal, debates, avatar, room and Coin history as
           JSON. Audio files are excluded.
         </Text>
         <Button
@@ -314,7 +314,7 @@ export function Settings({
           Delete account and data
         </Text>
         <Text style={T.small}>
-          Permanently delete your account, practice, journal, recordings, avatar and
+          Permanently delete your account, practice, journal, recordings, avatar, room and
           reward history from this server. Friend debates close and your messages are
           removed. Your partner’s messages and any copies saved elsewhere
           remain.

@@ -56,7 +56,7 @@
     "web": "expo start --web --port 8081",
     "dev": "concurrently -k -n api,app \"node --env-file-if-exists=.env.local server/index.mjs\" \"expo start --web --port 8081\"",
     "start:expo": "expo start",
-    "build:web": "expo export --platform web --clear",
+    "build:web": "expo export --platform web --clear && node scripts/prepare-web.mjs",
     "test:api": "node --test tests/*.test.mjs",
     "test:speech-media": "node --test tests/speech-media.integration.mjs",
     "ai:check": "node --env-file-if-exists=.env.local scripts/ai-check.mjs",
@@ -66,6 +66,7 @@
     "test:e2e:daily-access": "playwright test --config tests/daily-access.config.ts",
     "test:e2e:role3": "playwright test --config tests/role3.config.ts",
     "test:e2e:role3-boss": "playwright test --config tests/role3-boss.config.ts",
+    "test:e2e:room": "playwright test --config tests/room-ui.config.ts",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint"
   },

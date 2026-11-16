@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { File } from "expo-file-system";
 import { fetch as expoFetch } from "expo/fetch";
+import { clearRoomDraft } from "../room/draft";
 
 const configured = process.env.EXPO_PUBLIC_API_URL;
 export const API_BASE =
@@ -183,8 +184,9 @@ export const saveDraft = async (key: string, value: string) =>
 export const deleteDraft = async (key: string) =>
   AsyncStorage.removeItem(`mind-garden-draft:${owner}:${key}`);
 export async function clearDrafts() {
+  const draftOwner = owner;
   const keys = (await AsyncStorage.getAllKeys()).filter((k) =>
-    k.startsWith(`mind-garden-draft:${owner}:`),
+    k.startsWith(`mind-garden-draft:${draftOwner}:`),
   );
-  await AsyncStorage.multiRemove(keys);
+  await Promise.all([AsyncStorage.multiRemove(keys), clearRoomDraft(draftOwner)]);
 }

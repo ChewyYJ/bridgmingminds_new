@@ -47,13 +47,18 @@ export const DEBATE_OPPONENTS = [
   { id: 'mina', name: 'Mina', title: 'The curious listener', difficulty: 'beginner', style: 'One clear counterpoint and a gentle question.', collection: 'girl', description: 'Practise explaining your reasons in a calm exchange.' },
   { id: 'leo', name: 'Leo', title: 'The practical challenger', difficulty: 'intermediate', style: 'Tests examples, trade-offs and workable conditions.', collection: 'boy', description: 'Connect your claim to a concrete example and its limits.' },
   { id: 'ari', name: 'Ari', title: 'The careful questioner', difficulty: 'advanced', style: 'Examines assumptions and fairly compares alternatives.', collection: 'girl', description: 'Refine a position while addressing its strongest challenge.' },
+  { id: 'safiya', name: 'Safiya', title: 'The community connector', difficulty: 'beginner', style: 'Asks whose experience is missing and invites a practical example.', collection: 'girl', description: 'Explore how an idea affects different people in a neighbourhood.' },
+  { id: 'daniel', name: 'Daniel', title: 'The inventive thinker', difficulty: 'intermediate', style: 'Offers a different approach and asks how you would test it.', collection: 'boy', description: 'Compare possible solutions and explain what would make a fair trial.' },
+  { id: 'kai', name: 'Kai', title: 'The thoughtful sceptic', difficulty: 'advanced', style: 'Looks for a trade-off, a clear boundary and a reason to reconsider.', collection: 'boy', description: 'Strengthen a position by responding fairly to its limits.' },
 ];
 export const DEBATE_BOSS = {
   id: 'chair-lin', name: 'Chair Lin', title: 'The policy chair', difficulty: 'advanced', collection: 'girl', boss: true, fictional: true,
   style: 'A professional, calm policy discussion: test the actual proposal against implementation, affected groups, opportunity cost and a fair alternative. Ask one precise challenge at a time; acknowledge sound concessions. Never demand obscure facts or use personal attacks.',
-  description: 'A fictional final-round chair, not a public official. Defend a workable Singapore policy proposal while weighing who benefits, who bears costs and what could change your mind.',
+  description: 'A fictional policy challenger, not a public official. Defend a workable Singapore policy proposal while weighing who benefits, who bears costs and what could change your mind.',
 };
-export const TOURNAMENT_OPPONENTS = [DEBATE_OPPONENTS[0], DEBATE_OPPONENTS[1], DEBATE_BOSS];
+// Each new cup is one self-contained boss challenge. Saved brackets remain
+// snapshots so an older in-progress cup can still be resumed without data loss.
+export const TOURNAMENT_OPPONENTS = [DEBATE_BOSS];
 export const DEBATE_CRITERIA = [
   { key: 'relevance', label: 'Relevance', anchor: 'Responds to this proposition and the actual exchange.' },
   { key: 'claim_clarity', label: 'Claim clarity', anchor: 'Makes a precise, understandable position, including an appropriate qualification.' },
@@ -63,10 +68,10 @@ export const DEBATE_CRITERIA = [
   { key: 'coherence', label: 'Coherence', anchor: 'Connects the relevant parts so the case can be followed without repetition or a prescribed essay format.' },
 ];
 export const DEBATE_RULES = {
-  version: DEBATE_VERSION, title: 'Singapore Civic Cup', rounds: 3, tieMargin: 2,
+  version: DEBATE_VERSION, title: 'Singapore Civic Cup', rounds: 1, tieMargin: 2,
   scale: '0–4 per criterion; six equally weighted criteria for each side.',
   outcome: 'A total difference of at most 2 points is a draw. Incomplete or low-confidence judging is an uncertain draw, never an automatic loss.',
-  progression: 'A judged win advances. A draw can be replayed in the same round. A loss ends this run; start a new run to try again.',
+  progression: 'One boss match per challenge. A judged win completes the cup. A draw can be replayed against the same boss. A loss ends this challenge; start a new one to try again.',
   local: 'Without an AI provider, practice uses an explicitly labelled rule-based challenger and unscored reflection. Tournament progression is unavailable.',
   timers: 'Suggested speaking guides only. Pause freely; timeouts and technical failures never decide a match.',
   limitations: 'Response-level coaching, not a validated ability score. Accent, identity, verbosity and agreement are not scored. Delivery is not judged from a transcript. External facts are not independently verified.',

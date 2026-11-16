@@ -30,12 +30,12 @@ for (const size of [{ name: "phone", width: 360, height: 800 }, { name: "desktop
     await expect(page.getByTestId("daily-progress")).toHaveText("1/2");
     await page.reload(); await expect(page.getByTestId("daily-progress")).toHaveText("1/2");
     await page.getByRole("button", { name: "Spin and reflect", exact: true }).click();
-    await page.getByRole("button", { name: "Start brainstorming", exact: true }).waitFor();
-    await expect(page.getByRole("button", { name: "Start brainstorming", exact: true })).toBeEnabled();
+    await page.getByRole("button", { name: "Plan your response", exact: true }).waitFor();
+    await expect(page.getByRole("button", { name: "Plan your response", exact: true })).toBeEnabled();
     await page.screenshot({ path: info.outputPath("spin.png"), fullPage: true });
-    await page.getByRole("button", { name: "Start brainstorming", exact: true }).click();
+    await page.getByRole("button", { name: "Plan your response", exact: true }).click();
     await page.getByRole("textbox", { name: "My View note", exact: true }).fill("Try a small example first.");
-    await page.getByRole("button", { name: "Done brainstorming", exact: true }).click();
+    await page.getByRole("button", { name: "Ready to speak", exact: true }).click();
     await page.getByRole("button", { name: "Allow Private Recording", exact: true }).click();
     await page.getByRole("button", { name: "Record my response", exact: true }).click();
     await expect(page.getByRole("button", { name: "Finish recording", exact: true })).toBeEnabled();

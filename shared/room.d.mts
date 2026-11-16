@@ -1,0 +1,13 @@
+export type RoomCategory = 'seating' | 'tables' | 'storage' | 'decor';
+export type RoomItem = { id: string; name: string; category: RoomCategory; width: number; depth: number;
+  height: number; price: number | null; starter: boolean; description: string; assetKey: string };
+export type RoomPlacement = { itemId: string; x: number; y: number; rotation: 0 | 1 };
+export type RoomSummary = { version: number; coins: number; catalog: readonly RoomItem[]; ownedItemIds: string[]; placements: RoomPlacement[] };
+export type RoomPurchaseReceipt = { itemId: string; coinsSpent: number; balanceAfter: number; room: RoomSummary };
+export type RoomValidation = { valid: true; placements: RoomPlacement[] } | { valid: false; code: string; error: string };
+export const ROOM_SIZE: 8;
+export const ROOM_CATALOG: readonly RoomItem[];
+export const STARTER_ROOM_PLACEMENTS: readonly Readonly<RoomPlacement>[];
+export function roomItemFootprint(item: RoomItem, rotation: 0 | 1): { width: number; depth: number };
+export function isRoomUnderlay(item: RoomItem): boolean;
+export function validateRoomPlacements(placements: unknown, ownedItemIds?: Iterable<string>): RoomValidation;

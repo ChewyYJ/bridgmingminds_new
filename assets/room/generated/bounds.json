@@ -1,0 +1,98 @@
+{
+  "ceramic-plant": {
+    "sourceWidth": 1312,
+    "sourceHeight": 1199,
+    "x": 324,
+    "y": 241,
+    "width": 648,
+    "height": 708
+  },
+  "coffee-table": {
+    "sourceWidth": 1774,
+    "sourceHeight": 887,
+    "x": 263,
+    "y": 90,
+    "width": 1245,
+    "height": 760
+  },
+  "cushion-stool": {
+    "sourceWidth": 1312,
+    "sourceHeight": 1199,
+    "x": 269,
+    "y": 238,
+    "width": 773,
+    "height": 798
+  },
+  "leafy-plant": {
+    "sourceWidth": 1261,
+    "sourceHeight": 1247,
+    "x": 288,
+    "y": 87,
+    "width": 693,
+    "height": 1083
+  },
+  "linen-chair": {
+    "sourceWidth": 1312,
+    "sourceHeight": 1199,
+    "x": 244,
+    "y": 174,
+    "width": 815,
+    "height": 872
+  },
+  "low-cabinet": {
+    "sourceWidth": 1774,
+    "sourceHeight": 887,
+    "x": 394,
+    "y": 98,
+    "width": 960,
+    "height": 723
+  },
+  "oak-desk": {
+    "sourceWidth": 1774,
+    "sourceHeight": 887,
+    "x": 343,
+    "y": 43,
+    "width": 1069,
+    "height": 826
+  },
+  "oak-shelf": {
+    "sourceWidth": 1052,
+    "sourceHeight": 1495,
+    "x": 214,
+    "y": 122,
+    "width": 612,
+    "height": 1312
+  },
+  "oatmeal-sofa": {
+    "sourceWidth": 1774,
+    "sourceHeight": 887,
+    "x": 423,
+    "y": 122,
+    "width": 929,
+    "height": 700
+  },
+  "reading-lamp": {
+    "sourceWidth": 887,
+    "sourceHeight": 1774,
+    "x": 175,
+    "y": 187,
+    "width": 537,
+    "height": 1441
+  },
+  "side-table": {
+    "sourceWidth": 1312,
+    "sourceHeight": 1199,
+    "x": 287,
+    "y": 257,
+    "width": 732,
+    "height": 751
+  },
+  "woven-rug": {
+    "sourceWidth": 1774,
+    "sourceHeight": 887,
+    "x": 141,
+    "y": 46,
+    "width": 1492,
+    "height": 785
+  }
+}

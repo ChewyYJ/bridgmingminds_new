@@ -26,6 +26,7 @@ import AudioInput, {
 import { PrivateRecordingPlayback } from "../components/PrivateRecording";
 import { WordBloomPassage } from "../components/WordBloom";
 import { ReadingSpeech } from "../components/ReadingSpeech";
+import { ActivityArt } from "../room/ActivityArt";
 import { useApp } from "../lib/state";
 import {
   api,
@@ -48,21 +49,25 @@ export function DailyPlanIntro({ onStart, companion }: { onStart?: () => void; c
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
   const entering = useRef(false);
-  async function enter(activity: "read_aloud" | "spin_speak") {
+  async function enter(activity: "read_aloud" | "spin_speak" | "words") {
     if (entering.current) return;
+    const owner = state!.profile.id;
     entering.current = true;
     setBusy(activity);
     setError("");
     try {
       await api("/daily-workout/enroll", { method: "POST", body: {} });
+      if (!isDraftOwner(owner)) return;
       await refresh();
+      if (!isDraftOwner(owner)) return;
       if (activity === "read_aloud") router.push("/read-aloud");
+      else if (activity === "words") router.push("/vocabulary-review");
       else onStart?.();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Please try again.");
+      if (isDraftOwner(owner)) setError(cause instanceof Error ? cause.message : "Please try again.");
     } finally {
       entering.current = false;
-      setBusy(null);
+      if (isDraftOwner(owner)) setBusy(null);
     }
   }
   return (
@@ -71,6 +76,7 @@ export function DailyPlanIntro({ onStart, companion }: { onStart?: () => void; c
         state={state!}
         onRead={() => void enter("read_aloud")}
         onSpin={() => void enter("spin_speak")}
+        onWords={() => void enter("words")}
         busy={busy}
         companion={companion}
       />
@@ -93,15 +99,16 @@ export function DailyHome({
       state={state}
       onRead={() => router.push("/read-aloud")}
       onSpin={() => start("spin_speak")}
+      onWords={() => router.push(state.profile.wordBloomEnabled !== false ? "/vocabulary-review" : "/progress" as never)}
       companion={companion}
     />
   );
 }
 
 function ChallengeHub({
-  state, onRead, onSpin, busy, companion,
+  state, onRead, onSpin, onWords, busy, companion,
 }: {
-  state: AppState; onRead: () => void; onSpin: () => void;
+  state: AppState; onRead: () => void; onSpin: () => void; onWords: () => void;
   busy?: string | null; companion?: React.ReactNode;
 }) {
   const { width } = useWindowDimensions();
@@ -128,48 +135,50 @@ function ChallengeHub({
   const readDone = Boolean(daily?.activities.find(item => item.type === "read_aloud")?.completed);
   const spinDone = Boolean(daily?.activities.find(item => item.type === "spin_speak")?.completed);
   const next = savedSpeaking && !spinDone ? "spin_speak" : !readDone ? "read_aloud" : !spinDone ? "spin_speak" : null;
-  const continuePractice = () => next === "read_aloud" ? onRead() : next === "spin_speak" ? onSpin() : router.push("/play" as never);
-  const reviewWords = () => router.push(state.profile.dailyWorkout && state.profile.wordBloomEnabled !== false ? "/vocabulary-review" : "/progress" as never);
+  const continuePractice = () => next === "read_aloud" ? onRead() : onSpin();
+  const nextActivity = daily?.activities.find(item => item.type === next);
+  const activities = [
+    { id: "spin_speak", title: "Spin & Speak", description: "Build your ideas", duration: "About 4 min", kind: "speak" as const, action: onSpin, completed: spinDone },
+    { id: "read_aloud", title: "Read aloud", description: "Find your rhythm", duration: "About 3 min", kind: "read" as const, action: onRead, completed: readDone },
+    { id: "words", title: "Word review", description: "Use saved words", duration: "About 2 min", kind: "words" as const, action: onWords, completed: false },
+    { id: "respond", title: "Read & respond", description: "Explore an idea", duration: "Choose a practice read", kind: "respond" as const, action: () => router.push("/discover" as never), completed: false },
+  ];
   return (
-    <View style={{ width: "100%", maxWidth: 1040, alignSelf: "center", gap: 20 }} testID="daily-hub">
+    <View style={{ width: "100%", maxWidth: 1040, alignSelf: "center", gap: 16 }} testID="daily-hub">
       <View style={{ gap: 4 }}>
-        <Text style={T.body}>Hello{first ? ", " + first : ""}</Text>
+        <Text style={T.small}>Hello{first ? ", " + first : ""}</Text>
         <Text accessibilityRole="header" style={T.title}>A little practice today.</Text>
-        <Text style={T.small} testID="daily-streak-status">{complete ? "Both daily activities are complete. Make the next step your own." : "One small step, at your pace."}</Text>
       </View>
       <View style={{ flexDirection: wide ? "row" : "column", alignItems: "stretch", gap: 20 }}>
-        <View style={{ flex: wide ? 1 : undefined, gap: 14 }}>{companion}</View>
-        <View style={{ flex: wide ? 1.2 : undefined, gap: 16, minWidth: 0 }}>
-          <Card style={{ padding: 16, gap: 14 }}>
+        <View style={{ flex: wide ? 1 : undefined, gap: 14, minWidth: 0 }}>
+          {companion}
+          <Card style={{ padding: 16, gap: 12 }}>
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
               <Text accessibilityRole="header" style={[T.h2, { fontSize: 20 }]}>Today’s practice</Text>
               <Text testID="daily-progress" style={T.small}>{daily?.completed ?? 0} of {daily?.required ?? 2} complete</Text>
             </View>
-            {[
-              { id: "read_aloud", title: "Read aloud", duration: "About 3 min", icon: "book-open", action: onRead },
-              { id: "spin_speak", title: "Spin & Speak", duration: "About 4 min", icon: "mic", action: onSpin },
-            ].map(item => {
-              const activity = daily?.activities.find(entry => entry.type === item.id);
-              const isNext = next === item.id;
-              return <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.title}
-                accessibilityHint={activity?.completed ? "Completed today. Practise again." : isNext ? "Your next daily activity" : "Start this daily activity"}
-                accessibilityState={{ disabled: Boolean(busy), busy: busy === item.id }} disabled={Boolean(busy)} onPress={item.action}
-                style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, minHeight: 76, borderRadius: 13, backgroundColor: isNext ? C.sage : "#F5F1EC", opacity: pressed || (busy && busy !== item.id) ? 0.65 : 1 })}>
-                <View style={{ width: 38, height: 42, alignItems: "center", justifyContent: "center", backgroundColor: C.paper, borderRadius: 10 }}><Icon name={activity?.completed ? "check" : item.icon} size={21} /></View>
-                <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-                  <Text style={[T.h3, { fontSize: 16 }]}>{item.title}</Text>
-                  <Text style={T.small}>{activity?.completed ? "Completed · practise again" : savedSpeaking && item.id === "spin_speak" ? "Your saved plan · resume" : item.duration + (isNext ? " · Next up" : "")}</Text>
-                  {!activity?.completed && activity && <Text style={T.small}>+{activity.coins ?? 0} Coins{activity.xp ? " · +" + activity.xp + " XP" : ""}</Text>}
-                </View>
-                {busy === item.id ? <ActivityIndicator color={C.forest} /> : <Icon name={activity?.completed ? "check" : "chevron-right"} size={19} />}
-              </Pressable>;
-            })}
-            <Button label={complete ? "Explore more practice" : daily ? "Continue practice" : "Start daily practice"} icon="arrow-right" disabled={Boolean(busy)} loading={Boolean(busy)} onPress={continuePractice} />
+            <Text testID="daily-streak-status" style={T.body}>{complete ? "Both daily activities are complete. Choose what you’d like to practise next." : `Next up: ${next === "read_aloud" ? "Read aloud · about 3 min" : "Spin & Speak · about 4 min"}`}</Text>
+            {savedSpeaking && !spinDone && <Text style={[T.small, { color: C.ink }]}>Your saved plan · resume</Text>}
+            {(readDone || spinDone) && !complete && <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Icon name="check-circle" size={16} /><Text style={T.small}>{readDone ? "Read aloud" : "Spin & Speak"} completed</Text></View>}
+            {!complete && <>
+              {!!nextActivity && <Text style={T.small}>+{nextActivity.coins ?? 0} Coins{nextActivity.xp ? " · +" + nextActivity.xp + " XP" : ""} on eligible completion</Text>}
+              <Button label={daily ? "Continue practice" : "Start daily practice"} icon="arrow-right" disabled={Boolean(busy)} loading={Boolean(busy)} onPress={continuePractice} />
+            </>}
           </Card>
-          <Pressable accessibilityRole="button" accessibilityLabel="Word review" onPress={reviewWords} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, minHeight: 78, borderWidth: 1, borderColor: C.border, backgroundColor: C.paper, borderRadius: 16, opacity: pressed ? 0.7 : 1 })}>
-            <Icon name="book-open" size={23} /><View style={{ flex: 1, gap: 2 }}><Text style={T.h3}>Word review</Text><Text style={T.small}>{state.profile.dailyWorkout && state.profile.wordBloomEnabled !== false ? "Use the words you’ve saved · about 2 min" : "Find your saved words in My Dictionary"}</Text></View><Icon name="chevron-right" size={18} />
-          </Pressable>
-          <Button label="Your progress" variant="ghost" onPress={() => router.push("/progress" as never)} />
+        </View>
+        <View style={{ flex: wide ? 1.2 : undefined, gap: 12, minWidth: 0 }}>
+          <Text accessibilityRole="header" style={[T.h2, { fontSize: 21 }]}>Choose an activity</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }} testID="home-activity-grid">
+            {activities.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.title} accessibilityHint={item.completed ? "Completed today. Practise again." : item.duration} accessibilityState={{ disabled: Boolean(busy), busy: busy === item.id }} disabled={Boolean(busy)} onPress={item.action} testID={`home-activity-${item.id}`}
+              style={({ pressed }) => ({ width: "48%", flexGrow: 1, flexBasis: "45%", minHeight: 146, padding: 12, gap: 3, borderWidth: 1, borderColor: C.border, borderRadius: 15, backgroundColor: pressed ? C.sage : C.paper, opacity: busy && busy !== item.id ? 0.65 : 1 })}>
+              <ActivityArt kind={item.kind} size={50} />
+              <Text style={[T.h3, { fontSize: 16 }]}>{item.title}</Text>
+              <Text style={[T.small, { fontSize: 13 }]}>{item.description}</Text>
+              <Text style={[T.small, { fontSize: 12, color: item.completed ? C.forest : C.muted }]}>{item.completed ? "Completed · practise again" : item.duration}</Text>
+              {busy === item.id && <ActivityIndicator color={C.forest} style={{ position: "absolute", top: 12, right: 12 }} />}
+            </Pressable>)}
+          </View>
+          <Pressable accessibilityRole="button" accessibilityLabel="Open your room" onPress={() => router.push("/room" as never)} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 10, minHeight: 48, paddingHorizontal: 12, borderWidth: 1, borderColor: C.border, borderRadius: 13, backgroundColor: pressed ? C.sage : C.cream })}><Icon name="grid" size={19} /><Text style={[T.small, { flex: 1, color: C.ink }]}>Make a little space your own</Text><Icon name="chevron-right" size={16} /></Pressable>
         </View>
       </View>
     </View>

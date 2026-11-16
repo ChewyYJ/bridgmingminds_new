@@ -48,6 +48,8 @@ import { AssessmentCriteria } from "../components/AssessmentCriteria";
 import { BridgeFeedback } from "../components/BridgeFeedback";
 import { ThoughtTrail } from "../components/ThoughtTrail";
 import { ThoughtGuide } from "../components/ThoughtGuide";
+import { createPlanningBoard, planningBoardNotes, type PlanningBoard } from "../../shared/planning-board.mjs";
+import { IdeasBoard, IdeasPreview } from "../components/IdeasBoard";
 import { RecordingConsent } from "../components/RecordingConsent";
 import { SelfReflection } from "../components/SelfReflection";
 import { MotionPulse, MotionView } from "../components/Motion";
@@ -83,6 +85,8 @@ interface PracticeDraft {
   text: string;
   selfReflection?: string;
   planningNotes?: string;
+  planningBoard?: PlanningBoard;
+  prepDeadline?: number;
   transcriptEdited?: boolean;
   transcriptionMessage?: string;
   stage: Stage;
@@ -295,6 +299,8 @@ function ClassicPractice({
   const [session, setSession] = useState<Session | null>(null);
   const [text, setText] = useState("");
   const [planningNotes, setPlanningNotes] = useState("");
+  const [planningBoard, setPlanningBoard] = useState<PlanningBoard>(() => createPlanningBoard());
+  const [planningGesture, setPlanningGesture] = useState(false);
   const [selfReflection, setSelfReflection] = useState("");
   const [reflectionExpanded, setReflectionExpanded] = useState(false);
   const [showResponse, setShowResponse] = useState(false);
@@ -307,7 +313,10 @@ function ClassicPractice({
   const [rounds, setRounds] = useState(2);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [prep, setPrep] = useState(15);
-  const [input, setInput] = useState<"text" | "audio">("text");
+  const [prepDeadline, setPrepDeadline] = useState<number>();
+  const [input, setInput] = useState<"text" | "audio">(
+    mode === "read_reflect" ? "audio" : "text",
+  );
   const [audioUri, setAudioUri] = useState("");
   const [audioId, setAudioId] = useState("");
   const [attempt, setAttempt] = useState<Attempt | null>(null);
@@ -424,6 +433,7 @@ function ClassicPractice({
             setSession(draft.session);
             setText(draft.text || "");
             setPlanningNotes(draft.planningNotes ?? draft.attempt?.planningNotes ?? "");
+            setPlanningBoard(draft.planningBoard ?? draft.attempt?.planningBoard ?? createPlanningBoard(draft.planningNotes ?? draft.attempt?.planningNotes ?? ""));
             setTranscriptEdited(
               draft.transcriptEdited ??
                 Boolean(!draft.text?.trim() && draft.attempt?.text?.trim()),
@@ -436,18 +446,36 @@ function ClassicPractice({
             setJobId(draft.jobId || "");
             setAudioUri(draft.audioUri || "");
             setAudioId(draft.audioId || "");
-            setInput(draft.responseType || "text");
+            setInput(
+              mode === "read_reflect" ? "audio" : draft.responseType || "text",
+            );
             setRetryOf(draft.retryOf);
             submissionKey.current = draft.submissionKey || newKey();
             turnKey.current = draft.turnKey || newKey();
+            const legacyWrittenDraft =
+              mode === "read_reflect" &&
+              !draft.audioId &&
+              !draft.attempt &&
+              draft.responseType === "text" &&
+              ["edit", "reflect"].includes(draft.stage);
+            const deadline = draft.prepDeadline || Date.now() + 60000;
+            setPrepDeadline(deadline);
+            setPrep(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
             setStage(
-              draft.audioId && draft.stage === "edit"
-                ? "reflect"
-                : draft.stage === "prep"
-                  ? "edit"
+              legacyWrittenDraft ? "prep"
+                : draft.audioId && draft.stage === "edit" ? "reflect"
                   : draft.stage,
             );
-            setNotice("Your saved practice is ready to continue.");
+            if (legacyWrittenDraft) {
+              const notes = [draft.planningNotes, draft.text].filter(Boolean).join("\n\n").slice(0, 2000);
+              setPlanningNotes(notes);
+              setPlanningBoard(createPlanningBoard(notes));
+            }
+            setNotice(
+              legacyWrittenDraft
+                ? "Your written draft is in your notes. Record your response when ready."
+                : "Your saved practice is ready to continue.",
+            );
             if (draft.audioId) {
               void api<{ url: string }>(`/audio/${draft.audioId}/url`)
                 .then((result) => {
@@ -536,6 +564,7 @@ function ClassicPractice({
           if (!active) return;
           setSession(current);
           setPlanningNotes(startingRetryAttempt.planningNotes || "");
+          setPlanningBoard(startingRetryAttempt.planningBoard || createPlanningBoard(startingRetryAttempt.planningNotes));
           setStage("edit");
           if (startingRetryAttempt.status === "draft") {
             setAttempt(startingRetryAttempt);
@@ -564,6 +593,7 @@ function ClassicPractice({
                     startingRetryAttempt.text
                 : startingRetryAttempt.text,
             );
+            if (mode === "read_reflect") planReflection();
             setNotice("Your original response is ready to revise.");
           }
         }
@@ -605,6 +635,8 @@ function ClassicPractice({
         text,
         selfReflection,
         planningNotes,
+        planningBoard,
+        prepDeadline,
         transcriptEdited,
         transcriptionMessage,
         stage,
@@ -630,6 +662,8 @@ function ClassicPractice({
     text,
     selfReflection,
     planningNotes,
+    planningBoard,
+    prepDeadline,
     transcriptEdited,
     transcriptionMessage,
     stage,
@@ -643,15 +677,24 @@ function ClassicPractice({
   ]);
 
   useEffect(() => {
-    if (stage !== "prep") return;
-    const timer = setTimeout(() => {
-      if (prep <= 1) {
-        setPrep(0);
-        setStage("edit");
-      } else setPrep(prep - 1);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [prep, stage]);
+    if (stage !== "prep" || !prepDeadline) return;
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((prepDeadline - Date.now()) / 1000));
+      setPrep(remaining);
+      if (!remaining) { setPlanningGesture(false); setStage("edit"); }
+    };
+    tick();
+    const timer = setInterval(tick, 250);
+    return () => clearInterval(timer);
+  }, [prepDeadline, stage]);
+
+  function planReflection() {
+    setPlanningGesture(false);
+    setInput("audio");
+    setPrep(60);
+    setPrepDeadline(Date.now() + 60000);
+    setStage("prep");
+  }
 
   useEffect(() => {
     if (stage !== "processing" || !pendingAttemptId) return;
@@ -715,6 +758,8 @@ function ClassicPractice({
             text,
             selfReflection,
             planningNotes,
+            planningBoard,
+            prepDeadline,
             transcriptEdited,
             transcriptionMessage,
             stage,
@@ -784,10 +829,13 @@ function ClassicPractice({
       setSession(created);
       setDebateProvider(created.provider || "");
       setPlanningNotes("");
-      setPrep(created.assessmentFramework === "bridge-v1" ? 45 : 15);
-      setStage(
-        mode === "spin_speak" ? "prep" : mode === "debate" ? "debate" : "edit",
-      );
+      setPlanningBoard(createPlanningBoard());
+      const duration = mode === "read_reflect" ? 60
+        : created.assessmentFramework === "bridge-v1" ? 45 : 15;
+      setPrep(duration);
+      setPrepDeadline(Date.now() + duration * 1000);
+      if (mode === "read_reflect") setInput("audio");
+      setStage(mode === "debate" ? "debate" : "prep");
     } catch (e) {
       if (mounted.current) setError(errorMessage(e));
     } finally {
@@ -932,6 +980,7 @@ function ClassicPractice({
             text: text.trim(),
             selfReflection: note,
             planningNotes: planningNotes.trim(),
+            planningBoard: mode === "read_reflect" ? planningBoard : undefined,
             responseType: audioId ? "audio" : "text",
             audioId: audioId || undefined,
             retryOf,
@@ -980,6 +1029,7 @@ function ClassicPractice({
           sessionId: session.id,
           text: "",
           planningNotes: planningNotes.trim(),
+            planningBoard: mode === "read_reflect" ? planningBoard : undefined,
           responseType: "audio",
           audioId: uploaded.id,
           durationSeconds: recording.duration,
@@ -1104,6 +1154,7 @@ function ClassicPractice({
     setInput("text");
     setSelfReflection("");
     setPlanningNotes(current.planningNotes || "");
+    setPlanningBoard(current.planningBoard || createPlanningBoard(current.planningNotes));
     setShowResponse(false);
     setTranscriptEdited(false);
     setTranscriptionMessage("");
@@ -1115,7 +1166,8 @@ function ClassicPractice({
     );
     submissionKey.current = newKey();
     setNotice("Your original response is ready to revise.");
-    setStage("edit");
+    if (mode === "read_reflect") planReflection();
+    else setStage("edit");
   }
 
   if (stage === "result" && attempt)
@@ -1162,6 +1214,7 @@ function ClassicPractice({
       style={{ flex: 1, backgroundColor: C.cream }}
     >
       <ScrollView
+        scrollEnabled={stage !== "prep" || !planningGesture}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={s.scroll}
       >
@@ -1193,10 +1246,10 @@ function ClassicPractice({
             <>
               <ErrorNote message={error} />
               {session?.learningFocus && (stage === "prep" || stage === "edit") ? <Card testID="practice-learning-focus" style={{ gap: 8 }}><Text style={T.h3}>Practice focus · {session.learningFocus.label}</Text><Text style={T.body}>{session.learningFocus.instruction}</Text><Text style={T.small}>Suggested from repeated provisional feedback. This guided practice does not establish mastery.</Text></Card> : null}
-              {stage !== "processing" && stage !== "reflect" && (
+              {stage !== "processing" && stage !== "reflect" && stage !== "prep" && (
                 <AssessmentCriteria mode={mode} framework={session?.assessmentFramework || (!session && mode === "spin_speak" && appState?.profile.dailyWorkout ? "bridge-v1" : undefined)} />
               )}
-              {notice ? (
+              {notice && (stage !== "prep" || notice.startsWith("Your written draft")) ? (
                 <View style={s.notice}>
                   <Icon name="info" size={18} />
                   <Text style={[T.body, { flex: 1, fontSize: 13 }]}>
@@ -1417,7 +1470,7 @@ function ClassicPractice({
                       ))}
                     </View>
                     <Button
-                      label="Start reflection"
+                      label="Plan your response"
                       icon="edit-3"
                       loading={busy}
                       onPress={() => void start()}
@@ -1426,7 +1479,19 @@ function ClassicPractice({
                 ) : (
                   <ErrorNote message="Choose an article from Discover to begin your reflection." />
                 ))}
-              {stage === "prep" && session && (
+              {stage === "prep" && session && mode === "read_reflect" && (
+                <View style={{ gap: 18 }}>
+                  <Heading sub={session.prompt.question}>Plan your response</Heading>
+                  <View style={{ flexDirection: "row", gap: 8, alignItems: "center", alignSelf: "center" }}>
+                    <Icon name="clock" size={18} />
+                    <Text accessibilityLabel={`${prep} seconds preparation time`} style={T.h3}>
+                      {String(Math.floor(prep / 60)).padStart(2, "0")}:{String(prep % 60).padStart(2, "0")}
+                    </Text>
+                  </View>
+                  <IdeasBoard board={planningBoard} onChange={next => { setPlanningBoard(next); setPlanningNotes(planningBoardNotes(next)); }} onDone={() => setStage("edit")} onInteractionChange={setPlanningGesture} />
+                </View>
+              )}
+              {stage === "prep" && session && mode !== "read_reflect" && (
                 <>
                   <View style={s.centered}>
                     <Tag>{session.prompt.category}</Tag>
@@ -1496,14 +1561,7 @@ function ClassicPractice({
                   >
                     {session.prompt.question}
                   </Heading>
-                  {mode === "read_reflect" && article && (
-                    <Card style={{ backgroundColor: C.sage, gap: 8 }}>
-                      <Text style={T.label}>
-                        READING CONTEXT · {article.source}
-                      </Text>
-                      <Text style={T.body}>{article.summary}</Text>
-                    </Card>
-                  )}
+                  {mode === "read_reflect" && <IdeasPreview board={planningBoard} />}
                   {retryOf ? (
                     <ThoughtGuide
                       attemptId={retryOf}
@@ -1514,7 +1572,7 @@ function ClassicPractice({
                     />
                   ) : null}
                   <Card style={{ gap: 20 }}>
-                    {!audioId && !busy && !recordingActive && (
+                    {mode !== "read_reflect" && !audioId && !busy && !recordingActive && (
                       <View style={s.chips}>
                         <Chip
                           selected={input === "text"}
@@ -1530,11 +1588,12 @@ function ClassicPractice({
                         </Chip>
                       </View>
                     )}
-                    {input === "audio" && !audioId ? (
+                    {(mode === "read_reflect" || input === "audio") && !audioId ? (
                       recordingConsent ? (
                         <AudioInput
+                          appearance={mode === "read_reflect" ? "daily" : "garden"}
                           onRecorded={handleAudio}
-                          onCancel={() => setInput("text")}
+                          onCancel={() => mode === "read_reflect" ? planReflection() : setInput("text")}
                           onCaptureActive={setRecordingActive}
                           busy={busy}
                         />
@@ -1542,7 +1601,7 @@ function ClassicPractice({
                         <RecordingConsent
                           busy={busy}
                           onAllow={() => void allowRecordingStorage()}
-                          onWrite={() => setInput("text")}
+                          onWrite={mode === "read_reflect" ? undefined : () => setInput("text")}
                         />
                       )
                     ) : (

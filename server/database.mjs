@@ -5,6 +5,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
 import { openPostgresDatabase } from "./postgres.mjs";
 import { GAMIFICATION_SCHEMA } from "./gamification-schema.mjs";
+import { ROOM_SCHEMA } from "./room-schema.mjs";
 
 function openSqliteRaw(path) {
   if (path !== ":memory:")
@@ -146,6 +147,7 @@ CREATE INDEX IF NOT EXISTS vocabulary_review_users ON vocabulary_reviews(user_id
   ); CREATE INDEX IF NOT EXISTS wordbloom_processed_users ON wordbloom_processed_attempts(user_id);`);
   addColumn("practice_usage", "request_count", "INTEGER NOT NULL DEFAULT 0");
   db.exec(GAMIFICATION_SCHEMA);
+  db.exec(ROOM_SCHEMA);
   return db;
 }
 

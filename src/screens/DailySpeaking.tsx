@@ -38,7 +38,8 @@ import {
   type GuidedResponseDraft,
 } from "../../shared/guided-response.mjs";
 import AudioInput, { type RecordedAudio } from "../components/AudioInput";
-import { DailyBoard, createDailyBoard } from "../components/DailyBoard";
+import { IdeasPreview } from "../components/IdeasBoard";
+import { DailyBoard, createDailyBoard, dailyBoardText } from "../components/DailyBoard";
 import { NewsWheel } from "../components/NewsWheel";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { ThoughtMapView } from "../components/ThoughtMap";
@@ -102,6 +103,7 @@ export function DailySpeaking({
   const [step, setStep] = useState<Step>("entry");
   const [session, setSession] = useState<Session | null>(null);
   const [board, setBoard] = useState<BrainstormBoard | null>(null);
+  const [planningGesture, setPlanningGesture] = useState(false);
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -283,6 +285,7 @@ export function DailySpeaking({
       );
       setSeconds(remaining);
       if (!remaining) {
+        setPlanningGesture(false);
         setBoard((b) =>
           b ? { ...b, completedAt: new Date().toISOString() } : b,
         );
@@ -375,6 +378,7 @@ export function DailySpeaking({
           audioId: media.id,
           ...(board && retryAttempt?.status !== "completed"
             ? {
+                planningBoard: board.planningBoard,
                 planningNotes: board.notes
                   .map(({ text }) => text.trim())
                   .filter(Boolean)
@@ -597,7 +601,12 @@ export function DailySpeaking({
   }
   function nextBoard() {
     if (!session || lock.current) return;
-    setBoard(createDailyBoard());
+    setPlanningGesture(false);
+    setBoard((current) => ({
+      ...(current || createDailyBoard()),
+      expiresAt: new Date(Date.now() + 60000).toISOString(),
+      completedAt: undefined,
+    }));
     setSeconds(60);
     setStep("board");
     setError("");
@@ -654,6 +663,7 @@ export function DailySpeaking({
     >
       <ScrollView
         key={step}
+        scrollEnabled={step !== "board" || !planningGesture}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={s.scroll}
       >
@@ -839,7 +849,7 @@ export function DailySpeaking({
                   </Text>
                 </View>
                 <Action
-                  label="Start brainstorming"
+                  label="Plan your response"
                   icon="mic"
                   disabled={!session || busy}
                   onPress={nextBoard}
@@ -856,11 +866,8 @@ export function DailySpeaking({
             )}
             {step === "board" && board && (
               <>
-                <Text style={s.copy}>
-                  {session?.newsSource
-                    ? session.prompt.question
-                    : "A point. A reason. An example."}
-                </Text>
+                {session?.newsSource && <Text style={s.small}>{session.newsSource.title}</Text>}
+                <Text style={s.copy}>{session?.prompt.question}</Text>
                 <View style={s.timerPill}>
                   <Icon name="clock" color="#242424" size={17} />
                   <Text style={s.name}>
@@ -874,15 +881,10 @@ export function DailySpeaking({
                   <DailyBoard
                     board={board}
                     onChange={setBoard}
-                    topic={
-                      session?.newsSource?.title ||
-                      session?.prompt.question ||
-                      "My view"
-                    }
+                    onInteractionChange={setPlanningGesture}
                     onDone={finishBoard}
                   />
                 </View>
-                <Text style={s.small}>Typed notes help build your Thought Map when AI feedback is enabled.</Text>
               </>
             )}
             {step === "speak" && (
@@ -893,6 +895,7 @@ export function DailySpeaking({
                   </Text>
                   <Text style={s.copy}>One minute. In your own words.</Text>
                 </View>
+                <IdeasPreview value={dailyBoardText(board)} board={board?.planningBoard} />
                 <AudioInput
                   appearance="daily"
                   onRecorded={recorded}
