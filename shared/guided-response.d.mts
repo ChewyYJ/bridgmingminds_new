@@ -1,4 +1,5 @@
 export interface GuidedResponseDraft {
+  vocabularyTier?: "advanced" | typeof DAILY_VOCABULARY_TIER;
   vocabularyEligibleCount?: number;
   vocabulary?: {
     wordId: string;
@@ -24,6 +25,8 @@ export const GUIDED_RESPONSE_LIMITS: {
   label: number;
   explanation: number;
 };
+export const DAILY_VOCABULARY_TIER: "advanced-phrases";
+export function dailyVocabularyMinimum(eligibleCount: number): number;
 export function isGuidedResponseDraft(
   value: unknown,
 ): value is GuidedResponseDraft;
