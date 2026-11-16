@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { READING_CRITERIA } from "../../shared/reading-rubric.mjs";
 import {
   ActivityIndicator,
@@ -44,7 +43,7 @@ import type {
   WordReviewOutcome,
 } from "../types";
 
-export function DailyPlanIntro({ onStart }: { onStart?: () => void }) {
+export function DailyPlanIntro({ onStart, companion }: { onStart?: () => void; companion?: React.ReactNode }) {
   const { state, refresh } = useApp();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -73,6 +72,7 @@ export function DailyPlanIntro({ onStart }: { onStart?: () => void }) {
         onRead={() => void enter("read_aloud")}
         onSpin={() => void enter("spin_speak")}
         busy={busy}
+        companion={companion}
       />
       <ErrorNote message={error} />
     </View>
@@ -82,276 +82,95 @@ export function DailyPlanIntro({ onStart }: { onStart?: () => void }) {
 export function DailyHome({
   state,
   start,
+  companion,
 }: {
   state: AppState;
   start: (mode: Mode) => void;
+  companion?: React.ReactNode;
 }) {
   return (
     <ChallengeHub
       state={state}
       onRead={() => router.push("/read-aloud")}
       onSpin={() => start("spin_speak")}
+      companion={companion}
     />
   );
 }
 
 function ChallengeHub({
-  state,
-  onRead,
-  onSpin,
-  busy,
+  state, onRead, onSpin, busy, companion,
 }: {
-  state: AppState;
-  onRead: () => void;
-  onSpin: () => void;
-  busy?: string | null;
+  state: AppState; onRead: () => void; onSpin: () => void;
+  busy?: string | null; companion?: React.ReactNode;
 }) {
   const { width } = useWindowDimensions();
-  const wide = width >= 900;
-  const [focusedActivity, setFocusedActivity] = useState<string | null>(null);
+  const wide = width >= 1100;
   const daily = state.dailyWorkout;
   const complete = Boolean(daily && daily.completed === daily.required);
-  const first = state.profile.displayName.split(" ")[0];
+  const first = state.profile.displayName.trim().split(" ")[0];
+  const [savedDraft, setSavedDraft] = useState<{ owner: string; day: string; pending: boolean } | null>(null);
+  const savedSpeaking = savedDraft?.owner === state.profile.id && savedDraft.day === daily?.day && savedDraft.pending;
+  useEffect(() => {
+    let active = true;
+    const day = daily?.day;
+    if (day) void loadDraft("daily-speaking-v2:" + day + ":new").then(raw => {
+      if (!active || !isDraftOwner(state.profile.id)) return;
+      let pending = false;
+      try {
+        const saved = raw ? JSON.parse(raw) : null;
+        pending = saved?.version === 1 && ["board", "speak", "transcript", "processing"].includes(saved.step) && saved.attempt?.status !== "completed";
+      } catch { /* An unreadable draft must not claim resumable work. */ }
+      setSavedDraft({ owner: state.profile.id, day, pending });
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, [state.profile.id, daily?.day, daily?.completed]);
+  const readDone = Boolean(daily?.activities.find(item => item.type === "read_aloud")?.completed);
+  const spinDone = Boolean(daily?.activities.find(item => item.type === "spin_speak")?.completed);
+  const next = savedSpeaking && !spinDone ? "spin_speak" : !readDone ? "read_aloud" : !spinDone ? "spin_speak" : null;
+  const continuePractice = () => next === "read_aloud" ? onRead() : next === "spin_speak" ? onSpin() : router.push("/play" as never);
+  const reviewWords = () => router.push(state.profile.dailyWorkout && state.profile.wordBloomEnabled !== false ? "/vocabulary-review" : "/progress" as never);
   return (
-    <View
-      style={{
-        width: "100%",
-        maxWidth: 1040,
-        alignSelf: "center",
-        gap: wide ? 32 : 22,
-      }}
-      testID="daily-hub"
-    >
-      <View style={{ gap: 14 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            gap: 14,
-          }}
-        >
-          <View style={{ flex: 1, gap: 9, paddingTop: 4 }}>
-            <Text
-              accessibilityRole="header"
-              style={{
-                fontFamily: "DMBold",
-                fontSize: wide ? 38 : 29,
-                color: C.ink,
-              }}
-            >
-              Daily challenge
-            </Text>
-            <Text testID="daily-streak-status" style={T.body}>
-              {complete
-                ? "Both done. See you tomorrow."
-                : `${first}, choose where to start.`}
-            </Text>
-          </View>
-          <View
-            testID="home-streak"
-            accessible
-            accessibilityLabel={`${daily?.streak.current ?? 0} day streak. ${daily?.streak.securedToday ? "Today secured." : "Complete an eligible activity to build your streak."}`}
-            style={{
-              minWidth: wide ? 156 : 112,
-              paddingHorizontal: wide ? 22 : 14,
-              paddingVertical: 14,
-              borderRadius: 14,
-              backgroundColor: "#F7EAD2",
-              borderWidth: 1,
-              borderColor: "#E8D2AD",
-              alignItems: "center",
-              gap: 3,
-            }}
-          >
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-            >
-              <Ionicons
-                name="flame-outline"
-                size={wide ? 32 : 28}
-                color="#916A36"
-              />
-              <Text
-                style={{
-                  fontFamily: "DMBold",
-                  fontSize: wide ? 38 : 32,
-                  lineHeight: wide ? 44 : 38,
-                  color: C.ink,
-                }}
-              >
-                {daily?.streak.current ?? 0}
-              </Text>
+    <View style={{ width: "100%", maxWidth: 1040, alignSelf: "center", gap: 20 }} testID="daily-hub">
+      <View style={{ gap: 4 }}>
+        <Text style={T.body}>Hello{first ? ", " + first : ""}</Text>
+        <Text accessibilityRole="header" style={T.title}>A little practice today.</Text>
+        <Text style={T.small} testID="daily-streak-status">{complete ? "Both daily activities are complete. Make the next step your own." : "One small step, at your pace."}</Text>
+      </View>
+      <View style={{ flexDirection: wide ? "row" : "column", alignItems: "stretch", gap: 20 }}>
+        <View style={{ flex: wide ? 1 : undefined, gap: 14 }}>{companion}</View>
+        <View style={{ flex: wide ? 1.2 : undefined, gap: 16, minWidth: 0 }}>
+          <Card style={{ padding: 16, gap: 14 }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
+              <Text accessibilityRole="header" style={[T.h2, { fontSize: 20 }]}>Today’s practice</Text>
+              <Text testID="daily-progress" style={T.small}>{daily?.completed ?? 0} of {daily?.required ?? 2} complete</Text>
             </View>
-            <Text style={{ ...T.small, fontFamily: "DMBold", color: C.ink }}>
-              Day streak
-            </Text>
-            <Text style={{ ...T.small, fontSize: 11, color: "#785631" }}>
-              {daily?.streak.securedToday
-                ? "Today secured"
-                : daily?.streak.current
-                  ? "Keep it growing"
-                  : "Start today"}
-            </Text>
-          </View>
-        </View>
-        {daily ? (
-          <View
-            style={{
-              flexDirection: "row",
-              gap: 7,
-              alignItems: "center",
-            }}
-          >
-            <Icon name={complete ? "check-circle" : "circle"} size={17} />
-            <Text
-              testID="daily-progress"
-              style={{ ...T.small, fontFamily: "DMBold" }}
-            >
-              {daily.completed}/{daily.required}
-            </Text>
-            <Text style={T.small}>done today · {daily.xp} XP</Text>
-          </View>
-        ) : null}
-      </View>
-      <View style={{ flexDirection: wide ? "row" : "column", gap: 16 }}>
-        {[
-          {
-            id: "read_aloud",
-            title: "Read aloud",
-            caption: "Find your rhythm.",
-            copy: "A short passage. A little more confidence.",
-            icon: "book-open",
-            color: "#edf2e6",
-            action: onRead,
-          },
-          {
-            id: "spin_speak",
-            title: "Spin and reflect",
-            caption: "Find your point of view.",
-            copy: "One question. Your ideas, in your own words.",
-            icon: "shuffle",
-            color: "#efeaf6",
-            action: onSpin,
-          },
-        ].map((item) => {
-          const activity = daily?.activities.find((a) => a.type === item.id);
-          return (
-            <Pressable
-              key={item.id}
-              accessibilityRole="button"
-              accessibilityLabel={item.title}
-              accessibilityState={{
-                disabled: Boolean(busy),
-                busy: busy === item.id,
-              }}
-              disabled={Boolean(busy)}
-              onFocus={() => setFocusedActivity(item.id)}
-              onBlur={() => setFocusedActivity(null)}
-              onPress={item.action}
-              style={({ pressed }) => ({
-                flex: wide ? 1 : undefined,
-                minHeight: wide ? 248 : 176,
-                padding: wide ? 28 : 22,
-                borderRadius: 20,
-                backgroundColor: C.paper,
-                borderWidth: 1,
-                borderColor: focusedActivity === item.id ? C.forest : C.border,
-                opacity: pressed || (busy && busy !== item.id) ? 0.65 : 1,
-                gap: 18,
-              })}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <View
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 16,
-                    backgroundColor: C.sage,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon name={item.icon} size={24} />
+            {[
+              { id: "read_aloud", title: "Read aloud", duration: "About 3 min", icon: "book-open", action: onRead },
+              { id: "spin_speak", title: "Spin & Speak", duration: "About 4 min", icon: "mic", action: onSpin },
+            ].map(item => {
+              const activity = daily?.activities.find(entry => entry.type === item.id);
+              const isNext = next === item.id;
+              return <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.title}
+                accessibilityHint={activity?.completed ? "Completed today. Practise again." : isNext ? "Your next daily activity" : "Start this daily activity"}
+                accessibilityState={{ disabled: Boolean(busy), busy: busy === item.id }} disabled={Boolean(busy)} onPress={item.action}
+                style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, minHeight: 76, borderRadius: 13, backgroundColor: isNext ? C.sage : "#F5F1EC", opacity: pressed || (busy && busy !== item.id) ? 0.65 : 1 })}>
+                <View style={{ width: 38, height: 42, alignItems: "center", justifyContent: "center", backgroundColor: C.paper, borderRadius: 10 }}><Icon name={activity?.completed ? "check" : item.icon} size={21} /></View>
+                <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+                  <Text style={[T.h3, { fontSize: 16 }]}>{item.title}</Text>
+                  <Text style={T.small}>{activity?.completed ? "Completed · practise again" : savedSpeaking && item.id === "spin_speak" ? "Your saved plan · resume" : item.duration + (isNext ? " · Next up" : "")}</Text>
+                  {!activity?.completed && activity && <Text style={T.small}>+{activity.coins ?? 0} Coins{activity.xp ? " · +" + activity.xp + " XP" : ""}</Text>}
                 </View>
-                {activity?.completed ? (
-                  <Tag>Done today</Tag>
-                ) : activity ? (
-                  <Text style={T.small}>+{activity.coins || 0} Coins{activity.xp ? ` · +${activity.xp} XP` : ""}</Text>
-                ) : null}
-              </View>
-              <View style={{ gap: 5, flex: 1 }}>
-                <Text
-                  style={{
-                    fontFamily: "DMBold",
-                    color: C.ink,
-                    fontSize: wide ? 24 : 21,
-                    lineHeight: 30,
-                  }}
-                >
-                  {item.title}
-                </Text>
-                <Text style={T.body}>{wide ? item.copy : item.caption}</Text>
-              </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Text style={{ ...T.small, fontFamily: "DMBold" }}>
-                  {busy === item.id
-                    ? "Opening…"
-                    : activity?.completed
-                      ? "Practise again"
-                      : "Let’s begin"}
-                </Text>
-                {busy === item.id ? (
-                  <ActivityIndicator color={C.forest} />
-                ) : (
-                  <Icon name="arrow-up-right" size={23} />
-                )}
-              </View>
-            </Pressable>
-          );
-        })}
-      </View>
-      <View
-        style={{
-          borderTopWidth: 1,
-          borderColor: C.border,
-          paddingTop: 16,
-          flexDirection: "row",
-          flexWrap: "wrap",
-          gap: 12,
-          justifyContent: "space-between",
-        }}
-      >
-        <Button
-          label="My avatar"
-          icon="user"
-          variant="ghost"
-          onPress={() => router.push("/avatar" as never)}
-        />
-        <Button
-          label="More practice"
-          icon="arrow-right"
-          variant="ghost"
-          onPress={() => router.push("/play" as never)}
-        />
-        <Button
-          label="Read & Reflect"
-          icon="book-open"
-          variant="ghost"
-          onPress={() => router.push("/vocabulary-review")}
-        />
+                {busy === item.id ? <ActivityIndicator color={C.forest} /> : <Icon name={activity?.completed ? "check" : "chevron-right"} size={19} />}
+              </Pressable>;
+            })}
+            <Button label={complete ? "Explore more practice" : daily ? "Continue practice" : "Start daily practice"} icon="arrow-right" disabled={Boolean(busy)} loading={Boolean(busy)} onPress={continuePractice} />
+          </Card>
+          <Pressable accessibilityRole="button" accessibilityLabel="Word review" onPress={reviewWords} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, minHeight: 78, borderWidth: 1, borderColor: C.border, backgroundColor: C.paper, borderRadius: 16, opacity: pressed ? 0.7 : 1 })}>
+            <Icon name="book-open" size={23} /><View style={{ flex: 1, gap: 2 }}><Text style={T.h3}>Word review</Text><Text style={T.small}>{state.profile.dailyWorkout && state.profile.wordBloomEnabled !== false ? "Use the words you’ve saved · about 2 min" : "Find your saved words in My Dictionary"}</Text></View><Icon name="chevron-right" size={18} />
+          </Pressable>
+          <Button label="Your progress" variant="ghost" onPress={() => router.push("/progress" as never)} />
+        </View>
       </View>
     </View>
   );

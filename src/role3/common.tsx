@@ -5,6 +5,7 @@ import { useApp } from "../lib/state";
 import { isDraftOwner } from "../lib/api";
 import type { GamificationSummary } from "../../shared/gamification.mjs";
 import { role3Api } from "./api";
+import { CoinIcon } from "./CoinIcon";
 
 export const R = StyleSheet.create({
   page: { gap: 22 }, row: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 10 },
@@ -42,8 +43,8 @@ export function Meter({ value, max, label }: { value: number; max: number; label
 }
 
 export function CoinBalance({ value }: { value: number }) {
-  return <View style={[R.row, { gap: 6, backgroundColor: "#FBF0CE", paddingVertical: 7, paddingHorizontal: 11, borderRadius: 18 }]} accessibilityLabel={`${value} Coins`}>
-    <Text style={{ color: "#BA8113", fontSize: 19 }}>🪙</Text><Text style={[T.h3, { fontSize: 15 }]}>{value.toLocaleString()}</Text><Text style={T.small}>Coins</Text>
+  return <View style={[R.row, { gap: 5, backgroundColor: "#F0E9DD", paddingVertical: 7, paddingHorizontal: 10, borderRadius: 18 }]} accessibilityLabel={`${value} Coins`}>
+    <CoinIcon /><Text style={[T.h3, { fontSize: 15 }]}>{value.toLocaleString()}</Text><Text style={T.small}>Coins</Text>
   </View>;
 }
 

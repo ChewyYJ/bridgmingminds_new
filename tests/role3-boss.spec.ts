@@ -50,8 +50,9 @@ test("Singapore tournament uses real validated victories, advances to Chair Lin 
   await page.setViewportSize({ width: 1440, height: 1000 });
   await screenshot(page, "tournament-lobby-desktop");
   await page.setViewportSize({ width: 390, height: 1000 });
-  await page.getByRole("button", { name: "Topic & difficulty", exact: true }).click();
+  await page.getByRole("button", { name: "Read background", exact: true }).click();
   await expect(page.getByRole("link", { name: /URA/ })).toHaveAttribute("href", /ura\.gov\.sg/);
+  await page.getByRole("button", { name: "Change match setup", exact: true }).click();
   await page.getByRole("button", { name: "Close match setup", exact: true }).click();
   await page.getByTestId("start-debate-tournament").click();
 
@@ -101,7 +102,7 @@ test("Singapore tournament uses real validated victories, advances to Chair Lin 
       await page.getByRole("button", { name: "Next match", exact: true }).click();
     }
   }
-  await expect(page.getByText("🏆 Singapore Civic Cup completed", { exact: true })).toBeVisible();
+  await expect(page.getByText("Singapore Civic Cup complete", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Next match", exact: true })).toHaveCount(0);
   await screenshot(page, "boss-victory-mobile");
   await page.setViewportSize({ width: 1440, height: 1000 });

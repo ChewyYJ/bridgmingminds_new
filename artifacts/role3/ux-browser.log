@@ -1,0 +1,21 @@
+
+> mind-garden@1.0.0 test:e2e:role3
+> playwright test --config tests/role3.config.ts
+
+
+Running 8 tests using 1 worker
+
+(node:67628) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\role3.spec.ts:59:5 › mobile learner equips owned items, completes a recoverable local debate, and buys a confirmed onigiri meal (5.3s)
+[WebServer] (node:64712) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ok 2 tests\role3.spec.ts:185:7 › mobile five-tab navigation preserves daily learning, discovery and profile wardrobe (3.6s)
+  ok 3 tests\role3.spec.ts:185:7 › desktop five-tab navigation preserves daily learning, discovery and profile wardrobe (3.5s)
+  ok 4 tests\role3.spec.ts:305:5 › 320px Home keeps the Coins header, daily choices and companion card within the viewport (542ms)
+  ok 5 tests\role3.spec.ts:322:7 › Ramen purchase uses its matching eating action and the server price (852ms)
+  ok 6 tests\role3.spec.ts:322:7 › Bento purchase uses its matching eating action and the server price (872ms)
+  ok 7 tests\role3.spec.ts:342:5 › spoken debate turn keeps its private recording when local transcription requires a reviewed text (2.3s)
+  ok 8 tests\role3.spec.ts:367:5 › wardrobe purchase confirms its price, retries a lost receipt once, and equips only on request (1.3s)
+
+  8 passed (19.7s)

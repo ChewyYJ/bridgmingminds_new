@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import type { DebateOpponent, DebateProficiency, DebateSession, DebateTournament } from "../../shared/debate.mjs";
-import { T, ErrorNote } from "../components/ui";
+import { C, T, Icon, ErrorNote } from "../components/ui";
 import { LayeredAvatar } from "../avatar/LayeredAvatar";
 import { normalizeSelection } from "../avatar/pack";
 import { useApp } from "../lib/state";
@@ -12,9 +12,10 @@ import { DebateStreet, opponentLook } from "./DebateStreet";
 import { DebateMatch } from "./DebateMatch";
 import { DebateResults } from "./DebateResults";
 import { DebateSetup, TournamentLobby } from "./TournamentLobby";
+import { JudgingLabel } from "./DebateVisuals";
 
 type Tab = "street" | "lobby" | "practice" | "history";
-export function DebateScreen({ onBack, onScrollTop, initialTab = "street" }: { onBack: () => void; onScrollTop?: () => void; initialTab?: "street" | "lobby" }) {
+export function DebateScreen({ onBack, onScrollTop, initialTab = "street", onFocusChange, onOpenFriends }: { onBack: () => void; onScrollTop?: () => void; initialTab?: "street" | "lobby"; onFocusChange?: (focused: boolean) => void; onOpenFriends?: () => void }) {
   const summary = useGamification(); const { refresh } = useApp(); const owner = summary.owner;
   const [catalog, setCatalog] = useState<DebateCatalog | null>(null);
   const [history, setHistory] = useState<DebateHistory>({ sessions: [], tournaments: [] });
@@ -26,6 +27,9 @@ export function DebateScreen({ onBack, onScrollTop, initialTab = "street" }: { o
   const [deleting, setDeleting] = useState<{ id: string; tournament: boolean } | null>(null); const [notice, setNotice] = useState("");
   const lock = useRef(false); const creation = useRef({ signature: "", id: requestId() }); const advanceKey = useRef(requestId());
   const activeSession = useRef<string | null>(null);
+  const focused = Boolean(session);
+  useEffect(() => { onFocusChange?.(focused); }, [focused, onFocusChange]);
+  useEffect(() => () => onFocusChange?.(false), [onFocusChange]);
   useEffect(() => {
     const abort = new AbortController();
     void Promise.all([debateApi.catalog(abort.signal), debateApi.history(0, abort.signal)]).then(([nextCatalog, nextHistory]) => {
@@ -44,7 +48,7 @@ export function DebateScreen({ onBack, onScrollTop, initialTab = "street" }: { o
     setSession(next); onScrollTop?.(); void updateHistory();
     void Promise.all(next.turns.filter(turn => turn.speaker === "user").map(turn => deleteDraft(`debate-turn-${next.id}-${turn.stage}`))).catch(() => undefined);
     if (next.status === "completed") { summary.reload(); void refresh().catch(() => undefined); }
-    if (next.tournamentId) void debateApi.run(next.tournamentId).then(value => { if (isDraftOwner(owner)) setRun(value.run); }).catch(() => undefined);
+    if (next.tournamentId) void debateApi.run(next.tournamentId).then(value => { if (isDraftOwner(owner) && activeSession.current === next.id) setRun(value.run); }).catch(() => undefined);
   }
   async function start(tournament: boolean, bossPractice = false) {
     if (!catalog || lock.current) return;
@@ -100,30 +104,36 @@ export function DebateScreen({ onBack, onScrollTop, initialTab = "street" }: { o
     catch (cause) { if (isDraftOwner(owner)) setError(errorMessage(cause)); }
     finally { lock.current = false; if (isDraftOwner(owner)) setBusy(false); }
   }
-  function leaveMatch(next: Tab) { activeSession.current = null; setSession(null); navigate(next); }
+  function leaveMatch(next: Tab) { activeSession.current = null; setSession(null); navigate(next); void updateHistory(); }
   const ready = loadedOwner === owner && catalog && summary.data;
   if (!ready) return <View style={R.page}><ScreenHeader title="Debate street" onBack={onBack} /><LoadState loading={!loadError && (loadedOwner !== owner || summary.loading)} error={loadError || summary.error} onRetry={() => { setLoadError(""); setRevision(value => value + 1); summary.reload(); }} /></View>;
   const data = summary.data!; const configuration = catalog!;
   const currentOpponent = configuration.opponents.find(entry => entry.id === opponentId) ?? configuration.opponents[0];
   const currentTopic = configuration.topics.find(entry => entry.id === topicId) ?? configuration.topics[0];
   const currentRun = history.tournaments.find(entry => entry.status === "active") ?? null;
-  if (session) return <View style={{ gap: 14, width: "100%", maxWidth: 1000, alignSelf: "center" }}>
-    <View style={[R.row, { justifyContent: "space-between" }]}><Action label="Back" icon="arrow-left" onPress={() => leaveMatch("history")} /><Text style={T.h3}>{session.status === "completed" ? "Match result" : "Debate battle"}</Text><Text style={T.small}>Progress saved</Text></View>
+  const unfinished = history.sessions.find(entry => entry.status !== "completed");
+  if (session) return <View style={{ gap: 14, width: "100%", maxWidth: 680, alignSelf: "center" }}>
     {session.status === "completed" ? <><ErrorNote message={error} /><DebateResults session={session} summary={data} run={run} busy={busy} onAdvance={() => void advance()} onHistory={() => leaveMatch("history")} onNew={() => leaveMatch("street")} /></>
-      : <DebateMatch key={`${session.id}-${session.stage}`} session={session} selection={normalizeSelection(data.avatar.selection)} catalog={configuration} onSession={next => { if (activeSession.current === next.id) receive(next); else void updateHistory(); }} onFinish={() => void sessionAction("finish")} onRecover={() => void sessionAction("recover")} busy={busy} error={error} />}
+      : <DebateMatch key={`${session.id}-${session.stage}`} session={session} selection={normalizeSelection(data.avatar.selection)} catalog={configuration} onSession={next => { if (activeSession.current === next.id) receive(next); else void updateHistory(); }} onFinish={() => void sessionAction("finish")} onRecover={() => void sessionAction("recover")} onLeave={() => leaveMatch("street")} busy={busy} error={error} />}
   </View>;
-  return <View style={R.page} testID="debate-screen">
-    {tab === "lobby" ? <View style={[R.row, { justifyContent: "space-between" }]}><Action label="Back" icon="arrow-left" onPress={onBack} /><Text style={T.h3}>Tournament</Text></View> : <ScreenHeader title={tab === "street" ? "Debate street" : tab === "practice" ? "Meet your challenger" : "My debate record"} onBack={onBack} />}
-    <View style={R.row}><Action label="Street" selected={tab === "street"} onPress={() => navigate("street")} /><Action label="Tournament lobby" selected={tab === "lobby"} onPress={() => navigate("lobby")} /><Action label="My record" selected={tab === "history"} onPress={() => { navigate("history"); void updateHistory(); }} /></View>
-    {configuration.providerMode === "local" && tab !== "lobby" && <Text style={T.small}>Local practice mode · rule-based opponent, unscored reflection.</Text>}
+  return <View style={[R.page, { maxWidth: 760, width: "100%", alignSelf: "center", gap: 16 }]} testID="debate-screen">
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+      <Text accessibilityRole="header" style={[T.h2, { flex: 1, fontSize: 26 }]}>{tab === "history" ? "My debate record" : tab === "practice" ? "Meet your challenger" : "Debate street"}</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel="My record" onPress={() => { navigate("history"); void updateHistory(); }} style={{ minWidth: 44, minHeight: 44, justifyContent: "center", alignItems: "center" }}><Icon name="clock" size={23} color={C.ink} /></Pressable>
+    </View>
+    {tab === "street" && unfinished && <View style={[R.smallCard, { gap: 7 }]} testID="debate-resume-card"><Text style={T.h3}>Pick up where you left off</Text><Text numberOfLines={2} style={T.small}>{unfinished.topic.title}</Text><Action label={`Resume ${unfinished.stage} with ${unfinished.opponent.name}`} primary busy={busy} onPress={() => void openSession(unfinished.id)} /></View>}
+    <View style={{ flexDirection: "row", gap: 8 }}><Action label="Street" selected={tab === "street"} onPress={() => navigate("street")} style={{ flex: 1 }} /><Action label="Tournament" selected={tab === "lobby"} onPress={() => navigate("lobby")} style={{ flex: 1 }} /></View>
+    {tab !== "lobby" && <JudgingLabel local={configuration.providerMode === "local"} />}
     <ErrorNote message={error || loadError} />
     {tab === "street" && <><DebateStreet selection={normalizeSelection(data.avatar.selection)} opponents={configuration.opponents} onMeet={meet} />
-      {history.sessions.some(entry => entry.status !== "completed") && <View style={R.card}><Text style={T.h3}>Pick up where you left off</Text>{history.sessions.filter(entry => entry.status !== "completed").slice(0, 3).map(entry => <Action key={entry.id} label={`Resume ${entry.stage} with ${entry.opponent.name}`} busy={busy} onPress={() => void openSession(entry.id)} />)}</View>}</>}
+      <Action label={configuration.rules.title} icon="award" onPress={() => navigate("lobby")} />
+      {onOpenFriends && <View style={R.smallCard}><Action label="Debate with friends" icon="users" onPress={onOpenFriends} /><Text style={T.small}>Private conversation · no AI scores or Coin rewards</Text></View>}
+    </>}
     {tab === "lobby" && <TournamentLobby catalog={configuration} topic={configuration.tournamentTopics.find(entry => entry.id === topicId) || configuration.tournamentTopics[0]} position={position} proficiency={proficiency} currentRun={currentRun} busy={busy} onTopic={setTopicId} onPosition={setPosition} onProficiency={setProficiency} onStart={() => void start(true)} onBossPractice={() => void start(false, true)} onResume={() => currentRun && void openSession(currentRun.currentSessionId)} onHistory={() => navigate("history")} />}
     {tab === "practice" && <View style={{ gap: 16, maxWidth: 660, width: "100%", alignSelf: "center" }}>
       <View style={[R.card, { flexDirection: "row", alignItems: "center", gap: 14 }]}><LayeredAvatar selection={opponentLook(currentOpponent)} variant="chibi" scale={0.38} /><View style={{ flex: 1, gap: 6 }}><Text style={T.h2}>{currentOpponent.name}</Text><Text style={T.small}>{currentOpponent.title} · {currentOpponent.difficulty}</Text><Text style={T.small}>{currentOpponent.style}</Text></View></View>
-      <Action label={`Start practice with ${currentOpponent.name}`} primary busy={busy} onPress={() => void start(false)} testID="start-debate-practice" />
       <DebateSetup topics={configuration.topics} topic={currentTopic} position={position} proficiency={proficiency} busy={busy} onTopic={setTopicId} onPosition={setPosition} onProficiency={setProficiency} />
+      <Action label={`Start practice with ${currentOpponent.name}`} primary busy={busy} onPress={() => void start(false)} testID="start-debate-practice" />
       <Text style={T.small}>Opening → rebuttal → closing. {configuration.rules.timers}</Text>
       <Text style={T.small}>Eligible completion: +{configuration.rewardPreview?.coins || 0} Coins · +{configuration.rewardPreview?.xp || 0} XP.</Text>
     </View>}

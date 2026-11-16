@@ -1,6 +1,6 @@
 export type Mode = "spin_speak" | "debate" | "read_reflect";
 export type Page =
-  "home" | "play" | "discover" | "garden" | "profile" | "settings" | "avatar" | "food" | "achievements" | "debate-street" | "tournament" | "daily-practice";
+  "home" | "play" | "discover" | "garden" | "profile" | "progress" | "settings" | "avatar" | "food" | "achievements" | "debate" | "debate-street" | "tournament" | "daily-practice";
 export interface Profile {
   id: string;
   displayName: string;

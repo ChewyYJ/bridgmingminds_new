@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { View, Text, ImageBackground, ScrollView, useWindowDimensions } from "react-native";
+import { View, Text, ScrollView, useWindowDimensions } from "react-native";
 import { C, T, Button, Field, ErrorNote } from "../components/ui";
 import { BridgingMindsMark } from "../components/art";
 import { LayeredAvatar } from "../avatar/LayeredAvatar";
 import { defaultSelection } from "../avatar/pack";
+import { PixelScene } from "../role3/PixelScene";
 import { MotionView } from "../components/Motion";
 import { api, storeToken } from "../lib/api";
 import { AppState } from "../types";
@@ -112,10 +113,11 @@ export function Onboarding({
             duration={500}
             testID="welcome-avatar-motion"
           >
-            <ImageBackground source={require("../../assets/role3/debate-street.png")} resizeMode="cover"
+            <View
               style={{ height: width > 800 ? 340 : 210, justifyContent: "flex-end", alignItems: "center", overflow: "hidden", borderRadius: 16 }}>
+              <PixelScene scene="street" width={width > 800 ? Math.max(360, width / 2 - 110) : width - 52} height={width > 800 ? 340 : 210} absolute />
               <LayeredAvatar selection={defaultSelection("girl")} variant="big" animation="idle" scale={width > 800 ? 0.72 : 0.48} />
-            </ImageBackground>
+            </View>
           </MotionView>
         </View>
         <View

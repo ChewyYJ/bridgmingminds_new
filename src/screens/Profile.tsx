@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Platform } from "react-native";
 import Svg, { Polyline, Circle, Line, Text as SvgText } from "react-native-svg";
 import { C, T, Card, Button, Tag, Icon } from "../components/ui";
 import { AppState, Attempt, Mode } from "../types";
@@ -8,6 +8,7 @@ import { PracticeWeek } from "../components/PracticeWeek";
 import { WordBloomProgress } from "../components/WordBloom";
 import { LearnerProfile } from "../components/LearnerProfile";
 import { getThoughtGuide } from "../../shared/thought-guide.mjs";
+import { AvatarPanelHeader } from "../role3/AvatarPanelHeader";
 const dimensions = [
   ["grounded", "G", "Grounded", "#91AA77"],
   ["reasoned", "R", "Reasoned", "#A995C2"],
@@ -67,35 +68,12 @@ export function ProfileScreen({
   }));
   return (
     <View style={{ gap: 24 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 10,
-        }}
-      >
-        <View style={{ gap: 8, flexGrow: 1, flexBasis: 220 }}>
-          <Text style={T.title}>Your progress</Text>
-        </View>
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          {openAvatar && (
-            <Button
-              label="My avatar"
-              icon="smile"
-              variant="secondary"
-              onPress={openAvatar}
-            />
-          )}
-          <Button
-            label="Settings"
-            icon="settings"
-            variant="secondary"
-            onPress={openSettings}
-          />
-        </View>
-      </View>
+      <AvatarPanelHeader title="My profile" subtitle={`${state.profile.displayName} · Level ${state.gamification?.level || 1}`} onSettings={openSettings} />
+      {openAvatar && <View style={{ flexDirection: "row", padding: 3, backgroundColor: C.cream, borderRadius: 12, borderWidth: 1, borderColor: C.border }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Avatar" accessibilityState={{ selected: false }} onPress={openAvatar} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center" }}><Text style={[T.small, { color: C.ink, fontSize: 14 }]}>Avatar</Text></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel="Progress" accessibilityState={{ selected: true }} {...(Platform.OS === "web" ? { "aria-pressed": true } : {})} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center", borderRadius: 9, backgroundColor: C.forest }}><Text style={[T.small, { color: C.paper, fontFamily: "DMBold", fontSize: 14 }]}>Progress</Text></Pressable>
+      </View>}
+      <Text style={T.h2}>Your progress</Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 14 }}>
         {[
           [completed.length + (state.readAloudAttempts?.length || 0), "Practices completed", "book-open"],

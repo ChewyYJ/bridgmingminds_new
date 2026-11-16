@@ -115,8 +115,7 @@ function WordBloomPanel({
           ) : null}
           {!words.length ? (
             <Text style={T.small}>
-              Words from Spin &amp; Speak will appear here when there’s a useful
-              suggestion.
+              Words you choose from your sample scripts will appear here.
             </Text>
           ) : null}
           {progress && saved.length ? (
@@ -127,7 +126,7 @@ function WordBloomPanel({
               </Text>
               {data.enabled && due > 0 ? (
                 <Button
-                  label="Start Read & Reflect"
+                  label="Start word review"
                   icon="arrow-right"
                   onPress={() => router.push("/vocabulary-review")}
                 />
@@ -259,7 +258,7 @@ function WordBloomPanel({
         <Button
           label="Open My Dictionary"
           variant="ghost"
-          onPress={() => router.push("/profile")}
+          onPress={() => router.push("/progress" as any)}
         />
       ) : null}
     </Card>

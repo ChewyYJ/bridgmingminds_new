@@ -1,20 +1,24 @@
 # Role 3 implementation
 
-Implemented on top of `origin/person2akadakshaa` at `cd7fc9f`, fast-forwarded into the existing `person3/feature-trying-out` checkout. Existing avatar work was restored after integration; the safety stash remains. Nothing was pushed or deployed.
+Implemented on top of `origin/person2akadakshaa`, with the latest `c31ed0c` merged into `person3/feature-trying-out` on 16 November 2026 (merge `7d57729`). The earlier Role 3 implementation remains in `54322f4`; the original safety stash remains. Nothing was pushed or deployed.
 
 ## Product surfaces
 
-The app retains the latest branch's Expo Router, authentication, responsive shell, DM Sans typography and shared design tokens. Role 3 uses warm cream, beige, charcoal and coloured pixel art, following the approved reference layouts. Main navigation is Home, Avatar, Debate and Progress.
+The app retains Dakshaa's Expo Router, authentication, responsive shell, DM Sans typography and shared design tokens. Main navigation is **Home, Play, Discover, Debate, Profile** on mobile and desktop. The shared header shows Coins. Home retains the daily learning hub with an added equipped-avatar card; Play and Discover retain their existing learning content. Debate replaces Homeland, and Profile opens avatar customisation with secondary links to learning progress and settings.
 
 | Route | Behavior |
 | --- | --- |
-| `/` | Account Coins, level/XP, streak, animated chibi, four learning shortcuts, fullness and achievements |
-| `/daily-practice` | Existing Person 1 daily learning flow, connected to the shared reward ledger |
-| `/avatar` | Adult and chibi previews, seven categories, three choices per gender/category, owned/locked filters, Coin-priced purchases, alternate earned unlocks, palettes and server-saved equipment |
+| `/` | Existing daily challenge hub and activities, plus equipped chibi, overall level/XP and avatar, food and achievements links |
+| `/play` | Existing practice cards and friends-debate entry |
+| `/discover` | Existing reading categories, articles and news feed |
+| `/profile` | Adult and chibi previews, seven categories, three choices per gender/category, owned/locked filters, Coin-priced purchases, alternate earned unlocks, palettes and server-saved equipment |
+| `/progress` | Existing practice ratings, learning history, dictionary, learner profile and milestones |
 | `/food` | Ramen, onigiri and bento, price/fullness confirmation, atomic feeding, food-specific chibi animations, optional care/reminders |
 | `/achievements` | Actual earned milestones and progress toward locked achievements |
-| `/debate-street` | Left/right adult walking, reduced motion, three street opponents, preparation, spoken/written turns, recovery, results and history |
+| `/debate` | Left/right adult walking, reduced motion, three street opponents, preparation, spoken/written turns, recovery, results and history |
 | `/tournament` | Dedicated Singapore Civic Cup lobby, three-round bracket, fictional final boss Chair Lin, topic setup, rewards, saved-run resume and match history |
+
+Saved links remain compatible: `/avatar` opens Profile's wardrobe; `/garden`, `/homeland` and `/debate-street` open Debate; `/daily-practice` opens Home. Vocabulary-review and dictionary return links now point to `/progress`.
 
 The asset lab remains available for development review. It does not replace account inventory or bypass ownership checks. Adult avatars use idle/blink and walking; the other reactions use the legless chibi variant. The existing 42 approved modular designs and separate boy/girl collections are reused. [Scene provenance and exact ImageGen prompt](role3-art.md), [avatar documentation](avatar-modular.md), [food assets](avatar-food-assets.md).
 
@@ -28,7 +32,7 @@ The user delegated reward rates and requested retiring garden mechanics. [Econom
 - Clothing purchases grant ownership; equipping is a separate action. Previewing does not spend Coins. A confirmation shows the server price and balance. Repeated purchase requests cannot charge twice, and a different request for an already-owned item costs zero. There are no real-money purchases.
 - Each 100 XP advances a level. The first three-day streak adds 2 Coins; the first seven-day streak adds 5 Coins + 10 XP.
 - Seeds convert once to Coins at 1:1. The original wallet, Water, Sunlight and XP baseline are archived, not destroyed. Trusted historical daily streak dates are retained. New users begin at zero Coins.
-- Active APIs/UI use Coins. `/api/garden/*` transactions return 410 and `/garden` opens the avatar screen. Historical garden source/data remain for compatibility/export, with no active economy or navigation entry.
+- Active APIs/UI use Coins. `/api/garden/*` transactions return 410 and `/garden` opens Debate. Historical garden source/data remain for compatibility/export, with no active garden economy or navigation entry.
 - Care starts off. When enabled, fullness declines by six points/day; pausing care pauses decay. Low fullness never blocks learning or removes progress. Reminders are optional in-app messages, not push notifications.
 
 ## Contracts and persistence
@@ -80,9 +84,11 @@ The review preview started on `http://localhost:3025/` uses `data/role3-preview.
 
 ## Verification
 
-- Final full Node 24 API suite, including clothing purchases, Singapore boss progression and allowed-origin PUT preflight: 398 passed, zero failed, three optional live-cloud checks skipped (401 total).
+The subsequent approved UI redesign is documented in [Connected learning UI implementation](ux-implementation-2026-11.md), including the current export, pixel-art credits and refreshed browser checks. The entries below also retain the earlier merge baseline.
+
+- After merging `c31ed0c`, the full Node 24 API suite passed: 399 passed, zero failed, three optional live-cloud checks skipped (402 total). This includes the incoming daily-guidance changes, clothing purchases, Singapore boss progression and allowed-origin PUT preflight. Log: `artifacts/role3/merge-api-suite.log`.
 - Offline AI configuration check passed in local mode; offline mocked AI smoke passed all 43 checks.
-- Role 3 browser gate passed five flows: mobile/desktop layout, persisted inventory, local debate/recovery/results/history, each food's correct animation and single charge, synthetic microphone recording with manual transcript review, and a funded wardrobe purchase. The wardrobe check cancels a purchase without a request, simulates a lost successful response, retries the same key for one charge, then explicitly equips the owned item and checks persistence after reload.
+- Role 3 browser gate verifies eight scenarios on merged export `d67d3a8d7f162c5f11b890832b031d2a`: the five existing debate, food, recording and wardrobe flows, mobile and desktop navigation through all five tabs and learning destinations, and a 320px layout check. The first run passed six; two new tests needed their enrollment assertion moved after the first daily activity, then both passed on the same export. The wardrobe check cancels a purchase without a request, simulates a lost successful response, retries the same key for one charge, then explicitly equips the owned item and checks persistence after reload.
 - The separate boss browser gate completes all three tournament matches through the UI against a test-only mocked provider. It checks exact saved evidence, server-computed wins, the Chair Lin final, cup completion, result recovery and reward idempotency. Its screenshots demonstrate the victory layout using synthetic judging, not live-model quality.
 - All 42 wardrobe pieces resolve nonempty isolated thumbnail layers; existing art files are unchanged.
 - Typecheck, Expo lint and web export passed. Final visual checks use actual browser captures under `artifacts/role3`.

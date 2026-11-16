@@ -1,17 +1,21 @@
 import React, { useState } from "react";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { Link } from "expo-router";
 import type { DebateProficiency, DebateTopic, DebateTournament } from "../../shared/debate.mjs";
 import { C, T, Icon } from "../components/ui";
 import { LayeredAvatar } from "../avatar/LayeredAvatar";
 import { Action, R } from "./common";
 import { opponentLook } from "./DebateStreet";
+import { PixelScene } from "./PixelStreetBackdrop";
+import { JudgingLabel } from "./DebateVisuals";
 import type { DebateCatalog } from "./debate-api";
+
+const confidence = { beginner: "Getting started", developing: "Building confidence", confident: "Feeling confident" };
 
 export function TopicContext({ topic }: { topic: DebateTopic }) {
   return <View style={{ gap: 8 }}><Text style={T.small}>{topic.context}</Text>
-    {topic.sources?.map(source => <Link key={source.url} href={source.url as `https://${string}`} target="_blank" rel="noopener noreferrer" style={[T.small, { color: "#69543C", textDecorationLine: "underline", paddingVertical: 5 }]}>{source.title} ↗</Link>)}
-    {topic.contextReviewedAt && <Text style={[T.small, { fontSize: 10 }]}>Background reviewed {topic.contextReviewedAt} · original practice motion, not an official position.</Text>}
+    {topic.sources?.map(source => <Link key={source.url} href={source.url as `https://${string}`} target="_blank" rel="noopener noreferrer" style={[T.small, { color: C.forest, textDecorationLine: "underline", paddingVertical: 7 }]}>{source.title} ↗</Link>)}
+    {topic.contextReviewedAt && <Text style={[T.small, { fontSize: 12 }]}>Background reviewed {topic.contextReviewedAt}. Original practice motion, not an official position.</Text>}
   </View>;
 }
 
@@ -19,12 +23,16 @@ export function DebateSetup({ topics, topic, position, proficiency, busy, onTopi
   topics: DebateTopic[]; topic: DebateTopic; position: "for" | "against"; proficiency: DebateProficiency; busy: boolean;
   onTopic: (id: string) => void; onPosition: (value: "for" | "against") => void; onProficiency: (value: DebateProficiency) => void;
 }) {
-  return <View style={{ gap: 12 }}>
-    <Text style={T.h3}>Choose a topic</Text>
-    {topics.map(entry => <Action key={entry.id} label={entry.title} selected={topic.id === entry.id} disabled={busy} onPress={() => onTopic(entry.id)} />)}
-    <TopicContext topic={topic} />
-    <Text style={T.h3}>Your position</Text><View style={R.row}><Action label="Argue for" selected={position === "for"} disabled={busy} onPress={() => onPosition("for")} /><Action label="Argue against" selected={position === "against"} disabled={busy} onPress={() => onPosition("against")} /></View>
-    <Text style={T.h3}>Speaking confidence</Text><View style={R.row}>{([ ["beginner", "Getting started"], ["developing", "Building confidence"], ["confident", "Feeling confident"] ] as const).map(([value, label]) => <Action key={value} label={label} selected={proficiency === value} disabled={busy} onPress={() => onProficiency(value)} />)}</View>
+  const [choosing, setChoosing] = useState(false), [background, setBackground] = useState(false);
+  return <View style={{ gap: 14 }}>
+    <View style={[R.smallCard, { gap: 10 }]}>
+      <Text style={T.label}>YOUR MOTION</Text><Text accessibilityRole="header" style={T.h3}>{topic.title}</Text>
+      <View style={R.row}><Action label={choosing ? "Close topics" : "Change topic"} selected={choosing} disabled={busy} onPress={() => setChoosing(!choosing)} /><Action label={background ? "Hide background" : "Read background"} selected={background} onPress={() => setBackground(!background)} /></View>
+      {background && <TopicContext topic={topic} />}
+      {choosing && <View style={{ gap: 8 }}>{topics.map(entry => <Action key={entry.id} label={entry.title} selected={topic.id === entry.id} disabled={busy} onPress={() => { onTopic(entry.id); setChoosing(false); }} />)}</View>}
+    </View>
+    <Text style={T.h3}>Your position</Text><View style={R.row}><Action label="Argue for" selected={position === "for"} disabled={busy} onPress={() => onPosition("for")} style={{ flex: 1 }} /><Action label="Argue against" selected={position === "against"} disabled={busy} onPress={() => onPosition("against")} style={{ flex: 1 }} /></View>
+    <Text style={T.h3}>Speaking confidence</Text><View style={R.row}>{(Object.entries(confidence) as [DebateProficiency, string][]).map(([value, label]) => <Action key={value} label={label} selected={proficiency === value} disabled={busy} onPress={() => onProficiency(value)} />)}</View>
   </View>;
 }
 
@@ -33,36 +41,25 @@ export function TournamentLobby({ catalog, topic, position, proficiency, current
   onTopic: (id: string) => void; onPosition: (value: "for" | "against") => void; onProficiency: (value: DebateProficiency) => void;
   onStart: () => void; onBossPractice: () => void; onResume: () => void; onHistory: () => void;
 }) {
-  const [panel, setPanel] = useState<"rounds" | "rewards" | "setup" | null>(null);
-  const toggle = (next: typeof panel) => setPanel(panel === next ? null : next);
-  const boss = catalog.boss;
-  const bracket = currentRun?.bracket || catalog.tournamentOpponents;
-  const finalOpponent = bracket[bracket.length - 1] || boss;
-  return <View style={{ width: "100%", maxWidth: 620, alignSelf: "center", gap: 18 }} testID="tournament-lobby">
-    <View style={{ alignItems: "center", gap: 8 }}>
-      <Text accessible={false} style={{ fontSize: 43 }}>🏆</Text>
-      <Text accessibilityRole="header" style={[T.h2, { textAlign: "center", fontSize: 25 }]}>AI Debate Tournament</Text>
-      <Text style={[T.body, { textAlign: "center", fontSize: 14 }]}>Build your case. Meet the challengers.{"\n"}Take on Singapore’s big questions.</Text>
-    </View>
-    <View style={{ height: 210, borderRadius: 18, overflow: "hidden", backgroundColor: C.sage }}>
-      <Image source={require("../../assets/role3/debate-street.png")} resizeMode="cover" style={{ position: "absolute", width: "100%", height: "100%", opacity: 0.65 }} />
-      <View style={{ position: "absolute", top: 10, right: 18 }}><LayeredAvatar selection={opponentLook(finalOpponent)} variant="big" scale={0.36} playing={false} /></View>
-      <View style={{ position: "absolute", top: 32, left: 28, alignItems: "center" }}><Text accessible={false} style={{ fontSize: 45 }}>♜</Text><Text style={[T.small, { color: C.ink, fontFamily: "DMBold" }]}>{finalOpponent.boss ? "FINAL BOSS" : "FINAL ROUND"}</Text></View>
-      <View style={{ position: "absolute", bottom: 0, width: "100%", padding: 16, backgroundColor: "rgba(50,43,38,0.94)", alignItems: "center", gap: 4 }}>
-        <Text style={[T.h2, { color: "#FFF9EF", fontSize: 22 }]}>{currentRun?.title || catalog.rules.title}</Text><Text style={[T.small, { color: "#E8D8C1" }]}>3 rounds · Final challenge: {finalOpponent.name}</Text>
+  const [setup, setSetup] = useState(false), [background, setBackground] = useState(false), [rewards, setRewards] = useState(false), [width, setWidth] = useState(340);
+  const bracket = currentRun?.bracket || catalog.tournamentOpponents, selectedTopic = currentRun?.topic || topic, local = !catalog.tournamentAvailable;
+  return <View style={{ width: "100%", maxWidth: 620, alignSelf: "center", gap: 16 }} testID="tournament-lobby">
+    <View style={{ flexDirection: "row", gap: 9, alignItems: "center" }}><Icon name="award" size={25} /><Text accessibilityRole="header" style={[T.h2, { flex: 1 }]}>{currentRun?.title || catalog.rules.title}</Text></View>
+    <View onLayout={event => setWidth(event.nativeEvent.layout.width)} style={{ height: 150, borderRadius: 18, overflow: "hidden", backgroundColor: C.sage }}>
+      <PixelScene scene="hall" width={width} height={150} absolute />
+      <View style={{ flexDirection: "row", alignItems: "flex-end", justifyContent: "space-around", flex: 1, padding: 10 }}>
+        {bracket.map((opponent, index) => <View key={opponent.id} style={{ alignItems: "center", gap: 2 }}><LayeredAvatar selection={opponentLook(opponent)} variant="chibi" scale={0.3} playing={false} /><Text style={[T.small, { fontFamily: "DMBold", backgroundColor: C.paper, paddingHorizontal: 7, paddingVertical: 5, borderRadius: 9 }]}>{index + 1}. {opponent.name}</Text></View>)}
       </View>
     </View>
-    <View style={{ gap: 5 }}><Text style={[T.label, { fontSize: 10 }]}>YOUR MOTION · {position === "for" ? "FOR" : "AGAINST"}</Text><Text style={[T.body, { fontSize: 14 }]}>{currentRun?.topic.title || topic.title}</Text></View>
-    <Action label={currentRun ? `Continue round ${currentRun.round}` : "Start tournament"} primary icon="chevron-right" busy={busy} disabled={!currentRun && !catalog.tournamentAvailable} onPress={currentRun ? onResume : onStart} testID="start-debate-tournament" style={{ borderRadius: 24 }} />
-    {!catalog.tournamentAvailable && <Text style={[T.small, { textAlign: "center", fontSize: 11 }]}>Competitive judging needs a configured AI provider. You can practise with the boss below.</Text>}
-    <View style={{ flexDirection: "row", gap: 10 }}>
-      {([ ["rounds", "Rounds", "bar-chart-2"], ["rewards", "Rewards", "gift"], ["history", "My record", "file-text"] ] as const).map(([id, label, icon]) => <View key={id} style={[R.smallCard, { flex: 1, padding: 8, alignItems: "center", gap: 6 }]}><Icon name={icon} size={24} /><Action label={label} selected={id !== "history" && panel === id} onPress={id === "history" ? onHistory : () => toggle(id)} style={{ paddingHorizontal: 4, borderWidth: 0, minHeight: 38 }} /></View>)}
-    </View>
-    {panel === "rounds" && <View style={R.card}><Text style={T.h3}>The road to the final</Text>{bracket.map((opponent, index) => <View key={opponent.id} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}><LayeredAvatar selection={opponentLook(opponent)} variant="chibi" scale={0.22} playing={false} /><View style={{ flex: 1 }}><Text style={T.h3}>{index + 1}. {opponent.name}{opponent.boss ? " · Boss" : ""}</Text><Text style={T.small}>{opponent.title} · {opponent.difficulty}</Text></View></View>)}<Text style={T.small}>{catalog.rules.progression}</Text></View>}
-    {panel === "rewards" && <View style={R.card}><Text style={T.h3}>Rewards for taking part</Text><Text style={T.body}>Eligible match: +{catalog.rewardPreview?.coins || 0} Coins · +{catalog.rewardPreview?.xp || 0} XP</Text><Text style={T.small}>{catalog.rewardPreview?.unlockNote}</Text><Text style={T.small}>Up to {catalog.rewardPreview?.dailyCap || 2} rewarded debate completions each day. Verified wins can unlock special wardrobe pieces.</Text></View>}
-    <Action label={panel === "setup" ? "Close match setup" : "Topic & difficulty"} selected={panel === "setup"} onPress={() => toggle("setup")} />
-    {panel === "setup" && <View style={R.card}><DebateSetup topics={catalog.tournamentTopics} topic={topic} position={position} proficiency={proficiency} busy={busy} onTopic={onTopic} onPosition={onPosition} onProficiency={onProficiency} /><Text style={T.small}>{catalog.rules.scale}</Text><Text style={T.small}>{catalog.rules.outcome}</Text></View>}
-    <View style={[R.smallCard, { flexDirection: "row", alignItems: "center", gap: 12 }]}><LayeredAvatar selection={opponentLook(boss)} variant="chibi" scale={0.28} playing={false} /><View style={{ flex: 1, gap: 5 }}><Text style={T.h3}>{boss.name} · The policy chair</Text><Text style={T.small}>A fictional challenger who asks for evidence, trade-offs and a workable plan.</Text></View></View>
-    <Action label={`Practise with ${boss.name}`} busy={busy} onPress={onBossPractice} testID="start-debate-practice" />
+    <Text style={T.small}>Three matches · one final challenge. Win to advance; a draw replays the match.</Text>
+    <View style={[R.smallCard, { gap: 10 }]}><Text style={T.label}>YOUR MOTION</Text><Text style={T.h3}>{selectedTopic.title}</Text><Action label={background ? "Hide background" : "Read background"} selected={background} onPress={() => setBackground(!background)} />{background && <TopicContext topic={selectedTopic} />}</View>
+    <Text style={T.body}>{(currentRun?.position || position) === "for" ? "For" : "Against"} the motion · {confidence[currentRun?.proficiency || proficiency]}</Text>
+    <JudgingLabel local={local} />
+    {!currentRun && <Action label={setup ? "Close match setup" : "Change match setup"} selected={setup} disabled={busy} onPress={() => setSetup(!setup)} />}
+    {setup && !currentRun && <DebateSetup topics={catalog.tournamentTopics} topic={topic} position={position} proficiency={proficiency} busy={busy} onTopic={onTopic} onPosition={onPosition} onProficiency={onProficiency} />}
+    {currentRun ? <Action label={`Continue match ${currentRun.round}`} primary busy={busy} onPress={onResume} testID="start-debate-tournament" /> : local ? <><Text style={T.small}>This mode offers unscored practice. Competitive judging and cup progression are currently unavailable.</Text><Action label={`Practise with ${catalog.boss.name}`} primary busy={busy} onPress={onBossPractice} testID="start-debate-practice" /></> : <Action label="Enter tournament" primary busy={busy} onPress={onStart} testID="start-debate-tournament" />}
+    <View style={R.smallCard}><Text style={T.h3}>Meet {catalog.boss.name}</Text><Text style={T.small}>A fictional policy challenger who asks about evidence, trade-offs and a workable plan.</Text>{!local && <Action label={`Practise with ${catalog.boss.name}`} busy={busy} onPress={onBossPractice} testID="start-debate-practice" />}</View>
+    <View style={R.row}><Action label="Rewards" icon="gift" selected={rewards} onPress={() => setRewards(!rewards)} style={{ flex: 1 }} /><Action label="Match history" icon="clock" onPress={onHistory} style={{ flex: 1 }} /></View>
+    {rewards && <View style={R.smallCard}><Text style={T.h3}>Rewards for taking part</Text><Text style={T.body}>Eligible match: +{catalog.rewardPreview?.coins || 0} Coins · +{catalog.rewardPreview?.xp || 0} XP</Text><Text style={T.small}>{catalog.rewardPreview?.unlockNote}</Text><Text style={T.small}>Up to {catalog.rewardPreview?.dailyCap || 2} rewarded debate completions each day. Learning remains open after the reward limit.</Text></View>}
   </View>;
 }

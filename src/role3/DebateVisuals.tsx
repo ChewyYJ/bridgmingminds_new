@@ -1,11 +1,12 @@
 import React from "react";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { C, T } from "../components/ui";
+import { PixelScene } from "./PixelStreetBackdrop";
 
 export function SoftTownBackdrop() {
   return <View pointerEvents="none" accessible={false} style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: 20 }}>
-    <Image source={require("../../assets/role3/debate-street.png")} resizeMode="cover" style={{ position: "absolute", width: "100%", height: "100%", opacity: 0.13 }} />
+    <View style={{ opacity: 0.08 }}><PixelScene scene="hall" width={680} height={300} /></View>
   </View>;
 }
 
@@ -18,6 +19,21 @@ export function TurnProgress({ value, label }: { value: number; label: string })
 export function VoiceMark({ active = false }: { active?: boolean }) {
   return <View accessible={false} style={{ flexDirection: "row", gap: 3, justifyContent: "center", alignItems: "center", height: 30 }}>
     {[5, 9, 16, 24, 12, 28, 19, 10, 22, 15, 7, 4].map((height, index) => <View key={index} style={{ width: 3, height, borderRadius: 2, backgroundColor: active ? "#6F6256" : "#C8BDB1" }} />)}
+  </View>;
+}
+
+export function JudgingLabel({ local }: { local: boolean }) {
+  return <View style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, backgroundColor: C.sage, alignSelf: "flex-start" }}>
+    <Text style={[T.small, { fontSize: 12, color: C.ink }]}>{local ? "Practice · unscored" : "AI-assessed · provisional"}</Text>
+  </View>;
+}
+
+export function DebateSteps({ completed }: { completed: number }) {
+  return <View style={{ flexDirection: "row", gap: 6 }} accessibilityLabel={`${Math.min(completed, 3)} of 3 turns submitted`}>
+    {["Opening", "Rebuttal", "Closing"].map((label, index) => <View key={label} style={{ flex: 1, gap: 7, alignItems: "center" }}>
+      <View style={{ height: 4, width: "100%", borderRadius: 2, backgroundColor: index <= completed ? C.forest : C.border }} />
+      <Text style={[T.small, { fontSize: 12, color: index === completed ? C.ink : C.muted, fontFamily: index === completed ? "DMBold" : "DM" }]}>{index < completed ? "✓ " : ""}{label}</Text>
+    </View>)}
   </View>;
 }
 

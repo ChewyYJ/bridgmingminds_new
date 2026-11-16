@@ -775,7 +775,7 @@ export function DailySpeaking({
                     {session?.prompt.category || "Today’s question"}
                   </Text>
                   <Text accessibilityRole="header" style={s.title}>
-                    Spin and reflect
+                    Spin &amp; Speak
                   </Text>
                   <Text style={s.copy}>
                     {dailyCompleted

@@ -1,0 +1,97 @@
+
+Running 8 tests using 1 worker
+
+(node:67480) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\role3.spec.ts:54:5 › mobile learner equips owned items, completes a recoverable local debate, and buys a confirmed onigiri meal (5.2s)
+  x  2 tests\role3.spec.ts:153:7 › mobile five-tab navigation preserves daily learning, discovery and profile wardrobe (5.5s)
+(node:68376) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  3 tests\role3.spec.ts:153:7 › desktop five-tab navigation preserves daily learning, discovery and profile wardrobe (5.5s)
+(node:63148) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 4 tests\role3.spec.ts:235:5 › 320px Home keeps the Coins header, daily choices and companion card within the viewport (630ms)
+  ok 5 tests\role3.spec.ts:252:7 › Ramen purchase uses its matching eating action and the server price (630ms)
+  ok 6 tests\role3.spec.ts:252:7 › Bento purchase uses its matching eating action and the server price (629ms)
+  ok 7 tests\role3.spec.ts:263:5 › spoken debate turn keeps its private recording when local transcription requires a reviewed text (2.4s)
+  ok 8 tests\role3.spec.ts:283:5 › wardrobe purchase confirms its price, retries a lost receipt once, and equips only on request (1.2s)
+
+
+  1) tests\role3.spec.ts:153:7 › mobile five-tab navigation preserves daily learning, discovery and profile wardrobe 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByTestId('daily-progress')
+    Expected: "0/2"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveText" getByTestId('daily-progress') with timeout 5000ms
+      - waiting for getByTestId('daily-progress')
+
+
+      172 |     await shell();
+      173 |     await expect(page.getByRole("heading", { name: "Daily challenge", exact: true })).toBeVisible();
+    > 174 |     await expect(page.getByTestId("daily-progress")).toHaveText("0/2");
+          |                                                      ^
+      175 |     await expect(page.getByTestId("home-avatar-card")).toBeVisible();
+      176 |     await expect(page.getByTestId("home-avatar-card").getByTestId("layered-avatar-chibi")).toBeVisible();
+      177 |     await page.getByRole("button", { name: "Read aloud", exact: true }).click();
+        at C:\Users\mango\Codex\bridgingminds\bridgmingminds_new\tests\role3.spec.ts:174:54
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\role3-mobile-five-tab-navi-aada9-covery-and-profile-wardrobe\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\role3-mobile-five-tab-navi-aada9-covery-and-profile-wardrobe\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\role3-mobile-five-tab-navi-aada9-covery-and-profile-wardrobe\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\role3-mobile-five-tab-navi-aada9-covery-and-profile-wardrobe\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\role3.spec.ts:153:7 › desktop five-tab navigation preserves daily learning, discovery and profile wardrobe 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByTestId('daily-progress')
+    Expected: "0/2"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveText" getByTestId('daily-progress') with timeout 5000ms
+      - waiting for getByTestId('daily-progress')
+
+
+      172 |     await shell();
+      173 |     await expect(page.getByRole("heading", { name: "Daily challenge", exact: true })).toBeVisible();
+    > 174 |     await expect(page.getByTestId("daily-progress")).toHaveText("0/2");
+          |                                                      ^
+      175 |     await expect(page.getByTestId("home-avatar-card")).toBeVisible();
+      176 |     await expect(page.getByTestId("home-avatar-card").getByTestId("layered-avatar-chibi")).toBeVisible();
+      177 |     await page.getByRole("button", { name: "Read aloud", exact: true }).click();
+        at C:\Users\mango\Codex\bridgingminds\bridgmingminds_new\tests\role3.spec.ts:174:54
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\role3-desktop-five-tab-nav-cadf2-covery-and-profile-wardrobe\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\role3-desktop-five-tab-nav-cadf2-covery-and-profile-wardrobe\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\role3-desktop-five-tab-nav-cadf2-covery-and-profile-wardrobe\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\role3-desktop-five-tab-nav-cadf2-covery-and-profile-wardrobe\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    tests\role3.spec.ts:153:7 › mobile five-tab navigation preserves daily learning, discovery and profile wardrobe 
+    tests\role3.spec.ts:153:7 › desktop five-tab navigation preserves daily learning, discovery and profile wardrobe 
+  6 passed (24.5s)

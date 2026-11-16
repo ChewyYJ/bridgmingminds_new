@@ -29,17 +29,24 @@ import { Practice, Feedback } from "./src/screens/Practice";
 import Friends from "./src/screens/Friends";
 import { ReadAloud } from "./src/screens/DailyWorkout";
 import { VocabularyReviewScreen } from "./src/screens/VocabularyReview";
-import { GamificationHome, FoodCareScreen, AchievementsScreen, AvatarWardrobeScreen, DebateScreen } from "./src/role3";
+import { FoodCareScreen, AchievementsScreen, AvatarWardrobeScreen, DebateScreen } from "./src/role3";
 import { CoinBalance } from "./src/role3/common";
 import { Mode, Page, Article, Attempt } from "./src/types";
 import { api } from "./src/lib/api";
 const nav: [Page, string, string][] = [
   ["home", "Home", "home"],
-  ["avatar", "Avatar", "user"],
-  ["debate-street", "Debate", "message-circle"],
-  ["profile", "Progress", "bar-chart-2"],
+  ["play", "Play", "play"],
+  ["discover", "Discover", "compass"],
+  ["debate", "Debate", "message-circle"],
+  ["profile", "Profile", "user"],
 ];
+// Keep saved links working while the five main tabs use their new destinations.
+const pageAliases: Record<string, Page> = {
+  avatar: "profile", garden: "debate", homeland: "debate",
+  "debate-street": "debate", "daily-practice": "home",
+};
 export default function App() {
+  const [debateFocused, setDebateFocused] = useState(false);
   const pageScroll = useRef<ScrollView>(null);
   const showResultFromTop = useCallback(() => {
     pageScroll.current?.scrollTo({ y: 0, animated: false });
@@ -55,8 +62,12 @@ export default function App() {
     retry?: string;
     id?: string;
   }>();
-  const page = (pathname.split("/")[1] || "home") as
+  const route = pathname.split("/")[1] || "home";
+  const page = (pageAliases[route] || route) as
     Page | "practice" | "attempt" | "friends" | "read-aloud" | "vocabulary-review" | "avatar";
+  const activeTab = page === "tournament" ? "debate"
+    : ["progress", "settings", "food", "achievements"].includes(page) ? "profile"
+    : page === "friends" ? "debate" : page;
   const practiceMode: Mode =
     params.mode === "debate" || params.mode === "read_reflect"
       ? params.mode
@@ -64,7 +75,7 @@ export default function App() {
   const navigate = (p: Page) =>
     router.push(p === "home" ? "/" : (`/${p}` as any));
   function start(mode: Mode, article?: Article, retry?: Attempt) {
-    if (mode === "debate" && !retry) { router.push("/debate-street" as any); return; }
+    if (mode === "debate" && !retry) { router.push("/debate" as any); return; }
     router.push({
       pathname: "/practice",
       params: {
@@ -101,7 +112,7 @@ export default function App() {
         }}
       />
     );
-  const immersive = page === "practice" || page === "attempt" || page === "read-aloud" || page === "vocabulary-review";
+  const immersive = page === "practice" || page === "attempt" || page === "read-aloud" || page === "vocabulary-review" || (debateFocused && (page === "debate" || page === "tournament"));
   const dailySpeaking = page === "practice" && practiceMode === "spin_speak" && Boolean(state?.profile.dailyWorkout);
   const common = {
     state,
@@ -143,7 +154,7 @@ export default function App() {
                 key={id}
                 label={label}
                 icon={icon}
-                active={page === id || (id === "debate-street" && page === "tournament") || (id === "play" && page === "friends")}
+                active={activeTab === id}
                 onPress={() => navigate(id)}
               />
             ))}
@@ -186,44 +197,19 @@ export default function App() {
           </View>
         )}
         <View style={{ flex: 1, minWidth: 0 }}>
-          {!immersive && !(desktop && page === "garden") && (
+          {!immersive && (
             <View style={[s.topbar, { paddingHorizontal: desktop ? 36 : 18 }]}>
               {desktop ? (
                 <View />
               ) : (
                 <View
-                  style={{ flexDirection: "row", gap: 7, alignItems: "center" }}
+                  style={{ flexDirection: "row", gap: 7, alignItems: "center", flex: 1, minWidth: 0 }}
                 >
                   <BridgingMindsMark size={28} />
-                  <Text style={[T.h2, { fontSize: 18 }]}>BridgingMinds</Text>
+                  <Text numberOfLines={1} style={[T.h2, { fontSize: width < 360 ? 16 : 18, flexShrink: 1 }]}>BridgingMinds</Text>
                 </View>
               )}
-              {page === "home" ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Open your profile"
-                  onPress={() => navigate("profile")}
-                  testID="home-profile-avatar"
-                  style={({ pressed }) => [
-                    s.avatar,
-                    { width: 44, height: 44, opacity: pressed ? 0.7 : 1 },
-                  ]}
-                >
-                  <Text style={[T.h3, { fontSize: 18 }]}>
-                    {state.profile.displayName.charAt(0).toUpperCase()}
-                  </Text>
-                </Pressable>
-              ) : page !== "garden" ? (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: width < 450 ? 4 : 9,
-                  }}
-                >
-                  <CoinBalance value={state.wallet.coins || 0} />
-                </View>
-              ) : null}
+              <View testID="shell-coin-balance"><CoinBalance value={state.wallet.coins || 0} /></View>
             </View>
           )}
           <ScrollView
@@ -239,39 +225,32 @@ export default function App() {
             }}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={{ width: "100%", maxWidth: page === "read-aloud" ? 1050 : 1280, ...(dailySpeaking ? { flexGrow: 1 } : {}) }}>
+            <View style={{ width: "100%", maxWidth: page === "read-aloud" ? 1050 : 1080, ...(dailySpeaking ? { flexGrow: 1 } : {}) }}>
               {page === "read-aloud" ? (
                 <ReadAloud key={state.profile.id} />
               ) : page === "vocabulary-review" ? (
                 <VocabularyReviewScreen key={state.profile.id} />
               ) : page === "home" ? (
-                <GamificationHome
-                  onOpenAvatar={() => navigate("avatar")} onOpenFood={() => navigate("food")}
-                  onOpenAchievements={() => navigate("achievements")} onOpenDebate={() => navigate("debate-street")}
-                  onDailyPractice={() => navigate("daily-practice")}
-                  onReadAloud={() => router.push("/read-aloud" as any)} onReadReflect={() => navigate("discover")} />
-              ) : page === "daily-practice" ? (
                 <Home {...common} />
               ) : page === "play" ? (
                 <Play {...common} />
               ) : page === "discover" ? (
                 <Discover {...common} />
-              ) : page === "avatar" ? (
-                <AvatarWardrobeScreen key={state.profile.id} onBack={() => navigate("home")} />
+              ) : page === "profile" ? (
+                <AvatarWardrobeScreen key={state.profile.id} onBack={() => navigate("home")}
+                  onOpenProgress={() => navigate("progress")} onOpenSettings={() => navigate("settings")} onOpenFood={() => navigate("food")} />
               ) : page === "food" ? (
-                <FoodCareScreen key={state.profile.id} onBack={() => navigate("home")} />
+                <FoodCareScreen key={state.profile.id} onBack={() => navigate("profile")} />
               ) : page === "achievements" ? (
                 <AchievementsScreen onBack={() => navigate("home")} />
-              ) : page === "debate-street" || page === "tournament" ? (
-                <DebateScreen key={`${state.profile.id}-${page}`} initialTab={page === "tournament" ? "lobby" : "street"} onBack={() => navigate("home")} onScrollTop={showResultFromTop} />
+              ) : page === "debate" || page === "tournament" ? (
+                <DebateScreen key={`${state.profile.id}-${page}`} initialTab={page === "tournament" ? "lobby" : "street"} onBack={() => navigate("home")} onScrollTop={showResultFromTop} onFocusChange={setDebateFocused} onOpenFriends={common.openFriends} />
               ) : page === "friends" ? (
                 <Friends
                   userId={state.profile.id}
-                  onClose={() => navigate("play")}
+                  onClose={() => navigate("debate")}
                 />
-              ) : page === "garden" ? (
-                <AvatarWardrobeScreen key={state.profile.id} onBack={() => navigate("home")} />
-              ) : page === "profile" ? (
+              ) : page === "progress" ? (
                 <ProfileScreen
                   state={state}
                   openAttempt={(a) =>
@@ -281,7 +260,7 @@ export default function App() {
                     } as any)
                   }
                   openSettings={() => navigate("settings")}
-                  openAvatar={() => router.push("/avatar" as any)}
+                  openAvatar={() => navigate("profile")}
                   start={start}
                 />
               ) : page === "settings" ? (
@@ -311,13 +290,13 @@ export default function App() {
                   onResultShown={showResultFromTop}
                   onGarden={() => {
                     void refresh();
-                    navigate("avatar");
+                    navigate("profile");
                   }}
                 />
               ) : page === "attempt" ? (
                 <AttemptDetail
                   id={params.id || ""}
-                  onClose={() => navigate("profile")}
+                  onClose={() => navigate("progress")}
                   onRetry={(a) =>
                     start(
                       a.mode,
@@ -326,7 +305,7 @@ export default function App() {
                     )
                   }
                   refresh={refresh}
-                  onGarden={() => navigate("avatar")}
+                  onGarden={() => navigate("profile")}
                 />
               ) : (
                 <Home {...common} />
@@ -342,7 +321,7 @@ export default function App() {
                   accessibilityLabel={`Navigate to ${label}`}
                   accessibilityState={{
                     selected:
-                      page === id || (id === "debate-street" && page === "tournament") || (id === "play" && page === "friends"),
+                      activeTab === id,
                   }}
                   onPress={() => navigate(id)}
                   style={{
@@ -357,7 +336,7 @@ export default function App() {
                     name={icon}
                     size={20}
                     color={
-                      page === id || (id === "debate-street" && page === "tournament") || (id === "play" && page === "friends")
+                      activeTab === id
                         ? C.forest
                         : "#9A9F94"
                     }
@@ -365,12 +344,12 @@ export default function App() {
                   <Text
                     style={{
                       fontFamily:
-                        page === id || (id === "debate-street" && page === "tournament") || (id === "play" && page === "friends")
+                        activeTab === id
                           ? "DMBold"
                           : "DM",
                       fontSize: 10,
                       color:
-                        page === id || (id === "debate-street" && page === "tournament") || (id === "play" && page === "friends")
+                        activeTab === id
                           ? C.forest
                           : "#848D7D",
                     }}

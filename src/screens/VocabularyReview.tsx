@@ -73,10 +73,10 @@ export function VocabularyReviewScreen() {
         label="Back to My Dictionary"
         icon="arrow-left"
         variant="ghost"
-        onPress={() => router.replace("/profile")}
+        onPress={() => router.replace("/progress" as any)}
       />
       <Text accessibilityRole="header" style={T.title}>
-        Read &amp; Reflect
+        Word review
       </Text>
       <ErrorNote message={error} />
       {review === undefined ? (
@@ -115,7 +115,7 @@ export function VocabularyReviewScreen() {
           <Text style={T.small}>
             {review.result.xp
               ? `+${review.result.xp} XP earned`
-              : "Today’s Read & Reflect bonus was already earned."}
+              : "Today’s word review bonus was already earned."}
           </Text>
           <Button label="Review another word" onPress={loadNext} />
         </Card>
