@@ -8,7 +8,8 @@ import { isKnownPage } from "./src/navigation/routeInfo";
 import { Onboarding } from "./src/screens/Onboarding";
 import { NotFound, ScreenLoading } from "./src/components/ScreenStates";
 import { Button, ErrorNote } from "./src/components/ui";
-const LearningWorkspace = lazy(() => import("./src/screens/LearningWorkspace"));
+import { loadWorkspace } from "./src/lib/loadWorkspace";
+const LearningWorkspace = lazy(loadWorkspace);
 
 export default function App() {
   const { C, T } = useTheme();

@@ -1,37 +1,44 @@
 import { ThemeProvider, useTheme } from "../theme/ThemeProvider";
-import React from "react";
+import React, { useEffect } from "react";
 import { Slot, type ErrorBoundaryProps } from "expo-router";
 import { ScreenError } from "../components/ScreenStates";
 import Head from "expo-router/head";
 
 import { useFonts } from "expo-font";
+import { appFonts } from "../theme/fonts";
 import Feather from "@expo/vector-icons/Feather";
-import { DMSans_400Regular } from "@expo-google-fonts/dm-sans/400Regular";
-import { DMSans_500Medium } from "@expo-google-fonts/dm-sans/500Medium";
-import { DMSans_700Bold } from "@expo-google-fonts/dm-sans/700Bold";
-import { Lora_400Regular } from "@expo-google-fonts/lora/400Regular";
-import { AppProvider } from "../lib/state";
-import { View, ActivityIndicator } from "react-native";
+import { AppProvider, useApp } from "../lib/state";
+import { loadWorkspace } from "../lib/loadWorkspace";
+import { View, ActivityIndicator, Platform } from "react-native";
 export default function Layout() {
   return (
     <ThemeProvider>
-      <ThemedLayout />
+      <AppProvider>
+        <WorkspacePreload />
+        <ThemedLayout />
+      </AppProvider>
     </ThemeProvider>
   );
+}
+
+function WorkspacePreload() {
+  const { state } = useApp();
+  const onboarded = state?.profile.onboardingComplete;
+  useEffect(() => {
+    if (onboarded) void loadWorkspace().catch(() => undefined);
+  }, [onboarded]);
+  return null;
 }
 
 function ThemedLayout() {
   const { C } = useTheme();
 
   const [ready, error] = useFonts({
+    ...appFonts,
     feather: {
-      uri: Feather.font.feather,
+      uri: appFonts.feather,
       testString: String.fromCodePoint(Number(Feather.glyphMap.home)),
     },
-    DM: DMSans_400Regular,
-    DMMedium: DMSans_500Medium,
-    DMBold: DMSans_700Bold,
-    Lora: Lora_400Regular,
   });
   if (!ready && !error)
     return (
@@ -43,11 +50,11 @@ function ThemedLayout() {
           backgroundColor: C.cream,
         }}
       >
-        <ActivityIndicator color={C.forest} />
+        <ActivityIndicator accessibilityLabel="Loading" color={C.forest} />
       </View>
     );
   return (
-    <AppProvider>
+    <>
       <Head>
         <title>BridgingMinds</title>
         <meta name="application-name" content="BridgingMinds" />
@@ -63,7 +70,7 @@ function ThemedLayout() {
         />
       </Head>
       <Slot />
-    </AppProvider>
+    </>
   );
 }
 
@@ -72,7 +79,8 @@ export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
     <ThemeProvider>
       <ScreenError
         retry={() => {
-          void retry();
+          if (Platform.OS === "web") window.location.reload();
+          else void retry();
         }}
       />
     </ThemeProvider>

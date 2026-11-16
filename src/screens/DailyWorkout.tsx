@@ -334,7 +334,10 @@ function ChallengeHub({
                     )}
                   </View>
                   {busy === item.id ? (
-                    <ActivityIndicator color={C.forest} />
+                    <ActivityIndicator
+                      accessibilityLabel="Loading"
+                      color={C.forest}
+                    />
                   ) : (
                     <Icon
                       name={activity?.completed ? "check" : "chevron-right"}
@@ -602,7 +605,7 @@ export function ReadAloud() {
       <ErrorNote message={error} />
       {!assignment ? (
         <Card>
-          <ActivityIndicator color={C.forest} />
+          <ActivityIndicator accessibilityLabel="Loading" color={C.forest} />
           <Button
             label="Retry"
             variant="ghost"

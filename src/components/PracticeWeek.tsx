@@ -20,8 +20,8 @@ export function PracticeWeek({ week }: { week: AppState["practiceWeek"] }) {
         gap: 9,
         borderRadius: 18,
         borderWidth: 1,
-        borderColor: "#DCE4D2",
-        backgroundColor: "#F2F5EB",
+        borderColor: C.border,
+        backgroundColor: C.successSurface,
       }}
     >
       <View
@@ -66,7 +66,7 @@ export function PracticeWeek({ week }: { week: AppState["practiceWeek"] }) {
                 width: 22,
                 height: 22,
                 borderRadius: 11,
-                backgroundColor: index < count ? C.forest : "#E3E8D8",
+                backgroundColor: index < count ? C.forest : C.sage,
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -74,7 +74,7 @@ export function PracticeWeek({ week }: { week: AppState["practiceWeek"] }) {
               <Icon
                 name={index < count ? "check" : "feather"}
                 size={11}
-                color={index < count ? "white" : "#7E8D71"}
+                color={index < count ? C.onPrimary : C.muted}
               />
             </MotionPulse>
           ))}

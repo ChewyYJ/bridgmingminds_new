@@ -84,7 +84,10 @@ export function AttemptDetail({
             />
           ) : (
             <>
-              <ActivityIndicator color={C.forest} />
+              <ActivityIndicator
+                accessibilityLabel="Loading"
+                color={C.forest}
+              />
               <Text style={T.small}>
                 Evaluation {attempt.status}. You can return home and open this
                 saved response later.

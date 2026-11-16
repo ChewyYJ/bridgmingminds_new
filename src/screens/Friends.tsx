@@ -936,7 +936,11 @@ function FriendsContent({
           </View>
         )}
         {loading ? (
-          <ActivityIndicator color={C.forest} style={{ padding: 60 }} />
+          <ActivityIndicator
+            accessibilityLabel="Loading"
+            color={C.forest}
+            style={{ padding: 60 }}
+          />
         ) : room ? (
           <>
             <View style={s.between}>

@@ -249,7 +249,10 @@ function PetalWheel({
               ]}
             >
               {busy ? (
-                <ActivityIndicator color={C.cream} />
+                <ActivityIndicator
+                  accessibilityLabel="Loading"
+                  color={C.cream}
+                />
               ) : (
                 <Icon name="rotate-cw" size={22} color={C.cream} />
               )}
@@ -1290,7 +1293,11 @@ function ClassicPractice({
             />
           </View>
           {!ready ? (
-            <ActivityIndicator style={{ margin: 60 }} color={C.forest} />
+            <ActivityIndicator
+              accessibilityLabel="Loading"
+              style={{ margin: 60 }}
+              color={C.forest}
+            />
           ) : (
             <>
               <ErrorNote message={error} />
@@ -1939,7 +1946,11 @@ function ClassicPractice({
                     {jobFailed ? (
                       <Icon name="cloud-off" size={34} />
                     ) : (
-                      <ActivityIndicator size="large" color={C.forest} />
+                      <ActivityIndicator
+                        accessibilityLabel="Loading"
+                        size="large"
+                        color={C.forest}
+                      />
                     )}
                   </View>
                   <Text style={[T.title, s.centerText]}>

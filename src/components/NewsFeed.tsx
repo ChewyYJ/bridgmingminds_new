@@ -231,13 +231,15 @@ export function NewsFeed() {
       {!!error && <ErrorNote message={error} />}
       {loading && !feed && (
         <View style={{ padding: 30, alignItems: "center", gap: 12 }}>
-          <ActivityIndicator color={C.forest} />
+          <ActivityIndicator accessibilityLabel="Loading" color={C.forest} />
           <Text style={T.small}>Loading headlines…</Text>
         </View>
       )}
       {!!feed && !currentFeed && (
         <Card style={{ gap: 10, alignItems: "center", padding: 28 }}>
-          {loading && <ActivityIndicator color={C.forest} />}
+          {loading && (
+            <ActivityIndicator accessibilityLabel="Loading" color={C.forest} />
+          )}
           <Text
             accessibilityLiveRegion="polite"
             style={[T.h2, { textAlign: "center" }]}

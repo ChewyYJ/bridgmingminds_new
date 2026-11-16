@@ -192,7 +192,7 @@ export function ReadingSpeech({
       <Card style={{ gap: 14 }} testID="reading-speech">
         {loading || pending ? (
           <>
-            <ActivityIndicator color={C.forest} />
+            <ActivityIndicator accessibilityLabel="Loading" color={C.forest} />
             <Text accessibilityLiveRegion="polite" style={T.h3}>
               Listening to your reading…
             </Text>

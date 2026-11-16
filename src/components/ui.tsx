@@ -103,7 +103,11 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={foreground} />
+        <ActivityIndicator
+          accessibilityLabel="Loading"
+          size="small"
+          color={foreground}
+        />
       ) : icon ? (
         <Icon name={icon} size={18} color={foreground} />
       ) : null}
@@ -331,6 +335,7 @@ export function Toggle({
     <Pressable
       accessibilityRole="switch"
       accessibilityLabel={label}
+      aria-checked={value}
       accessibilityState={{ checked: value, disabled }}
       disabled={disabled}
       onPress={() => onChange(!value)}

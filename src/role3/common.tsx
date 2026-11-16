@@ -197,7 +197,7 @@ export function LoadState({
     <View style={[R.card, { minHeight: 140, justifyContent: "center" }]}>
       {loading ? (
         <>
-          <ActivityIndicator color={C.forest} />
+          <ActivityIndicator accessibilityLabel="Loading" color={C.forest} />
           <Text style={[T.small, { textAlign: "center" }]}>
             Loading your progress…
           </Text>
@@ -230,7 +230,7 @@ export function useGamification() {
   const [saved, setSaved] = useState<{
     owner: string;
     data: GamificationSummary | null;
-  }>({ owner, data: null });
+  }>(() => ({ owner, data: state?.gamification ?? null }));
   const [revision, setRevision] = useState(0);
   const [status, setStatus] = useState({ owner, revision: 0, error: "" });
   const generation = useRef(0);

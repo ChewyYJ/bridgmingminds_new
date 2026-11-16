@@ -788,7 +788,11 @@ export function DailySpeaking({
               </View>
             ) : null}
             {!ready ? (
-              <ActivityIndicator color={C.ink} style={{ margin: 80 }} />
+              <ActivityIndicator
+                accessibilityLabel="Loading"
+                color={C.ink}
+                style={{ margin: 80 }}
+              />
             ) : null}
             {step === "entry" && (
               <>
@@ -1100,7 +1104,10 @@ export function DailySpeaking({
               <>
                 {busy ? (
                   <View style={s.center}>
-                    <ActivityIndicator color={C.forest} />
+                    <ActivityIndicator
+                      accessibilityLabel="Loading"
+                      color={C.forest}
+                    />
                     <Text style={s.small}>Checking your answer…</Text>
                   </View>
                 ) : null}
@@ -1294,7 +1301,11 @@ export function DailySpeaking({
               <>
                 <Text style={s.copy}>Based on what you said.</Text>
                 {busy ? (
-                  <ActivityIndicator color={C.ink} style={{ margin: 50 }} />
+                  <ActivityIndicator
+                    accessibilityLabel="Loading"
+                    color={C.ink}
+                    style={{ margin: 50 }}
+                  />
                 ) : script ? (
                   <View style={s.card}>
                     <Text selectable style={[s.body, { lineHeight: 25 }]}>
@@ -1609,7 +1620,11 @@ function Status({
       {done ? (
         <Icon name="check" color={C.ink} size={20} />
       ) : (
-        <ActivityIndicator size="small" color={C.border} />
+        <ActivityIndicator
+          accessibilityLabel="Loading"
+          size="small"
+          color={C.border}
+        />
       )}
     </View>
   );

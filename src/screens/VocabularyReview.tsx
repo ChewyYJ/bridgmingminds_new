@@ -88,7 +88,7 @@ export function VocabularyReviewScreen() {
         error ? (
           <Button label="Try again" onPress={loadNext} />
         ) : (
-          <ActivityIndicator color={C.forest} />
+          <ActivityIndicator accessibilityLabel="Loading" color={C.forest} />
         )
       ) : review === null ? (
         <Card style={styles.paper}>

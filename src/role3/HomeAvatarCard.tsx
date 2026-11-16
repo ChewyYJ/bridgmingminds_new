@@ -35,7 +35,7 @@ export function HomeAvatarCard({ onOpenAvatar }: HomeAvatarCardProps) {
       >
         {loading ? (
           <>
-            <ActivityIndicator color={C.forest} />
+            <ActivityIndicator accessibilityLabel="Loading" color={C.forest} />
             <Text style={T.small}>Loading your avatar…</Text>
           </>
         ) : (
