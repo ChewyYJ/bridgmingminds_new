@@ -1,10 +1,13 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React from "react";
 import { Text, View } from "react-native";
 import type { AppState } from "../types";
-import { C, Icon, T } from "./ui";
+import { Icon } from "./ui";
 import { MotionPulse } from "./Motion";
 
 export function PracticeWeek({ week }: { week: AppState["practiceWeek"] }) {
+  const { C, T } = useTheme();
+
   const count = week?.days.length || 0;
   const target = week?.target || 3;
   const reached = count >= target;

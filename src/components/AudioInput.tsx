@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   AppState,
@@ -16,7 +17,7 @@ import {
   useAudioRecorder,
   useAudioRecorderState,
 } from "expo-audio";
-import { Button, C, ErrorNote, Icon, T } from "./ui";
+import { Button, ErrorNote, Icon } from "./ui";
 import { LiveVoiceMeter } from "./LiveVoiceMeter";
 
 export interface RecordedAudio {
@@ -60,6 +61,9 @@ function WebAudioPlayback({
   startSeconds: number;
   playLabel: string;
 }) {
+  const { T } = useTheme();
+  const s = useStyles();
+
   const audio = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
@@ -147,6 +151,9 @@ function NativeAudioPlayback({
   startSeconds: number;
   playLabel: string;
 }) {
+  const { T } = useTheme();
+  const s = useStyles();
+
   const player = useAudioPlayer(uri);
   const status = useAudioPlayerStatus(player);
   const [error, setError] = useState("");
@@ -224,6 +231,10 @@ export default function AudioInput({
   appearance?: "garden" | "daily" | "reading";
   reviewActionLabel?: string;
 }) {
+  const { T, C } = useTheme();
+  const dailyAudio = useDailyAudioStyles();
+  const s = useStyles();
+
   const recorder = useAudioRecorder({
     ...RecordingPresets.HIGH_QUALITY,
     isMeteringEnabled: true,
@@ -474,7 +485,7 @@ export default function AudioInput({
         {phase === "review" && recorded ? (
           <>
             <View style={dailyAudio.ring}>
-              <Icon name="check" size={46} color="#555" />
+              <Icon name="check" size={46} color={C.muted} />
             </View>
             <Text style={dailyAudio.hint}>Your recording is ready</Text>
             <AudioPlayback uri={recorded.uri} />
@@ -488,7 +499,7 @@ export default function AudioInput({
               <Text style={dailyAudio.buttonText}>
                 {busy ? "Saving…" : reviewActionLabel}
               </Text>
-              <Icon name="chevron-right" color="#fff" />
+              <Icon name="chevron-right" color={C.onPrimary} />
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -515,7 +526,7 @@ export default function AudioInput({
                   <Icon
                     name={phase === "idle" ? "mic" : "square"}
                     size={48}
-                    color="#555"
+                    color={C.muted}
                   />
                 </View>
               </View>
@@ -560,7 +571,7 @@ export default function AudioInput({
                   (working || busy || elapsed < 1) && { opacity: 0.5 },
                 ]}
               >
-                <Icon name="check" color="#fff" />
+                <Icon name="check" color={C.onPrimary} />
                 <Text style={dailyAudio.buttonText}>Done</Text>
               </Pressable>
             ) : null}
@@ -697,91 +708,105 @@ export default function AudioInput({
   );
 }
 
-const dailyAudio = StyleSheet.create({
-  outerRing: {
-    width: 192,
-    height: 192,
-    borderRadius: 96,
-    backgroundColor: "#fcfcfc",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 22,
-  },
-  middleRing: {
-    width: 156,
-    height: 156,
-    borderRadius: 78,
-    backgroundColor: C.cream,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  ring: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: C.sage,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  timer: { fontFamily: "DMBold", fontSize: 28, color: "#181818" },
-  hint: { fontFamily: "DM", fontSize: 14, color: "#555", textAlign: "center" },
-  button: {
-    borderRadius: 10,
-    minHeight: 50,
-    backgroundColor: C.forest,
-    alignSelf: "stretch",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: 10,
-    padding: 12,
-  },
-  buttonText: { color: "#fff", fontFamily: "DMBold", fontSize: 15 },
-  secondary: { padding: 12, minHeight: 44 },
-});
+const useDailyAudioStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    outerRing: {
+      width: 192,
+      height: 192,
+      borderRadius: 96,
+      backgroundColor: C.paper,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 22,
+    },
+    middleRing: {
+      width: 156,
+      height: 156,
+      borderRadius: 78,
+      backgroundColor: C.cream,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    ring: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: C.sage,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    timer: { fontFamily: "DMBold", fontSize: 28, color: C.ink },
+    hint: {
+      fontFamily: "DM",
+      fontSize: 14,
+      color: C.muted,
+      textAlign: "center",
+    },
+    button: {
+      borderRadius: 10,
+      minHeight: 50,
+      backgroundColor: C.forest,
+      alignSelf: "stretch",
+      alignItems: "center",
+      justifyContent: "center",
+      flexDirection: "row",
+      gap: 10,
+      padding: 12,
+    },
+    buttonText: { color: C.onPrimary, fontFamily: "DMBold", fontSize: 15 },
+    secondary: { padding: 12, minHeight: 44 },
+  }),
+);
 
-const s = StyleSheet.create({
-  container: {
-    backgroundColor: C.cream,
-    borderRadius: 18,
-    padding: 24,
-    gap: 18,
-    alignItems: "center",
-  },
-  row: {
-    flexDirection: "row",
-    gap: 10,
-    flexWrap: "wrap",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  review: {
-    width: "100%",
-    maxWidth: 400,
-    alignItems: "center",
-    gap: 18,
-  },
-  reviewContainer: { paddingHorizontal: 16 },
-  playbackButton: { paddingHorizontal: 12 },
-  reviewActions: { alignSelf: "stretch", gap: 8 },
-  primaryAction: { alignSelf: "stretch", paddingHorizontal: 12 },
-  secondaryActions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  secondaryAction: {
-    flexBasis: 160,
-    flexGrow: 1,
-    flexShrink: 1,
-    minWidth: 0,
-    alignSelf: "stretch",
-    paddingHorizontal: 12,
-  },
-  center: { textAlign: "center", maxWidth: 430 },
-  mic: {
-    width: 70,
-    height: 70,
-    backgroundColor: C.sage,
-    borderRadius: 35,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  timer: { fontFamily: "Lora", fontSize: 60, lineHeight: 76, color: C.forest },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: C.cream,
+      borderRadius: 18,
+      padding: 24,
+      gap: 18,
+      alignItems: "center",
+    },
+    row: {
+      flexDirection: "row",
+      gap: 10,
+      flexWrap: "wrap",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    review: {
+      width: "100%",
+      maxWidth: 400,
+      alignItems: "center",
+      gap: 18,
+    },
+    reviewContainer: { paddingHorizontal: 16 },
+    playbackButton: { paddingHorizontal: 12 },
+    reviewActions: { alignSelf: "stretch", gap: 8 },
+    primaryAction: { alignSelf: "stretch", paddingHorizontal: 12 },
+    secondaryActions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    secondaryAction: {
+      flexBasis: 160,
+      flexGrow: 1,
+      flexShrink: 1,
+      minWidth: 0,
+      alignSelf: "stretch",
+      paddingHorizontal: 12,
+    },
+    center: { textAlign: "center", maxWidth: 430 },
+    mic: {
+      width: 70,
+      height: 70,
+      backgroundColor: C.sage,
+      borderRadius: 35,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    timer: {
+      fontFamily: "Lora",
+      fontSize: 60,
+      lineHeight: 76,
+      color: C.forest,
+    },
+  }),
+);

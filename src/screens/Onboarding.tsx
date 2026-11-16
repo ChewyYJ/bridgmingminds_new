@@ -1,6 +1,7 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useState } from "react";
 import { View, Text, ScrollView, useWindowDimensions } from "react-native";
-import { C, T, Button, Field, ErrorNote } from "../components/ui";
+import { Button, Field, ErrorNote } from "../components/ui";
 import { BridgingMindsMark } from "../components/art";
 import { LayeredAvatar } from "../avatar/LayeredAvatar";
 import { defaultSelection } from "../avatar/pack";
@@ -23,6 +24,8 @@ export function Onboarding({
   state: AppState | null;
   onDone: () => Promise<void>;
 }) {
+  const { C, T } = useTheme();
+
   const { width } = useWindowDimensions();
   const [step, setStep] = useState(state ? "preferences" : "welcome");
   const [auth, setAuth] = useState<"register" | "login">("register");
@@ -35,7 +38,11 @@ export function Onboarding({
       : ["Science", "Technology"],
   );
   const [goal, setGoal] = useState("Articulation");
-  const [timezone, setTimezone] = useState(state?.profile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
+  const [timezone, setTimezone] = useState(
+    state?.profile.timezone ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone ||
+      "UTC",
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   async function run(fn: () => Promise<void>) {
@@ -114,9 +121,28 @@ export function Onboarding({
             testID="welcome-avatar-motion"
           >
             <View
-              style={{ height: width > 800 ? 340 : 210, justifyContent: "flex-end", alignItems: "center", overflow: "hidden", borderRadius: 16 }}>
-              <PixelScene scene="street" width={width > 800 ? Math.max(360, width / 2 - 110) : width - 52} height={width > 800 ? 340 : 210} absolute />
-              <LayeredAvatar selection={defaultSelection("girl")} variant="big" animation="idle" scale={width > 800 ? 0.72 : 0.48} />
+              style={{
+                height: width > 800 ? 340 : 210,
+                justifyContent: "flex-end",
+                alignItems: "center",
+                overflow: "hidden",
+                borderRadius: 16,
+              }}
+            >
+              <PixelScene
+                scene="street"
+                width={
+                  width > 800 ? Math.max(360, width / 2 - 110) : width - 52
+                }
+                height={width > 800 ? 340 : 210}
+                absolute
+              />
+              <LayeredAvatar
+                selection={defaultSelection("girl")}
+                variant="big"
+                animation="idle"
+                scale={width > 800 ? 0.72 : 0.48}
+              />
             </View>
           </MotionView>
         </View>
@@ -232,8 +258,17 @@ export function Onboarding({
                 onChangeText={setName}
                 placeholder="Curious mind"
               />
-              <Field label="Your time zone" value={timezone} onChangeText={setTimezone} placeholder="Asia/Singapore" autoCapitalize="none" />
-              <Text style={T.small}>Use an IANA time zone, such as Asia/Singapore. Your local calendar sets the daily workout boundary.</Text>
+              <Field
+                label="Your time zone"
+                value={timezone}
+                onChangeText={setTimezone}
+                placeholder="Asia/Singapore"
+                autoCapitalize="none"
+              />
+              <Text style={T.small}>
+                Use an IANA time zone, such as Asia/Singapore. Your local
+                calendar sets the daily workout boundary.
+              </Text>
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 9 }}>
                 {topics.map((topic) => (
                   <Button

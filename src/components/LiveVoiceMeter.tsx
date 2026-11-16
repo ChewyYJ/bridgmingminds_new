@@ -1,7 +1,7 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useReducedMotion } from "../hooks/useReducedMotion";
-import { C } from "./ui";
 
 const BAR_COUNT = 19;
 const empty = () => Array<number>(BAR_COUNT).fill(0);
@@ -19,6 +19,8 @@ export function LiveVoiceMeter({
   recorder: { getStatus: () => { isRecording: boolean; metering?: number } };
   active: boolean;
 }) {
+  const { C } = useTheme();
+
   const reducedMotion = useReducedMotion();
   const [signal, setSignal] = useState({ samples: empty(), available: true });
   useEffect(() => {

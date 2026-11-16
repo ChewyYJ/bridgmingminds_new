@@ -1,15 +1,23 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Easing, Platform, StyleSheet, Text, View } from "react-native";
+import {
+  Animated,
+  Easing,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import type { DebateSession } from "../../shared/debate.mjs";
 import {
   createPlanningBoard,
   type PlanningBoard,
 } from "../../shared/planning-board.mjs";
 import { IdeasBoard } from "../components/IdeasBoard";
-import { C, ErrorNote, Icon, T } from "../components/ui";
+import { ErrorNote, Icon } from "../components/ui";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { deleteDraft, isDraftOwner, loadDraft, saveDraft } from "../lib/api";
-import { Action, errorMessage, R } from "./common";
+import { Action, errorMessage, useRoleStyles } from "./common";
 import { debateApi } from "./debate-api";
 import { TopicContext } from "./TournamentLobby";
 
@@ -22,10 +30,14 @@ function PositionRoll({
   position: DebateSession["position"];
   onReveal: () => void;
 }) {
+  const s = useStyles();
+
   const reducedMotion = useReducedMotion();
   const [offset] = useState(() => new Animated.Value(0));
   const finish = useRef(onReveal);
-  useEffect(() => { finish.current = onReveal; }, [onReveal]);
+  useEffect(() => {
+    finish.current = onReveal;
+  }, [onReveal]);
   const last = position === "for" ? 12 : 13;
   useEffect(() => {
     if (reducedMotion) {
@@ -79,6 +91,10 @@ export function DebatePreparation({
   onSession: (session: DebateSession) => void;
   onLeave: () => void;
 }) {
+  const { T } = useTheme();
+  const R = useRoleStyles();
+  const s = useStyles();
+
   const plan = session.preparation!;
   const [board, setBoard] = useState(
     () => plan.planningBoard || createPlanningBoard(),
@@ -94,7 +110,9 @@ export function DebatePreparation({
   const expired = useRef(false);
   const writes = useRef(Promise.resolve());
   const callbacks = useRef({ onSession, onLeave });
-  useEffect(() => { callbacks.current = { onSession, onLeave }; }, [onSession, onLeave]);
+  useEffect(() => {
+    callbacks.current = { onSession, onLeave };
+  }, [onSession, onLeave]);
   const draftKey = `debate-plan-${session.id}`;
 
   useEffect(() => {
@@ -134,22 +152,25 @@ export function DebatePreparation({
     };
   }, [draftKey, owner]);
 
-  const changeBoard = useCallback((next: PlanningBoard) => {
-    latestBoard.current = next;
-    setBoard(next);
-    const snapshot = JSON.stringify(next);
-    writes.current = writes.current
-      .catch(() => undefined)
-      .then(async () => {
-        if (isDraftOwner(owner)) await saveDraft(draftKey, snapshot);
+  const changeBoard = useCallback(
+    (next: PlanningBoard) => {
+      latestBoard.current = next;
+      setBoard(next);
+      const snapshot = JSON.stringify(next);
+      writes.current = writes.current
+        .catch(() => undefined)
+        .then(async () => {
+          if (isDraftOwner(owner)) await saveDraft(draftKey, snapshot);
+        });
+      void writes.current.catch(() => {
+        if (mounted.current && isDraftOwner(owner))
+          setError(
+            "Notes are still here, but could not save on this device. Use Save & leave to save them to your account.",
+          );
       });
-    void writes.current.catch(() => {
-      if (mounted.current && isDraftOwner(owner))
-        setError(
-          "Notes are still here, but could not save on this device. Use Save & leave to save them to your account.",
-        );
-    });
-  }, [draftKey, owner]);
+    },
+    [draftKey, owner],
+  );
 
   const act = useCallback(
     async (action: "reveal" | "save" | "begin") => {
@@ -182,7 +203,9 @@ export function DebatePreparation({
     },
     [draftKey, owner, session.id],
   );
-  const begin = useCallback(() => { void act("begin"); }, [act]);
+  const begin = useCallback(() => {
+    void act("begin");
+  }, [act]);
 
   useEffect(() => {
     if (!plan.endsAt) return;
@@ -310,42 +333,44 @@ export function DebatePreparation({
   );
 }
 
-const s = StyleSheet.create({
-  center: { textAlign: "center" },
-  reveal: { alignItems: "center", gap: 18, paddingVertical: 36 },
-  roll: {
-    height: 64,
-    width: "100%",
-    maxWidth: 300,
-    overflow: "hidden",
-    backgroundColor: C.sage,
-    borderColor: C.border,
-    borderWidth: 1,
-    borderRadius: 14,
-    marginVertical: 10,
-  },
-  rollText: {
-    height: 64,
-    lineHeight: 64,
-    textAlign: "center",
-    fontFamily: "DMBold",
-    fontSize: 30,
-    letterSpacing: 3,
-    color: C.ink,
-  },
-  stance: { fontFamily: "DMBold", fontSize: 27, color: C.ink },
-  clock: {
-    flexDirection: "row",
-    gap: 7,
-    alignItems: "center",
-    backgroundColor: C.sage,
-    padding: 12,
-    borderRadius: 12,
-  },
-  time: {
-    fontFamily: "DMBold",
-    fontSize: 22,
-    fontVariant: ["tabular-nums"],
-    color: C.ink,
-  },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    center: { textAlign: "center" },
+    reveal: { alignItems: "center", gap: 18, paddingVertical: 36 },
+    roll: {
+      height: 64,
+      width: "100%",
+      maxWidth: 300,
+      overflow: "hidden",
+      backgroundColor: C.sage,
+      borderColor: C.border,
+      borderWidth: 1,
+      borderRadius: 14,
+      marginVertical: 10,
+    },
+    rollText: {
+      height: 64,
+      lineHeight: 64,
+      textAlign: "center",
+      fontFamily: "DMBold",
+      fontSize: 30,
+      letterSpacing: 3,
+      color: C.ink,
+    },
+    stance: { fontFamily: "DMBold", fontSize: 27, color: C.ink },
+    clock: {
+      flexDirection: "row",
+      gap: 7,
+      alignItems: "center",
+      backgroundColor: C.sage,
+      padding: 12,
+      borderRadius: 12,
+    },
+    time: {
+      fontFamily: "DMBold",
+      fontSize: 22,
+      fontVariant: ["tabular-nums"],
+      color: C.ink,
+    },
+  }),
+);

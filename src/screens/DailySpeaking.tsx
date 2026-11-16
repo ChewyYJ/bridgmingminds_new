@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -37,11 +38,15 @@ import {
 } from "../../shared/guided-response.mjs";
 import AudioInput, { type RecordedAudio } from "../components/AudioInput";
 import { IdeasPreview } from "../components/IdeasBoard";
-import { DailyBoard, createDailyBoard, dailyBoardText } from "../components/DailyBoard";
+import {
+  DailyBoard,
+  createDailyBoard,
+  dailyBoardText,
+} from "../components/DailyBoard";
 import { NewsWheel } from "../components/NewsWheel";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { ThoughtMapView } from "../components/ThoughtMap";
-import { C, Icon } from "../components/ui";
+import { Icon } from "../components/ui";
 import Svg, { Path } from "react-native-svg";
 
 type Step =
@@ -94,6 +99,9 @@ export function DailySpeaking({
   onStepChange?: () => void;
   retryAttempt?: Attempt;
 }) {
+  const { C } = useTheme();
+  const s = useStyles();
+
   const { state, refresh } = useApp();
   const { width } = useWindowDimensions();
   const wide = width >= 900;
@@ -733,7 +741,11 @@ export function DailySpeaking({
             style={[
               s.phone,
               {
-                maxWidth: wide ? (step === "feedback" && showMap ? 1028 : 680) : 560,
+                maxWidth: wide
+                  ? step === "feedback" && showMap
+                    ? 1028
+                    : 680
+                  : 560,
                 flex: wide ? 1 : undefined,
                 padding: wide ? 32 : 20,
               },
@@ -749,7 +761,7 @@ export function DailySpeaking({
                   onPress={back}
                   style={s.back}
                 >
-                  <Icon name="chevron-left" color="#181818" size={24} />
+                  <Icon name="chevron-left" color={C.ink} size={24} />
                 </Pressable>
                 {title && !["speak"].includes(step) ? (
                   <Text accessibilityRole="header" style={s.heading}>
@@ -776,7 +788,7 @@ export function DailySpeaking({
               </View>
             ) : null}
             {!ready ? (
-              <ActivityIndicator color="#242424" style={{ margin: 80 }} />
+              <ActivityIndicator color={C.ink} style={{ margin: 80 }} />
             ) : null}
             {step === "entry" && (
               <>
@@ -805,7 +817,7 @@ export function DailySpeaking({
                   accessibilityLiveRegion="polite"
                   testID="daily-news-question"
                 >
-                  <Icon name="message-circle" color="#242424" size={24} />
+                  <Icon name="message-circle" color={C.ink} size={24} />
                   <Text style={s.small}>
                     {session?.newsSource ? "In the news" : "Your prompt"}
                   </Text>
@@ -864,10 +876,12 @@ export function DailySpeaking({
             )}
             {step === "board" && board && (
               <>
-                {session?.newsSource && <Text style={s.small}>{session.newsSource.title}</Text>}
+                {session?.newsSource && (
+                  <Text style={s.small}>{session.newsSource.title}</Text>
+                )}
                 <Text style={s.copy}>{session?.prompt.question}</Text>
                 <View style={s.timerPill}>
-                  <Icon name="clock" color="#242424" size={17} />
+                  <Icon name="clock" color={C.ink} size={17} />
                   <Text style={s.name}>
                     {String(Math.floor(seconds / 60)).padStart(2, "0")}:
                     {String(seconds % 60).padStart(2, "0")}
@@ -893,7 +907,10 @@ export function DailySpeaking({
                   </Text>
                   <Text style={s.copy}>One minute. In your own words.</Text>
                 </View>
-                <IdeasPreview value={dailyBoardText(board)} board={board?.planningBoard} />
+                <IdeasPreview
+                  value={dailyBoardText(board)}
+                  board={board?.planningBoard}
+                />
                 <AudioInput
                   appearance="daily"
                   onRecorded={recorded}
@@ -923,7 +940,7 @@ export function DailySpeaking({
                     <Path
                       d="M22 3 Q25 19 41 22 Q25 25 22 41 Q19 25 3 22 Q19 19 22 3Z"
                       fill="none"
-                      stroke="#181818"
+                      stroke={C.ink}
                       strokeWidth={1.8}
                     />
                   </Svg>
@@ -1047,11 +1064,11 @@ export function DailySpeaking({
                   aria-expanded={showMap}
                   style={s.disclosure}
                 >
-                  <Icon name="git-branch" color="#242424" size={18} />
+                  <Icon name="git-branch" color={C.ink} size={18} />
                   <Text style={[s.name, { flex: 1 }]}>Thought map</Text>
                   <Icon
                     name={showMap ? "chevron-up" : "chevron-down"}
-                    color="#242424"
+                    color={C.ink}
                     size={18}
                   />
                 </Pressable>
@@ -1111,7 +1128,7 @@ export function DailySpeaking({
                             {q.question}
                           </Text>
                           {answers[i] ? (
-                            <Icon name="check" size={17} color="#555" />
+                            <Icon name="check" size={17} color={C.muted} />
                           ) : null}
                         </Pressable>
                         {answers[i] ? (
@@ -1256,7 +1273,8 @@ export function DailySpeaking({
             {step === "sample-offer" && (
               <>
                 <Text style={s.copy}>
-                  Your ideas, expressed more clearly, with 1–3 new words when available.
+                  Your ideas, expressed more clearly, with 1–3 new words when
+                  available.
                 </Text>
                 <Action
                   label="View sample script"
@@ -1276,7 +1294,7 @@ export function DailySpeaking({
               <>
                 <Text style={s.copy}>Based on what you said.</Text>
                 {busy ? (
-                  <ActivityIndicator color="#242424" style={{ margin: 50 }} />
+                  <ActivityIndicator color={C.ink} style={{ margin: 50 }} />
                 ) : script ? (
                   <View style={s.card}>
                     <Text selectable style={[s.body, { lineHeight: 25 }]}>
@@ -1295,7 +1313,9 @@ export function DailySpeaking({
                       New vocabulary ({script.vocabulary?.length || 0})
                     </Text>
                     {script.vocabulary?.length ? (
-                      <Text style={s.small}>Pick words to save to My Dictionary.</Text>
+                      <Text style={s.small}>
+                        Pick words to save to My Dictionary.
+                      </Text>
                     ) : null}
                     {(script.vocabulary || []).map((word) => {
                       const saved = savedWordIds.includes(word.wordId);
@@ -1351,7 +1371,9 @@ export function DailySpeaking({
                     })}
                     {!script.vocabulary?.length ? (
                       script.vocabularyEligibleCount === 0 ? (
-                        <Text style={s.small}>There are no eligible new words for this sample.</Text>
+                        <Text style={s.small}>
+                          There are no eligible new words for this sample.
+                        </Text>
                       ) : (
                         <Action
                           label="Regenerate with vocabulary"
@@ -1384,7 +1406,7 @@ export function DailySpeaking({
                     <Path
                       d="M19 8H45V23C45 42 19 42 19 23ZM19 13H10V20C10 28 16 30 21 29M45 13H54V20C54 28 48 30 43 29M32 37V49M24 49H40L43 56H21Z"
                       fill="none"
-                      stroke="#242424"
+                      stroke={C.ink}
                       strokeWidth={2}
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -1446,6 +1468,8 @@ function BridgeSummary({
   evaluation: Evaluation;
   tab: string;
 }) {
+  const s = useStyles();
+
   return (
     <View accessibilityLabel="BRIDGE framework" style={{ gap: 12 }}>
       {bridgeCriteria.map((criterion) => {
@@ -1500,6 +1524,8 @@ function BridgeSummary({
 }
 
 function ScriptText({ script }: { script: GuidedResponseDraft }) {
+  const { C } = useTheme();
+
   let cursor = 0;
   const fragments: React.ReactNode[] = [];
   const highlights = (script.vocabulary || [])
@@ -1536,6 +1562,10 @@ function Action({
   disabled?: boolean;
   secondary?: boolean;
 }) {
+  const { C } = useTheme();
+
+  const s = useStyles();
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -1550,12 +1580,12 @@ function Action({
       ]}
     >
       {icon ? (
-        <Icon name={icon} color={secondary ? "#242424" : "#fff"} size={19} />
+        <Icon name={icon} color={secondary ? C.ink : C.onPrimary} size={19} />
       ) : null}
-      <Text style={[s.actionText, secondary && { color: "#242424" }]}>
-        {label}
-      </Text>
-      {!secondary ? <Icon name="chevron-right" color="#fff" size={19} /> : null}
+      <Text style={[s.actionText, secondary && { color: C.ink }]}>{label}</Text>
+      {!secondary ? (
+        <Icon name="chevron-right" color={C.onPrimary} size={19} />
+      ) : null}
     </Pressable>
   );
 }
@@ -1568,14 +1598,18 @@ function Status({
   label: string;
   done: boolean;
 }) {
+  const { C } = useTheme();
+
+  const s = useStyles();
+
   return (
     <View style={s.status}>
-      <Icon name={icon} color="#242424" size={21} />
+      <Icon name={icon} color={C.ink} size={21} />
       <Text style={[s.body, { flex: 1, fontSize: 13 }]}>{label}</Text>
       {done ? (
-        <Icon name="check" color="#242424" size={20} />
+        <Icon name="check" color={C.ink} size={20} />
       ) : (
-        <ActivityIndicator size="small" color="#bbb" />
+        <ActivityIndicator size="small" color={C.border} />
       )}
     </View>
   );
@@ -1589,9 +1623,13 @@ function FeedbackLine({
   text: string;
   label?: string;
 }) {
+  const { C } = useTheme();
+
+  const s = useStyles();
+
   return (
     <View style={s.feedbackLine}>
-      <Icon name={icon} color="#555" size={19} />
+      <Icon name={icon} color={C.muted} size={19} />
       <View style={{ flex: 1, gap: 6 }}>
         {label ? <Text style={s.name}>{label}</Text> : null}
         <Text style={[s.body, { fontSize: 14 }]}>{text}</Text>
@@ -1608,273 +1646,284 @@ function Reward({
   value: string;
   label: string;
 }) {
+  const { C } = useTheme();
+
+  const s = useStyles();
+
   return (
     <View style={s.reward}>
-      <Icon name={icon} color="#242424" size={30} />
+      <Icon name={icon} color={C.ink} size={30} />
       <Text style={[s.name, { marginTop: 8 }]}>{value}</Text>
       <Text style={s.body}>{label}</Text>
     </View>
   );
 }
 
-const s = StyleSheet.create({
-  bridgeCard: {
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 12,
-    padding: 14,
-    gap: 12,
-    backgroundColor: C.paper,
-  },
-  bridgeHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
-  bridgeLetter: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: C.sage,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bridgeLetterText: { fontFamily: "DMBold", fontSize: 18, color: C.ink },
-  bridgeFeedback: { gap: 4 },
-  bridgeNext: {
-    backgroundColor: C.cream,
-    borderRadius: 8,
-    padding: 10,
-  },
-  bridgeLabel: { fontFamily: "DMBold", fontSize: 12, color: C.muted },
-  bridgeText: { fontFamily: "DM", fontSize: 14, lineHeight: 21, color: C.ink },
-  root: { flex: 1, backgroundColor: C.cream },
-  scroll: {
-    flexGrow: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: C.cream,
-    paddingHorizontal: 12,
-    paddingVertical: 24,
-  },
-  phone: {
-    width: "100%",
-    maxWidth: 680,
-    backgroundColor: C.paper,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 24,
-    padding: 24,
-    gap: 20,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginHorizontal: -12,
-    minHeight: 34,
-    gap: 2,
-  },
-  back: {
-    width: 38,
-    height: 38,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  heading: {
-    flex: 1,
-    fontFamily: "DMBold",
-    fontSize: 20,
-    lineHeight: 26,
-    color: C.ink,
-    textAlign: "center",
-  },
-  title: {
-    fontFamily: "DMBold",
-    fontSize: 24,
-    lineHeight: 30,
-    color: C.ink,
-    textAlign: "center",
-  },
-  center: { alignItems: "center", gap: 14 },
-  copy: {
-    fontFamily: "DM",
-    fontSize: 14,
-    lineHeight: 21,
-    color: "#181818",
-    textAlign: "center",
-  },
-  body: { fontFamily: "DM", fontSize: 15, lineHeight: 22, color: "#181818" },
-  small: { fontFamily: "DM", fontSize: 12, lineHeight: 18, color: "#666" },
-  name: { fontFamily: "DMBold", fontSize: 14, color: "#181818" },
-  profile: {
-    flexDirection: "row",
-    gap: 10,
-    alignItems: "center",
-    marginHorizontal: -4,
-  },
-  avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 24,
-    borderWidth: 1.3,
-    borderColor: "#242424",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  wallet: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    padding: 8,
-    borderWidth: 1,
-    borderColor: "#eee",
-    borderRadius: 24,
-  },
-  progress: {
-    width: 104,
-    height: 7,
-    borderRadius: 5,
-    backgroundColor: "#eee",
-    overflow: "hidden",
-  },
-  progressFill: { height: "100%", backgroundColor: "#666", borderRadius: 5 },
-  topicCard: {
-    backgroundColor: C.cream,
-    borderRadius: 18,
-    padding: 20,
-    minHeight: 160,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-    marginTop: 0,
-  },
-  topic: {
-    fontFamily: "DMBold",
-    fontSize: 18,
-    lineHeight: 24,
-    color: "#111",
-    textAlign: "center",
-  },
-  action: {
-    minHeight: 48,
-    borderRadius: 10,
-    backgroundColor: C.forest,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 9,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  actionSecondary: { backgroundColor: "transparent" },
-  actionText: {
-    fontFamily: "DMBold",
-    fontSize: 14,
-    color: "#fff",
-    textAlign: "center",
-  },
-  quiet: { minHeight: 44, alignItems: "center", justifyContent: "center" },
-  timerPill: {
-    alignSelf: "center",
-    flexDirection: "row",
-    gap: 7,
-    paddingVertical: 7,
-    paddingHorizontal: 17,
-    borderRadius: 10,
-    backgroundColor: C.sage,
-  },
-  card: {
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 12,
-    padding: 17,
-    backgroundColor: C.paper,
-    gap: 10,
-  },
-  status: {
-    flexDirection: "row",
-    gap: 14,
-    alignItems: "center",
-    minHeight: 38,
-  },
-  divider: { height: 1, backgroundColor: "#f3f3f3" },
-  tabs: {
-    flexDirection: "row",
-    gap: 3,
-    padding: 3,
-    backgroundColor: C.cream,
-    borderRadius: 12,
-  },
-  tab: {
-    flex: 1,
-    minHeight: 40,
-    borderRadius: 9,
-    borderWidth: 1,
-    borderColor: "transparent",
-    backgroundColor: "transparent",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 5,
-  },
-  tabActive: { backgroundColor: C.sage, borderColor: C.border },
-  tabText: {
-    fontFamily: "DMMedium",
-    fontSize: 11,
-    color: "#181818",
-    textAlign: "center",
-  },
-  score: { fontFamily: "DMBold", fontSize: 38, color: "#111" },
-  feedbackLine: {
-    flexDirection: "row",
-    gap: 12,
-    alignItems: "flex-start",
-    paddingVertical: 12,
-  },
-  reviewLink: {
-    minHeight: 44,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    gap: 6,
-  },
-  disclosure: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    minHeight: 48,
-    backgroundColor: C.cream,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-  },
-  number: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#eee",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  question: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 14,
-    gap: 13,
-  },
-  rewardRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 28,
-    paddingVertical: 24,
-  },
-  reward: { alignItems: "center", gap: 4, flex: 1 },
-  input: {
-    fontFamily: "DM",
-    color: "#181818",
-    fontSize: 15,
-    lineHeight: 22,
-    minHeight: 170,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 14,
-    padding: 14,
-    textAlignVertical: "top",
-  },
-  error: { padding: 12, backgroundColor: "#fff3ef", borderRadius: 12 },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    bridgeCard: {
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 12,
+      padding: 14,
+      gap: 12,
+      backgroundColor: C.paper,
+    },
+    bridgeHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
+    bridgeLetter: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      backgroundColor: C.sage,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    bridgeLetterText: { fontFamily: "DMBold", fontSize: 18, color: C.ink },
+    bridgeFeedback: { gap: 4 },
+    bridgeNext: {
+      backgroundColor: C.cream,
+      borderRadius: 8,
+      padding: 10,
+    },
+    bridgeLabel: { fontFamily: "DMBold", fontSize: 12, color: C.muted },
+    bridgeText: {
+      fontFamily: "DM",
+      fontSize: 14,
+      lineHeight: 21,
+      color: C.ink,
+    },
+    root: { flex: 1, backgroundColor: C.cream },
+    scroll: {
+      flexGrow: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: C.cream,
+      paddingHorizontal: 12,
+      paddingVertical: 24,
+    },
+    phone: {
+      width: "100%",
+      maxWidth: 680,
+      backgroundColor: C.paper,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 24,
+      padding: 24,
+      gap: 20,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginHorizontal: -12,
+      minHeight: 34,
+      gap: 2,
+    },
+    back: {
+      width: 44,
+      height: 44,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    heading: {
+      flex: 1,
+      fontFamily: "DMBold",
+      fontSize: 20,
+      lineHeight: 26,
+      color: C.ink,
+      textAlign: "center",
+    },
+    title: {
+      fontFamily: "DMBold",
+      fontSize: 24,
+      lineHeight: 30,
+      color: C.ink,
+      textAlign: "center",
+    },
+    center: { alignItems: "center", gap: 14 },
+    copy: {
+      fontFamily: "DM",
+      fontSize: 14,
+      lineHeight: 21,
+      color: C.ink,
+      textAlign: "center",
+    },
+    body: { fontFamily: "DM", fontSize: 15, lineHeight: 22, color: C.ink },
+    small: { fontFamily: "DM", fontSize: 12, lineHeight: 18, color: C.muted },
+    name: { fontFamily: "DMBold", fontSize: 14, color: C.ink },
+    profile: {
+      flexDirection: "row",
+      gap: 10,
+      alignItems: "center",
+      marginHorizontal: -4,
+    },
+    avatar: {
+      width: 42,
+      height: 42,
+      borderRadius: 24,
+      borderWidth: 1.3,
+      borderColor: C.ink,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    wallet: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      padding: 8,
+      borderWidth: 1,
+      borderColor: C.sage,
+      borderRadius: 24,
+    },
+    progress: {
+      width: 104,
+      height: 7,
+      borderRadius: 5,
+      backgroundColor: C.sage,
+      overflow: "hidden",
+    },
+    progressFill: { height: "100%", backgroundColor: C.muted, borderRadius: 5 },
+    topicCard: {
+      backgroundColor: C.cream,
+      borderRadius: 18,
+      padding: 20,
+      minHeight: 160,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 12,
+      marginTop: 0,
+    },
+    topic: {
+      fontFamily: "DMBold",
+      fontSize: 18,
+      lineHeight: 24,
+      color: C.ink,
+      textAlign: "center",
+    },
+    action: {
+      minHeight: 48,
+      borderRadius: 10,
+      backgroundColor: C.forest,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 9,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    actionSecondary: { backgroundColor: "transparent" },
+    actionText: {
+      fontFamily: "DMBold",
+      fontSize: 14,
+      color: C.onPrimary,
+      textAlign: "center",
+    },
+    quiet: { minHeight: 44, alignItems: "center", justifyContent: "center" },
+    timerPill: {
+      alignSelf: "center",
+      flexDirection: "row",
+      gap: 7,
+      paddingVertical: 7,
+      paddingHorizontal: 17,
+      borderRadius: 10,
+      backgroundColor: C.sage,
+    },
+    card: {
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 12,
+      padding: 17,
+      backgroundColor: C.paper,
+      gap: 10,
+    },
+    status: {
+      flexDirection: "row",
+      gap: 14,
+      alignItems: "center",
+      minHeight: 38,
+    },
+    divider: { height: 1, backgroundColor: C.quiet },
+    tabs: {
+      flexDirection: "row",
+      gap: 3,
+      padding: 3,
+      backgroundColor: C.cream,
+      borderRadius: 12,
+    },
+    tab: {
+      flex: 1,
+      minHeight: 44,
+      borderRadius: 9,
+      borderWidth: 1,
+      borderColor: "transparent",
+      backgroundColor: "transparent",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 5,
+    },
+    tabActive: { backgroundColor: C.sage, borderColor: C.border },
+    tabText: {
+      fontFamily: "DMMedium",
+      fontSize: 11,
+      color: C.ink,
+      textAlign: "center",
+    },
+    score: { fontFamily: "DMBold", fontSize: 38, color: C.ink },
+    feedbackLine: {
+      flexDirection: "row",
+      gap: 12,
+      alignItems: "flex-start",
+      paddingVertical: 12,
+    },
+    reviewLink: {
+      minHeight: 44,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      gap: 6,
+    },
+    disclosure: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      minHeight: 48,
+      backgroundColor: C.cream,
+      paddingHorizontal: 10,
+      borderRadius: 10,
+    },
+    number: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: C.sage,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    question: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 14,
+      gap: 13,
+    },
+    rewardRow: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      marginTop: 28,
+      paddingVertical: 24,
+    },
+    reward: { alignItems: "center", gap: 4, flex: 1 },
+    input: {
+      fontFamily: "DM",
+      color: C.ink,
+      fontSize: 15,
+      lineHeight: 22,
+      minHeight: 170,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 14,
+      padding: 14,
+      textAlignVertical: "top",
+    },
+    error: { padding: 12, backgroundColor: C.errorSurface, borderRadius: 12 },
+  }),
+);

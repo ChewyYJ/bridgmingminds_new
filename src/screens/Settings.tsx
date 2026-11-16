@@ -1,12 +1,15 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useEffect, useState } from "react";
-import { View, Text, Switch, Platform } from "react-native";
+import { View, Text, Platform } from "react-native";
 import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import { C, T, Card, Button, Field, ErrorNote, Tag } from "../components/ui";
+import { Card, Button, Field, ErrorNote, Tag, Toggle } from "../components/ui";
 import { AppState } from "../types";
 import { api, clearDrafts, storeToken } from "../lib/api";
 
 function AIStatus() {
+  const { T } = useTheme();
+
   const [status, setStatus] = useState<{
     mode: "local" | "openai" | "configuration_error";
     issues: string[];
@@ -77,6 +80,8 @@ export function Settings({
   refresh: () => Promise<void>;
   onLogout: () => void;
 }) {
+  const { C, T, preference, setPreference } = useTheme();
+
   const [name, setName] = useState(state.profile.displayName),
     [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
@@ -157,10 +162,10 @@ export function Settings({
         />
       </Card>
       {state.profile.isGuest && (
-        <Card style={{ gap: 16, backgroundColor: "#F0F2E7" }}>
+        <Card style={{ gap: 16, backgroundColor: C.successSurface }}>
           <Text style={T.h2}>Create an account</Text>
           <Text style={T.body}>
-            Keep your progress and sign in on other devices using this server.
+            Keep your progress and sign in from any device.
           </Text>
           <Field
             label="Account email"
@@ -197,7 +202,38 @@ export function Settings({
         </Card>
       )}
       <Card style={{ gap: 19 }}>
-        <Text style={T.h2}>Privacy & display</Text>
+        <Text style={T.h2}>Appearance & privacy</Text>
+        <View style={{ gap: 10 }}>
+          <Text style={T.h3}>Colour theme</Text>
+          <View
+            role="group"
+            accessibilityLabel="Colour theme"
+            style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
+          >
+            {(["system", "light", "dark"] as const).map((value) => (
+              <Button
+                key={value}
+                label={
+                  value === "system"
+                    ? "Use device"
+                    : value === "light"
+                      ? "Light"
+                      : "Dark"
+                }
+                variant="secondary"
+                selected={preference === value}
+                style={{ flex: 1, minWidth: 90 }}
+                onPress={() => {
+                  void setPreference(value).catch(() =>
+                    setError(
+                      "Theme changed for now. This device could not save your preference.",
+                    ),
+                  );
+                }}
+              />
+            ))}
+          </View>
+        </View>
         <View
           style={{
             flexDirection: "row",
@@ -210,12 +246,11 @@ export function Settings({
             <Text style={T.h3}>Reduce motion</Text>
             <Text style={T.small}>Limit animations.</Text>
           </View>
-          <Switch
-            accessibilityLabel="Reduce motion"
+          <Toggle
+            label="Reduce motion"
             value={!!state.profile.reducedMotion}
             disabled={busy}
-            trackColor={{ true: C.forest, false: "#CDD3C5" }}
-            onValueChange={(v) =>
+            onChange={(v) =>
               run(async () => {
                 await api("/me", {
                   method: "PATCH",
@@ -242,12 +277,11 @@ export function Settings({
               expire after 30 days.
             </Text>
           </View>
-          <Switch
-            accessibilityLabel="Private recording storage"
+          <Toggle
+            label="Private recording storage"
             value={!!state.profile.consent?.recording}
             disabled={busy}
-            trackColor={{ true: C.forest, false: "#CDD3C5" }}
-            onValueChange={(v) =>
+            onChange={(v) =>
               run(async () => {
                 await api("/me", {
                   method: "PATCH",
@@ -279,8 +313,8 @@ export function Settings({
       <Card style={{ gap: 15 }}>
         <Text style={T.h2}>Your data</Text>
         <Text style={T.body}>
-          Export your profile, practice, journal, debates, avatar and Coin history as
-          JSON. Audio files are excluded.
+          Export your profile, practice, journal, debates, avatar and Coin
+          history as JSON. Audio files are excluded.
         </Text>
         <Button
           label="Export my data"
@@ -310,14 +344,12 @@ export function Settings({
         <View
           style={{ height: 1, backgroundColor: C.border, marginVertical: 5 }}
         />
-        <Text style={[T.h3, { color: "#9B5950" }]}>
-          Delete account and data
-        </Text>
+        <Text style={[T.h3, { color: C.red }]}>Delete account and data</Text>
         <Text style={T.small}>
-          Permanently delete your account, practice, journal, recordings, avatar and
-          reward history from this server. Friend debates close and your messages are
-          removed. Your partner’s messages and any copies saved elsewhere
-          remain.
+          Permanently delete your account, practice, journal, recordings, avatar
+          and reward history from this server. Friend debates close and your
+          messages are removed. Your partner’s messages and any copies saved
+          elsewhere remain.
         </Text>
         {showDelete ? (
           <>

@@ -1,8 +1,9 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { api, isDraftOwner } from "../lib/api";
 import { useApp } from "../lib/state";
-import { Button, Card, ErrorNote, T } from "./ui";
+import { Button, Card, ErrorNote } from "./ui";
 
 interface LearnerSummary {
   enabled: boolean;
@@ -18,6 +19,8 @@ interface LearnerSummary {
   };
 }
 export function LearnerProfile({ start }: { start: () => void }) {
+  const { T } = useTheme();
+
   const { state } = useApp();
   const uid = state!.profile.id;
   const [data, setData] = useState<LearnerSummary | null>(null);

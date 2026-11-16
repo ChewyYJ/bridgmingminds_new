@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useState } from "react";
 import {
   Keyboard,
@@ -19,7 +20,7 @@ import {
   MindMapCanvas,
   planId,
 } from "./PlanningCanvas";
-import { Button, C, Icon, T } from "./ui";
+import { Button, Icon } from "./ui";
 
 const modes = [
   { id: "notepad", label: "Notepad", icon: "file-text" },
@@ -44,6 +45,9 @@ export function IdeasBoard({
   doneDisabled?: boolean;
   hint?: string;
 }) {
+  const { C, T } = useTheme();
+  const s = useStyles();
+
   const [selectedId, setSelectedId] = useState<string>();
   const [connecting, setConnecting] = useState(false);
   const [selectedPort, setSelectedPort] = useState<PlanPort>();
@@ -320,9 +324,7 @@ export function IdeasBoard({
           onDone();
         }}
       />
-      <Text style={[T.small, s.hint]}>
-        {hint}
-      </Text>
+      <Text style={[T.small, s.hint]}>{hint}</Text>
     </View>
   );
 }
@@ -334,6 +336,9 @@ export function IdeasPreview({
   value?: string;
   board?: PlanningBoard;
 }) {
+  const { T } = useTheme();
+  const s = useStyles();
+
   const note = board?.notepad ?? value ?? "";
   if (!note.trim() && !board?.nodes.length && !board?.strokes.length)
     return null;
@@ -356,65 +361,67 @@ export function IdeasPreview({
   );
 }
 
-const s = StyleSheet.create({
-  container: { gap: 14, width: "100%" },
-  tabs: {
-    flexDirection: "row",
-    padding: 4,
-    gap: 4,
-    backgroundColor: C.sage,
-    borderRadius: 12,
-  },
-  tab: {
-    flex: 1,
-    minHeight: 56,
-    gap: 4,
-    padding: 6,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 9,
-  },
-  selectedTab: { backgroundColor: C.forest },
-  tools: { flexDirection: "row", gap: 8 },
-  board: {
-    backgroundColor: C.paper,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 16,
-    padding: 18,
-    gap: 8,
-  },
-  heading: { flexDirection: "row", gap: 8, alignItems: "center" },
-  input: {
-    minHeight: 180,
-    maxHeight: 320,
-    fontSize: 16,
-    lineHeight: 28,
-    padding: 10,
-    marginTop: 6,
-    borderRadius: 8,
-  },
-  editor: {
-    padding: 12,
-    gap: 8,
-    backgroundColor: C.paper,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 12,
-  },
-  nodeInput: {
-    minHeight: 44,
-    padding: 8,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 8,
-  },
-  hint: { textAlign: "center" },
-  preview: {
-    width: "100%",
-    padding: 16,
-    gap: 8,
-    borderRadius: 12,
-    backgroundColor: C.peach,
-  },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    container: { gap: 14, width: "100%" },
+    tabs: {
+      flexDirection: "row",
+      padding: 4,
+      gap: 4,
+      backgroundColor: C.sage,
+      borderRadius: 12,
+    },
+    tab: {
+      flex: 1,
+      minHeight: 56,
+      gap: 4,
+      padding: 6,
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 9,
+    },
+    selectedTab: { backgroundColor: C.forest },
+    tools: { flexDirection: "row", gap: 8 },
+    board: {
+      backgroundColor: C.paper,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 16,
+      padding: 18,
+      gap: 8,
+    },
+    heading: { flexDirection: "row", gap: 8, alignItems: "center" },
+    input: {
+      minHeight: 180,
+      maxHeight: 320,
+      fontSize: 16,
+      lineHeight: 28,
+      padding: 10,
+      marginTop: 6,
+      borderRadius: 8,
+    },
+    editor: {
+      padding: 12,
+      gap: 8,
+      backgroundColor: C.paper,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 12,
+    },
+    nodeInput: {
+      minHeight: 44,
+      padding: 8,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 8,
+    },
+    hint: { textAlign: "center" },
+    preview: {
+      width: "100%",
+      padding: 16,
+      gap: 8,
+      borderRadius: 12,
+      backgroundColor: C.peach,
+    },
+  }),
+);

@@ -7,51 +7,36 @@ import {
   TextInput,
   ActivityIndicator,
   Animated,
-  ViewStyle,
-  TextStyle,
+  type ViewStyle,
+  type TextStyle,
+  type TextInputProps,
 } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { usePressMotion } from "./Motion";
+import { createThemedStyles, useTheme } from "../theme/ThemeProvider";
+import { tokens } from "../theme/tokens";
+
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-export const C = {
-  cream: "#FAF8F5",
-  paper: "#FFFDFB",
-  forest: "#34312E",
-  ink: "#292623",
-  muted: "#746C63",
-  sage: "#ECE6DF",
-  peach: "#F1EAE2",
-  lilac: "#EEEAE6",
-  border: "#DDD5CC",
-  yellow: "#EFE4CD",
-  orange: "#927653",
-  red: "#A5453F",
-};
-export const T = StyleSheet.create({
-  body: { fontFamily: "DM", fontSize: 15, color: C.ink, lineHeight: 23 },
-  small: { fontFamily: "DM", fontSize: 12, color: C.muted, lineHeight: 18 },
-  label: {
-    fontFamily: "DMBold",
-    fontSize: 11,
-    letterSpacing: 1.8,
-    color: C.muted,
-    textTransform: "uppercase",
-  },
-  title: { fontFamily: "DMBold", fontSize: 30, color: C.ink, lineHeight: 38 },
-  h2: { fontFamily: "DMBold", fontSize: 22, color: C.ink, lineHeight: 30 },
-  h3: { fontFamily: "DMBold", fontSize: 17, color: C.ink, lineHeight: 24 },
-});
 export function Icon({
   name,
   size = 20,
-  color = C.forest,
+  color,
 }: {
-  name: any;
+  name: React.ComponentProps<typeof Feather>["name"] | string;
   size?: number;
   color?: string;
 }) {
-  return <Feather name={name} size={size} color={color} />;
+  const { C } = useTheme();
+  return (
+    <Feather
+      name={name as React.ComponentProps<typeof Feather>["name"]}
+      size={size}
+      color={color ?? C.forest}
+      aria-hidden
+    />
+  );
 }
+
 export function Button({
   label,
   onPress,
@@ -61,6 +46,7 @@ export function Button({
   selected,
   icon,
   style,
+  testID,
 }: {
   label: string;
   onPress: () => void;
@@ -70,61 +56,65 @@ export function Button({
   selected?: boolean;
   icon?: string;
   style?: ViewStyle;
+  testID?: string;
 }) {
-  const [pressed, setPressed] = useState(false);
+  const { C } = useTheme();
+  const styles = useStyles();
   const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
   const motion = usePressMotion({ disabled: disabled || loading });
+  const primary = variant === "primary";
+  const foreground = primary ? C.onPrimary : C.ink;
   return (
     <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      {...(selected === undefined
-        ? {}
-        : { accessibilityState: { selected }, "aria-pressed": selected })}
+      testID={testID}
+      accessibilityState={{
+        disabled: disabled || loading,
+        busy: loading,
+        ...(selected === undefined ? {} : { selected }),
+      }}
+      {...(selected === undefined ? {} : { "aria-pressed": selected })}
       disabled={disabled || loading}
       onPress={onPress}
-      onPressIn={() => {
-        setPressed(true);
-        motion.onPressIn();
-      }}
-      onPressOut={() => {
-        setPressed(false);
-        motion.onPressOut();
-      }}
+      onPressIn={motion.onPressIn}
+      onPressOut={motion.onPressOut}
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       style={[
         styles.button,
-        variant === "primary"
-          ? { backgroundColor: C.forest }
-          : variant === "secondary"
-            ? { backgroundColor: C.sage }
-            : { backgroundColor: "transparent" },
-        (disabled || loading) && { opacity: 0.5 },
-        (pressed || hovered) && { opacity: 0.85 },
+        {
+          backgroundColor: primary
+            ? C.forest
+            : variant === "secondary"
+              ? selected
+                ? C.accentSurface
+                : C.sage
+              : "transparent",
+          borderColor: focused ? C.accent : selected ? C.accent : "transparent",
+        },
+        hovered && !disabled && !loading && { opacity: 0.88 },
+        (disabled || loading) && { opacity: 0.55 },
         style,
         motion.style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator
-          size="small"
-          color={variant === "primary" ? "white" : C.forest}
-        />
+        <ActivityIndicator size="small" color={foreground} />
       ) : icon ? (
-        <Icon
-          name={icon}
-          size={17}
-          color={variant === "primary" ? "white" : C.forest}
-        />
+        <Icon name={icon} size={18} color={foreground} />
       ) : null}
       <Text
         style={{
-          fontFamily: "DMBold",
+          fontFamily: tokens.font.bold,
           fontSize: 14,
+          lineHeight: 20,
           textAlign: "center",
           flexShrink: 1,
-          color: variant === "primary" ? "#FFF" : C.forest,
+          color: foreground,
         }}
       >
         {label}
@@ -132,6 +122,7 @@ export function Button({
     </AnimatedPressable>
   );
 }
+
 export function Card({
   children,
   style,
@@ -141,37 +132,48 @@ export function Card({
   style?: ViewStyle;
   testID?: string;
 }) {
+  const styles = useStyles();
   return (
     <View testID={testID} style={[styles.card, style]}>
       {children}
     </View>
   );
 }
+
 export function Tag({
   children,
-  color = C.sage,
-  textColor = C.forest,
+  color,
+  textColor,
 }: {
   children: React.ReactNode;
   color?: string;
   textColor?: string;
 }) {
+  const { C } = useTheme();
   return (
     <View
       style={{
         alignSelf: "flex-start",
-        backgroundColor: color,
-        borderRadius: 8,
-        paddingHorizontal: 11,
+        backgroundColor: color ?? C.sage,
+        borderRadius: tokens.radius.sm,
+        paddingHorizontal: 10,
         paddingVertical: 6,
       }}
     >
-      <Text style={{ fontFamily: "DMMedium", fontSize: 11, color: textColor }}>
+      <Text
+        style={{
+          fontFamily: tokens.font.medium,
+          fontSize: 12,
+          lineHeight: 18,
+          color: textColor ?? C.ink,
+        }}
+      >
         {children}
       </Text>
     </View>
   );
 }
+
 export function Heading({
   children,
   sub,
@@ -179,15 +181,17 @@ export function Heading({
   children: React.ReactNode;
   sub?: string;
 }) {
+  const { T } = useTheme();
   return (
-    <View style={{ gap: 6, marginBottom: 24 }}>
-      <Text accessibilityRole="header" style={T.title}>
+    <View style={{ gap: 6, marginBottom: tokens.space.xl }}>
+      <Text role="heading" aria-level={1} style={T.title}>
         {children}
       </Text>
-      {sub && <Text style={[T.body, { color: C.muted }]}>{sub}</Text>}
+      {sub && <Text style={T.small}>{sub}</Text>}
     </View>
   );
 }
+
 export function Field({
   value,
   onChangeText,
@@ -202,21 +206,24 @@ export function Field({
   maxLength,
 }: {
   value: string;
-  onChangeText: (s: string) => void;
+  onChangeText: (value: string) => void;
   placeholder?: string;
   multiline?: boolean;
   label?: string;
   secureTextEntry?: boolean;
   style?: TextStyle;
-  keyboardType?: any;
-  autoCapitalize?: any;
+  keyboardType?: TextInputProps["keyboardType"];
+  autoCapitalize?: TextInputProps["autoCapitalize"];
   editable?: boolean;
   maxLength?: number;
 }) {
+  const { C, T } = useTheme();
+  const styles = useStyles();
+  const [focused, setFocused] = useState(false);
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: tokens.space.sm }}>
       {label && (
-        <Text style={[T.small, { fontFamily: "DMBold", color: C.ink }]}>
+        <Text style={[T.small, { fontFamily: tokens.font.bold, color: C.ink }]}>
           {label}
         </Text>
       )}
@@ -225,13 +232,15 @@ export function Field({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#92978D"
+        placeholderTextColor={C.muted}
         multiline={multiline}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         editable={editable}
         maxLength={maxLength}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         style={[
           styles.field,
           multiline && {
@@ -239,12 +248,15 @@ export function Field({
             textAlignVertical: "top",
             lineHeight: 26,
           },
+          focused && { borderColor: C.accent },
+          !editable && { opacity: 0.65 },
           style,
         ]}
       />
     </View>
   );
 }
+
 export function ErrorNote({
   message,
   children,
@@ -252,29 +264,36 @@ export function ErrorNote({
   message?: string;
   children?: React.ReactNode;
 }) {
+  const { C, T } = useTheme();
   if (!message && !children) return null;
   return (
     <View
       accessibilityRole="alert"
-      style={{ backgroundColor: "#F9EBE5", borderRadius: 12, padding: 14 }}
+      style={{
+        backgroundColor: C.errorSurface,
+        borderRadius: tokens.radius.control,
+        padding: tokens.space.lg,
+      }}
     >
-      <Text style={[T.body, { fontSize: 13, color: C.red }]}>
+      <Text style={[T.body, { fontSize: 14, color: C.red }]}>
         {message || children}
       </Text>
     </View>
   );
 }
+
 export function Resource({
   icon,
   value,
   label,
-  color = C.sage,
+  color,
 }: {
   icon: string;
   value: number;
   label: string;
   color?: string;
 }) {
+  const { C, T } = useTheme();
   return (
     <View
       accessibilityLabel={`${value} ${label}`}
@@ -282,48 +301,103 @@ export function Resource({
         flexDirection: "row",
         alignItems: "center",
         gap: 7,
-        backgroundColor: color,
+        backgroundColor: color ?? C.sage,
         paddingHorizontal: 13,
         paddingVertical: 9,
-        borderRadius: 24,
+        borderRadius: tokens.radius.control,
       }}
     >
       <Icon name={icon} size={15} />
-      <Text style={{ fontFamily: "DMBold", fontSize: 12, color: C.forest }}>
-        {value}
-      </Text>
-      <Text style={[T.small, { fontSize: 11 }]}>{label}</Text>
+      <Text style={[T.h3, { fontSize: 13 }]}>{value}</Text>
+      <Text style={T.small}>{label}</Text>
     </View>
   );
 }
-export const styles = StyleSheet.create({
-  button: {
-    minHeight: 48,
-    borderRadius: 10,
-    paddingHorizontal: 19,
-    paddingVertical: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: 9,
-    alignSelf: "stretch",
-  },
-  card: {
-    backgroundColor: C.paper,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 14,
-    padding: 20,
-  },
-  field: {
-    minHeight: 48,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 12,
-    padding: 14,
-    fontFamily: "DM",
-    fontSize: 15,
-    color: C.ink,
-    backgroundColor: "#FFFEFB",
-  },
-});
+
+/** The visible switch stays compact; its entire 48 × 48 control is tappable. */
+export function Toggle({
+  label,
+  value,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  value: boolean;
+  disabled?: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  const { C } = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="switch"
+      accessibilityLabel={label}
+      accessibilityState={{ checked: value, disabled }}
+      disabled={disabled}
+      onPress={() => onChange(!value)}
+      style={{
+        minWidth: 48,
+        minHeight: 48,
+        alignItems: "center",
+        justifyContent: "center",
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      <View
+        pointerEvents="none"
+        style={{
+          width: 40,
+          height: 24,
+          borderRadius: 12,
+          backgroundColor: value ? C.accent : C.border,
+          padding: 3,
+          alignItems: value ? "flex-end" : "flex-start",
+        }}
+      >
+        <View
+          style={{
+            width: 18,
+            height: 18,
+            borderRadius: 9,
+            backgroundColor: value ? C.onPrimary : C.paper,
+          }}
+        />
+      </View>
+    </Pressable>
+  );
+}
+
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    button: {
+      minHeight: tokens.size.control,
+      minWidth: tokens.size.touch,
+      borderRadius: tokens.radius.control,
+      borderWidth: 1,
+      paddingHorizontal: 18,
+      paddingVertical: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      flexDirection: "row",
+      gap: 9,
+      alignSelf: "stretch",
+    },
+    card: {
+      backgroundColor: C.paper,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: tokens.radius.card,
+      padding: tokens.space.xl,
+    },
+    field: {
+      minHeight: tokens.size.control,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: tokens.radius.control,
+      padding: 14,
+      fontFamily: tokens.font.body,
+      fontSize: 16,
+      color: C.ink,
+      backgroundColor: C.input,
+    },
+  }),
+);

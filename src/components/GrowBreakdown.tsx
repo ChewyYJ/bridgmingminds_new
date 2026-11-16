@@ -1,20 +1,20 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { Dimension, Evaluation } from "../types";
-import { C, Icon, T } from "./ui";
+import { Icon } from "./ui";
 import { MotionView } from "./Motion";
 
 const GROW_KEYS = ["grounded", "reasoned", "organised", "well_rounded"];
-const DIMENSIONS: Record<
-  string,
-  { name: string; letter: string; color: string }
-> = {
-  grounded: { name: "Grounded", letter: "G", color: C.sage },
-  reasoned: { name: "Reasoned", letter: "R", color: C.peach },
-  organised: { name: "Organised", letter: "O", color: C.lilac },
-  well_rounded: { name: "Well-rounded", letter: "W", color: C.yellow },
-  delivery: { name: "Delivery", letter: "", color: "#EDF0E9" },
-};
+const useDIMENSIONSStyles = createThemedStyles(
+  ({ C }): Record<string, { name: string; letter: string; color: string }> => ({
+    grounded: { name: "Grounded", letter: "G", color: C.sage },
+    reasoned: { name: "Reasoned", letter: "R", color: C.peach },
+    organised: { name: "Organised", letter: "O", color: C.lilac },
+    well_rounded: { name: "Well-rounded", letter: "W", color: C.yellow },
+    delivery: { name: "Delivery", letter: "", color: "#EDF0E9" },
+  }),
+);
 const LEVELS = [
   "Not assessed",
   "Seedling",
@@ -36,6 +36,10 @@ function DimensionRow({
   provisional?: boolean;
   local?: boolean;
 }) {
+  const { C, T } = useTheme();
+  const DIMENSIONS = useDIMENSIONSStyles();
+  const s = useStyles();
+
   const [expanded, setExpanded] = useState(false);
   const [focused, setFocused] = useState(false);
   const appearance = DIMENSIONS[dimension.key];
@@ -187,6 +191,8 @@ export function GrowBreakdown({
   evaluation: Evaluation;
   previous?: Evaluation;
 }) {
+  const s = useStyles();
+
   const grow = GROW_KEYS.flatMap((key) =>
     evaluation.dimensions.filter((dimension) => dimension.key === key),
   );
@@ -234,75 +240,77 @@ export function GrowBreakdown({
   );
 }
 
-const s = StyleSheet.create({
-  container: { width: "100%", alignSelf: "center", gap: 10 },
-  card: {
-    backgroundColor: C.paper,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 18,
-    overflow: "hidden",
-  },
-  divider: { borderTopWidth: 1, borderTopColor: C.border },
-  expandedRow: { backgroundColor: "#FCFDF8" },
-  rowButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    minHeight: 76,
-    paddingHorizontal: 13,
-    paddingVertical: 12,
-    gap: 10,
-    borderWidth: 2,
-    borderColor: "transparent",
-    borderRadius: 14,
-  },
-  letter: {
-    width: 34,
-    height: 36,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  letterText: {
-    fontFamily: "Lora",
-    color: C.forest,
-    fontSize: 19,
-    lineHeight: 25,
-  },
-  nameColumn: { flex: 1, minWidth: 0, gap: 2 },
-  dimensionName: { fontSize: 15, lineHeight: 21, flexShrink: 1 },
-  levelName: { fontSize: 11, lineHeight: 16 },
-  scoreColumn: { alignItems: "flex-end", gap: 7, flexShrink: 0 },
-  score: { color: C.forest, fontFamily: "DMBold", fontSize: 12 },
-  levelBar: { width: 49, flexDirection: "row", gap: 3 },
-  levelSegment: { height: 4, borderRadius: 3, flex: 1 },
-  details: { paddingHorizontal: 18, paddingBottom: 19, gap: 12 },
-  detailRule: { height: 1, backgroundColor: C.border, marginBottom: 2 },
-  detailHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  detailLabel: { ...T.label, fontSize: 9, letterSpacing: 1.2 },
-  confidence: { fontSize: 11, lineHeight: 16 },
-  detailBody: { fontSize: 14, lineHeight: 22 },
-  quote: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderLeftWidth: 3,
-    borderLeftColor: "#B7C6A6",
-    backgroundColor: C.cream,
-    gap: 5,
-  },
-  quoteText: { fontSize: 14, lineHeight: 22, fontStyle: "italic" },
-  nextStep: { gap: 6 },
-  comparison: {
-    borderTopWidth: 1,
-    borderTopColor: C.border,
-    paddingTop: 10,
-    gap: 3,
-  },
-});
+const useStyles = createThemedStyles(({ C, T }) =>
+  StyleSheet.create({
+    container: { width: "100%", alignSelf: "center", gap: 10 },
+    card: {
+      backgroundColor: C.paper,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 18,
+      overflow: "hidden",
+    },
+    divider: { borderTopWidth: 1, borderTopColor: C.border },
+    expandedRow: { backgroundColor: "#FCFDF8" },
+    rowButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      minHeight: 76,
+      paddingHorizontal: 13,
+      paddingVertical: 12,
+      gap: 10,
+      borderWidth: 2,
+      borderColor: "transparent",
+      borderRadius: 14,
+    },
+    letter: {
+      width: 34,
+      height: 36,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    letterText: {
+      fontFamily: "Lora",
+      color: C.forest,
+      fontSize: 19,
+      lineHeight: 25,
+    },
+    nameColumn: { flex: 1, minWidth: 0, gap: 2 },
+    dimensionName: { fontSize: 15, lineHeight: 21, flexShrink: 1 },
+    levelName: { fontSize: 11, lineHeight: 16 },
+    scoreColumn: { alignItems: "flex-end", gap: 7, flexShrink: 0 },
+    score: { color: C.forest, fontFamily: "DMBold", fontSize: 12 },
+    levelBar: { width: 49, flexDirection: "row", gap: 3 },
+    levelSegment: { height: 4, borderRadius: 3, flex: 1 },
+    details: { paddingHorizontal: 18, paddingBottom: 19, gap: 12 },
+    detailRule: { height: 1, backgroundColor: C.border, marginBottom: 2 },
+    detailHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    detailLabel: { ...T.label, fontSize: 9, letterSpacing: 1.2 },
+    confidence: { fontSize: 11, lineHeight: 16 },
+    detailBody: { fontSize: 14, lineHeight: 22 },
+    quote: {
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderLeftWidth: 3,
+      borderLeftColor: "#B7C6A6",
+      backgroundColor: C.cream,
+      gap: 5,
+    },
+    quoteText: { fontSize: 14, lineHeight: 22, fontStyle: "italic" },
+    nextStep: { gap: 6 },
+    comparison: {
+      borderTopWidth: 1,
+      borderTopColor: C.border,
+      paddingTop: 10,
+      gap: 3,
+    },
+  }),
+);

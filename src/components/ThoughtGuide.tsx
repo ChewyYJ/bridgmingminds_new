@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import {
@@ -12,7 +13,7 @@ import { api, isDraftOwner, loadDraft, saveDraft } from "../lib/api";
 import { useApp } from "../lib/state";
 import type { Evaluation, Mode } from "../types";
 import { GuidedResponse } from "./GuidedResponse";
-import { Button, C, Card, ErrorNote, Icon, T } from "./ui";
+import { Button, Card, ErrorNote, Icon } from "./ui";
 
 interface Props {
   attemptId: string;
@@ -75,6 +76,9 @@ function ThoughtGuideContent({
   loading = false,
   children,
 }: Props & { accountId: string }) {
+  const { C, T } = useTheme();
+  const styles = useStyles();
+
   const [expanded, setExpanded] = useState(!collapsed);
   const [storedQuestions, setStoredQuestions] = useState<
     GuidingQuestion[] | null
@@ -481,67 +485,69 @@ function ThoughtGuideContent({
   );
 }
 
-const styles = StyleSheet.create({
-  questionTools: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  hintButton: {
-    minHeight: 44,
-    minWidth: 44,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-  hintLabel: { ...T.small, fontFamily: "DMMedium", color: C.forest },
-  hint: {
-    backgroundColor: C.sage,
-    borderRadius: 12,
-    padding: 12,
-  },
-  toggle: {
-    minHeight: 44,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  progress: {
-    ...T.small,
-    color: C.forest,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: C.sage,
-  },
-  navigation: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  stepButton: {
-    minHeight: 44,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-  stepLabel: { ...T.body, fontFamily: "DMMedium", color: C.forest },
-  disabled: { opacity: 0.35 },
-  pressed: { backgroundColor: C.sage },
-  input: {
-    ...T.body,
-    minHeight: 104,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 12,
-    backgroundColor: C.cream,
-  },
-});
+const useStyles = createThemedStyles(({ C, T }) =>
+  StyleSheet.create({
+    questionTools: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    hintButton: {
+      minHeight: 44,
+      minWidth: 44,
+      paddingHorizontal: 10,
+      borderRadius: 10,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+    },
+    hintLabel: { ...T.small, fontFamily: "DMMedium", color: C.forest },
+    hint: {
+      backgroundColor: C.sage,
+      borderRadius: 12,
+      padding: 12,
+    },
+    toggle: {
+      minHeight: 44,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+    progress: {
+      ...T.small,
+      color: C.forest,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+      backgroundColor: C.sage,
+    },
+    navigation: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    stepButton: {
+      minHeight: 44,
+      paddingHorizontal: 12,
+      borderRadius: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+    },
+    stepLabel: { ...T.body, fontFamily: "DMMedium", color: C.forest },
+    disabled: { opacity: 0.35 },
+    pressed: { backgroundColor: C.sage },
+    input: {
+      ...T.body,
+      minHeight: 104,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 12,
+      backgroundColor: C.cream,
+    },
+  }),
+);

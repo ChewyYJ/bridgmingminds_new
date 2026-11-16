@@ -1,3 +1,4 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { getBridgeRubric } from "../../shared/bridge-rubric.mjs";
@@ -15,7 +16,7 @@ import { ThoughtGuide } from "./ThoughtGuide";
 import { ThoughtMapView } from "./ThoughtMap";
 import { ThoughtTrail } from "./ThoughtTrail";
 import { WordBloomPreview } from "./WordBloom";
-import { Button, C, Card, ErrorNote, Field, T, Tag } from "./ui";
+import { Button, Card, ErrorNote, Field, Tag } from "./ui";
 
 export function BridgeFeedback({
   attempt,
@@ -30,6 +31,8 @@ export function BridgeFeedback({
   onGarden: () => void;
   onRefresh?: () => void;
 }) {
+  const { C, T } = useTheme();
+
   const evaluation = attempt.evaluation!;
   const [breakdown, setBreakdown] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);

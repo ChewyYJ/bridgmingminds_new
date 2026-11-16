@@ -1,12 +1,17 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
-import { Button, C, Card, ErrorNote, Field, T } from "../components/ui";
+import { Button, Card, ErrorNote, Field } from "../components/ui";
 import { api } from "../lib/api";
 import { useApp } from "../lib/state";
 import type { VocabularyReview } from "../types";
 
 export function VocabularyReviewScreen() {
+  const styles = useStyles();
+
+  const { C, T } = useTheme();
+
   const { state, refresh } = useApp();
   const [review, setReview] = useState<VocabularyReview | null>();
   const [version, setVersion] = useState(0);
@@ -191,14 +196,16 @@ export function VocabularyReviewScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  page: { alignSelf: "center", width: "100%", maxWidth: 780, gap: 18 },
-  paper: {
-    backgroundColor: "#FFFCF4",
-    gap: 12,
-    padding: 24,
-    borderColor: "#E7DED1",
-  },
-  activity: { gap: 14 },
-  actions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    page: { alignSelf: "center", width: "100%", maxWidth: 780, gap: 18 },
+    paper: {
+      backgroundColor: C.yellow,
+      gap: 12,
+      padding: 24,
+      borderColor: "#E7DED1",
+    },
+    activity: { gap: 14 },
+    actions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  }),
+);

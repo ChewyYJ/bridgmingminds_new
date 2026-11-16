@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Platform,
@@ -10,46 +11,46 @@ import {
 import Svg, { Circle, Defs, Path, Pattern, Rect } from "react-native-svg";
 import { layoutThoughtMap } from "../../shared/thought-map-layout.mjs";
 import type { ThoughtMap as MapData, ThoughtMapNode } from "../types";
-import { Button, Card, T } from "./ui";
+import { Button, Card } from "./ui";
 
-const palette = {
+const usePalette = createThemedStyles(({ C }) => ({
   developed: {
     label: "Well developed",
-    fill: "#EFF7F1",
-    ink: "#286344",
-    line: "#4A9568",
+    fill: C.successSurface,
+    ink: C.success,
+    line: C.success,
   },
   needs_elaboration: {
     label: "Needs elaboration",
-    fill: "#FFF8E5",
-    ink: "#755313",
-    line: "#AA781F",
+    fill: C.yellow,
+    ink: C.orange,
+    line: C.orange,
   },
   missing: {
     label: "Suggested gap",
-    fill: "#FFF1EF",
-    ink: "#8B3535",
-    line: "#BD5656",
+    fill: C.errorSurface,
+    ink: C.red,
+    line: C.red,
   },
   brainstorm_only: {
     label: "Planned, left unsaid",
-    fill: "#EDF5FF",
-    ink: "#2A5488",
-    line: "#577EAF",
+    fill: C.accentSurface,
+    ink: C.accent,
+    line: C.accent,
   },
   inferred: {
     label: "Possible interpretation",
-    fill: "#F4F3F0",
-    ink: "#575451",
-    line: "#817C75",
+    fill: C.quiet,
+    ink: C.muted,
+    line: C.muted,
   },
   explicit: {
     label: "In the response",
-    fill: "#F4F3F0",
-    ink: "#575451",
-    line: "#817C75",
+    fill: C.quiet,
+    ink: C.muted,
+    line: C.muted,
   },
-};
+}));
 const titles = {
   claim: "Main idea",
   reason: "Reason",
@@ -65,9 +66,6 @@ const legend = [
   "missing",
   "brainstorm_only",
 ] as const;
-const appearance = (node: ThoughtMapNode) =>
-  palette[node.development ?? node.status];
-const pencil = "#37352F";
 const headingFont =
   Platform.OS === "web" ? "Segoe Print, Bradley Hand, cursive" : "DMBold";
 
@@ -128,6 +126,14 @@ export function ThoughtMapView({
   sample?: boolean;
   written?: boolean;
 }) {
+  const s = useStyles();
+
+  const { C, T } = useTheme();
+  const palette = usePalette();
+  const pencil = C.ink;
+  const appearance = (node: ThoughtMapNode) =>
+    palette[node.development ?? node.status];
+
   const [view, setView] = useState<"map" | "outline">("map");
   const [selectedId, setSelectedId] = useState<string>();
   const [width, setWidth] = useState(0);
@@ -272,7 +278,7 @@ export function ThoughtMapView({
                         cx={2}
                         cy={2}
                         r={0.8}
-                        fill="#D8CDBB"
+                        fill={C.border}
                         opacity={0.55}
                       />
                     </Pattern>
@@ -316,7 +322,7 @@ export function ThoughtMapView({
                   })}
                   <Path
                     d={topicOutline(layout.centre)}
-                    fill="#FFFCF4"
+                    fill={C.yellow}
                     stroke={pencil}
                     strokeWidth={2.6}
                   />
@@ -335,7 +341,7 @@ export function ThoughtMapView({
                         <Path
                           d={outline}
                           transform="translate(1 3)"
-                          fill="#433626"
+                          fill={C.ink}
                           opacity={0.08}
                         />
                         <Path
@@ -550,7 +556,7 @@ export function ThoughtMapView({
               <Text selectable testID="thought-map-source" style={T.body}>
                 {answer.slice(0, quoteSpan.start)}
                 <Text
-                  style={{ backgroundColor: "#F6E5A8", fontFamily: "DMBold" }}
+                  style={{ backgroundColor: C.yellow, fontFamily: "DMBold" }}
                 >
                   {answer.slice(quoteSpan.start, quoteSpan.end)}
                 </Text>
@@ -573,39 +579,41 @@ export function ThoughtMapView({
   );
 }
 
-const s = StyleSheet.create({
-  card: { gap: 14, backgroundColor: "#FFFFFF" },
-  toolbar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  controls: { flexDirection: "row", flexWrap: "wrap", gap: 5 },
-  legend: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  legendItem: { flexDirection: "row", alignItems: "center", gap: 5 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  canvas: {
-    borderWidth: 1,
-    borderColor: "#E7DED1",
-    borderRadius: 20,
-    backgroundColor: "#FAF6EE",
-    overflow: "hidden",
-  },
-  canvasContent: { flexGrow: 1, justifyContent: "center" },
-  topic: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 25,
-  },
-  node: { position: "absolute", borderRadius: 14, justifyContent: "center" },
-  scrollHint: { padding: 8, textAlign: "center" },
-  outline: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-    borderLeftWidth: 2,
-  },
-  inspector: { padding: 16, borderLeftWidth: 3, borderRadius: 12, gap: 8 },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    card: { gap: 14, backgroundColor: C.paper },
+    toolbar: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    controls: { flexDirection: "row", flexWrap: "wrap", gap: 5 },
+    legend: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+    legendItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+    dot: { width: 8, height: 8, borderRadius: 4 },
+    canvas: {
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 20,
+      backgroundColor: C.paper,
+      overflow: "hidden",
+    },
+    canvasContent: { flexGrow: 1, justifyContent: "center" },
+    topic: {
+      position: "absolute",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 25,
+    },
+    node: { position: "absolute", borderRadius: 14, justifyContent: "center" },
+    scrollHint: { padding: 8, textAlign: "center" },
+    outline: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 10,
+      borderLeftWidth: 2,
+    },
+    inspector: { padding: 16, borderLeftWidth: 3, borderRadius: 12, gap: 8 },
+  }),
+);

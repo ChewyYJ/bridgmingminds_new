@@ -1,7 +1,8 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { api } from "../lib/api";
-import { Button, Card, ErrorNote, Icon, T } from "./ui";
+import { Button, Card, ErrorNote, Icon } from "./ui";
 import { PrivateRecordingPlayback } from "./PrivateRecording";
 
 export function ReadingSample({
@@ -11,6 +12,8 @@ export function ReadingSample({
   attemptId: string;
   passage: string;
 }) {
+  const { T } = useTheme();
+
   const [capability, setCapability] = useState<{
     available: boolean;
     sample: { audioId: string } | null;

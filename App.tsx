@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "./src/theme/ThemeProvider";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
@@ -11,14 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, usePathname, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import {
-  C,
-  T,
-  Icon,
-  Button,
-  ErrorNote,
-  Card,
-} from "./src/components/ui";
+import { Icon, Button, ErrorNote, Card } from "./src/components/ui";
 import { BridgingMindsMark } from "./src/components/art";
 import { useApp } from "./src/lib/state";
 import { Home, Play, Discover } from "./src/screens/Dashboard";
@@ -29,7 +23,12 @@ import { Practice, Feedback } from "./src/screens/Practice";
 import Friends from "./src/screens/Friends";
 import { ReadAloud } from "./src/screens/DailyWorkout";
 import { VocabularyReviewScreen } from "./src/screens/VocabularyReview";
-import { FoodCareScreen, AchievementsScreen, AvatarWardrobeScreen, DebateScreen } from "./src/role3";
+import {
+  FoodCareScreen,
+  AchievementsScreen,
+  AvatarWardrobeScreen,
+  DebateScreen,
+} from "./src/role3";
 import { CoinBalance } from "./src/role3/common";
 import { Mode, Page, Article, Attempt } from "./src/types";
 import { api } from "./src/lib/api";
@@ -42,10 +41,16 @@ const nav: [Page, string, string][] = [
 ];
 // Keep saved links working while the five main tabs use their new destinations.
 const pageAliases: Record<string, Page> = {
-  avatar: "profile", garden: "debate", homeland: "debate",
-  "debate-street": "debate", "daily-practice": "home",
+  avatar: "profile",
+  garden: "debate",
+  homeland: "debate",
+  "debate-street": "debate",
+  "daily-practice": "home",
 };
 export default function App() {
+  const { C, T, dark } = useTheme();
+  const s = useStyles();
+
   const [debateFocused, setDebateFocused] = useState(false);
   const pageScroll = useRef<ScrollView>(null);
   const showResultFromTop = useCallback(() => {
@@ -64,10 +69,21 @@ export default function App() {
   }>();
   const route = pathname.split("/")[1] || "home";
   const page = (pageAliases[route] || route) as
-    Page | "practice" | "attempt" | "friends" | "read-aloud" | "vocabulary-review" | "avatar";
-  const activeTab = page === "tournament" ? "debate"
-    : ["progress", "settings", "food", "achievements"].includes(page) ? "profile"
-    : page === "friends" ? "debate" : page;
+    | Page
+    | "practice"
+    | "attempt"
+    | "friends"
+    | "read-aloud"
+    | "vocabulary-review"
+    | "avatar";
+  const activeTab =
+    page === "tournament"
+      ? "debate"
+      : ["progress", "settings", "food", "achievements"].includes(page)
+        ? "profile"
+        : page === "friends"
+          ? "debate"
+          : page;
   const practiceMode: Mode =
     params.mode === "debate" || params.mode === "read_reflect"
       ? params.mode
@@ -75,7 +91,10 @@ export default function App() {
   const navigate = (p: Page) =>
     router.push(p === "home" ? "/" : (`/${p}` as any));
   function start(mode: Mode, article?: Article, retry?: Attempt) {
-    if (mode === "debate" && !retry) { router.push("/debate" as any); return; }
+    if (mode === "debate" && !retry) {
+      router.push("/debate" as any);
+      return;
+    }
     router.push({
       pathname: "/practice",
       params: {
@@ -112,8 +131,16 @@ export default function App() {
         }}
       />
     );
-  const immersive = page === "practice" || page === "attempt" || page === "read-aloud" || page === "vocabulary-review" || (debateFocused && (page === "debate" || page === "tournament"));
-  const dailySpeaking = page === "practice" && practiceMode === "spin_speak" && Boolean(state?.profile.dailyWorkout);
+  const immersive =
+    page === "practice" ||
+    page === "attempt" ||
+    page === "read-aloud" ||
+    page === "vocabulary-review" ||
+    (debateFocused && (page === "debate" || page === "tournament"));
+  const dailySpeaking =
+    page === "practice" &&
+    practiceMode === "spin_speak" &&
+    Boolean(state?.profile.dailyWorkout);
   const common = {
     state,
     articles,
@@ -125,7 +152,7 @@ export default function App() {
   };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.cream }}>
-      <StatusBar style="dark" />
+      <StatusBar style={dark ? "light" : "dark"} />
       <View style={{ flex: 1, flexDirection: "row" }}>
         {desktop && !immersive && (
           <View style={s.sidebar}>
@@ -203,29 +230,62 @@ export default function App() {
                 <View />
               ) : (
                 <View
-                  style={{ flexDirection: "row", gap: 7, alignItems: "center", flex: 1, minWidth: 0 }}
+                  style={{
+                    flexDirection: "row",
+                    gap: 7,
+                    alignItems: "center",
+                    flex: 1,
+                    minWidth: 0,
+                  }}
                 >
                   <BridgingMindsMark size={28} />
-                  <Text numberOfLines={1} style={[T.h2, { fontSize: width < 360 ? 16 : 18, flexShrink: 1 }]}>BridgingMinds</Text>
+                  <Text
+                    numberOfLines={1}
+                    style={[
+                      T.h2,
+                      { fontSize: width < 360 ? 16 : 18, flexShrink: 1 },
+                    ]}
+                  >
+                    BridgingMinds
+                  </Text>
                 </View>
               )}
-              <View testID="shell-coin-balance"><CoinBalance value={state.wallet.coins || 0} /></View>
+              <View testID="shell-coin-balance">
+                <CoinBalance value={state.wallet.coins || 0} />
+              </View>
             </View>
           )}
           <ScrollView
             ref={pageScroll}
             key={pathname + JSON.stringify(params)}
-            style={{ flex: 1, ...(dailySpeaking ? { backgroundColor: C.cream } : {}) }}
+            style={{
+              flex: 1,
+              ...(dailySpeaking ? { backgroundColor: C.cream } : {}),
+            }}
             contentContainerStyle={{
               padding: dailySpeaking ? 0 : desktop ? 34 : 20,
-              paddingTop: dailySpeaking ? 0 : immersive ? 22 : desktop ? 32 : 23,
+              paddingTop: dailySpeaking
+                ? 0
+                : immersive
+                  ? 22
+                  : desktop
+                    ? 32
+                    : 23,
               paddingBottom: dailySpeaking ? 0 : 40,
-              ...(dailySpeaking ? { backgroundColor: C.cream, flexGrow: 1 } : {}),
+              ...(dailySpeaking
+                ? { backgroundColor: C.cream, flexGrow: 1 }
+                : {}),
               alignItems: "center",
             }}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={{ width: "100%", maxWidth: page === "read-aloud" ? 1050 : 1080, ...(dailySpeaking ? { flexGrow: 1 } : {}) }}>
+            <View
+              style={{
+                width: "100%",
+                maxWidth: page === "read-aloud" ? 1050 : 1080,
+                ...(dailySpeaking ? { flexGrow: 1 } : {}),
+              }}
+            >
               {page === "read-aloud" ? (
                 <ReadAloud key={state.profile.id} />
               ) : page === "vocabulary-review" ? (
@@ -237,14 +297,29 @@ export default function App() {
               ) : page === "discover" ? (
                 <Discover {...common} />
               ) : page === "profile" ? (
-                <AvatarWardrobeScreen key={state.profile.id} onBack={() => navigate("home")}
-                  onOpenProgress={() => navigate("progress")} onOpenSettings={() => navigate("settings")} onOpenFood={() => navigate("food")} />
+                <AvatarWardrobeScreen
+                  key={state.profile.id}
+                  onBack={() => navigate("home")}
+                  onOpenProgress={() => navigate("progress")}
+                  onOpenSettings={() => navigate("settings")}
+                  onOpenFood={() => navigate("food")}
+                />
               ) : page === "food" ? (
-                <FoodCareScreen key={state.profile.id} onBack={() => navigate("profile")} />
+                <FoodCareScreen
+                  key={state.profile.id}
+                  onBack={() => navigate("profile")}
+                />
               ) : page === "achievements" ? (
                 <AchievementsScreen onBack={() => navigate("home")} />
               ) : page === "debate" || page === "tournament" ? (
-                <DebateScreen key={`${state.profile.id}-${page}`} initialTab={page === "tournament" ? "lobby" : "street"} onBack={() => navigate("home")} onScrollTop={showResultFromTop} onFocusChange={setDebateFocused} onOpenFriends={common.openFriends} />
+                <DebateScreen
+                  key={`${state.profile.id}-${page}`}
+                  initialTab={page === "tournament" ? "lobby" : "street"}
+                  onBack={() => navigate("home")}
+                  onScrollTop={showResultFromTop}
+                  onFocusChange={setDebateFocused}
+                  onOpenFriends={common.openFriends}
+                />
               ) : page === "friends" ? (
                 <Friends
                   userId={state.profile.id}
@@ -320,8 +395,7 @@ export default function App() {
                   accessibilityRole="button"
                   accessibilityLabel={`Navigate to ${label}`}
                   accessibilityState={{
-                    selected:
-                      activeTab === id,
+                    selected: activeTab === id,
                   }}
                   onPress={() => navigate(id)}
                   style={{
@@ -335,23 +409,13 @@ export default function App() {
                   <Icon
                     name={icon}
                     size={20}
-                    color={
-                      activeTab === id
-                        ? C.forest
-                        : "#9A9F94"
-                    }
+                    color={activeTab === id ? C.forest : C.muted}
                   />
                   <Text
                     style={{
-                      fontFamily:
-                        activeTab === id
-                          ? "DMBold"
-                          : "DM",
+                      fontFamily: activeTab === id ? "DMBold" : "DM",
                       fontSize: 10,
-                      color:
-                        activeTab === id
-                          ? C.forest
-                          : "#848D7D",
+                      color: activeTab === id ? C.forest : C.muted,
                     }}
                   >
                     {label}
@@ -376,6 +440,8 @@ function NavItem({
   active: boolean;
   onPress: () => void;
 }) {
+  const { C } = useTheme();
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -390,11 +456,7 @@ function NavItem({
         paddingVertical: 15,
         borderRadius: 11,
         marginVertical: 3,
-        backgroundColor: active
-          ? C.sage
-          : hovered
-            ? C.cream
-            : "transparent",
+        backgroundColor: active ? C.sage : hovered ? C.cream : "transparent",
       })}
     >
       <Icon name={icon} size={19} color={active ? C.forest : C.muted} />
@@ -434,6 +496,8 @@ function AttemptDetail({
   refresh: () => Promise<void>;
   onGarden: () => void;
 }) {
+  const { C, T } = useTheme();
+
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -510,43 +574,45 @@ function AttemptDetail({
     </View>
   );
 }
-const s = StyleSheet.create({
-  center: {
-    flex: 1,
-    backgroundColor: C.cream,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 30,
-    gap: 25,
-  },
-  sidebar: {
-    width: 248,
-    backgroundColor: C.paper,
-    padding: 16,
-    borderRightWidth: 1,
-    borderColor: C.border,
-  },
-  topbar: {
-    height: 77,
-    borderBottomWidth: 1,
-    borderColor: C.border,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  avatar: {
-    height: 37,
-    width: 37,
-    borderRadius: 25,
-    backgroundColor: C.sage,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bottomNav: {
-    flexDirection: "row",
-    backgroundColor: "#FDFCF8",
-    borderTopWidth: 1,
-    borderColor: C.border,
-  },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    center: {
+      flex: 1,
+      backgroundColor: C.cream,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 30,
+      gap: 25,
+    },
+    sidebar: {
+      width: 248,
+      backgroundColor: C.paper,
+      padding: 16,
+      borderRightWidth: 1,
+      borderColor: C.border,
+    },
+    topbar: {
+      height: 77,
+      borderBottomWidth: 1,
+      borderColor: C.border,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 8,
+    },
+    avatar: {
+      height: 37,
+      width: 37,
+      borderRadius: 25,
+      backgroundColor: C.sage,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    bottomNav: {
+      flexDirection: "row",
+      backgroundColor: C.paper,
+      borderTopWidth: 1,
+      borderColor: C.border,
+    },
+  }),
+);

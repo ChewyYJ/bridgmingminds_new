@@ -1,3 +1,4 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { memo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { plantCareStatus } from "../../shared/garden-care.mjs";
@@ -7,7 +8,7 @@ import {
 } from "../../shared/garden-layout.mjs";
 import type { Plot } from "../types";
 import { GardenIsland, MeadowPlant } from "./GardenIsland";
-import { T } from "./ui";
+
 import { MotionView } from "./Motion";
 
 export const GardenPreview = memo(function GardenPreview({
@@ -19,6 +20,8 @@ export const GardenPreview = memo(function GardenPreview({
   decorations: string[];
   now: number;
 }) {
+  const { T } = useTheme();
+
   const [width, setWidth] = useState(0);
   const height = width * (GARDEN_VIEWBOX.height / GARDEN_VIEWBOX.width);
   const size = Math.max(46, Math.min(64, width * 0.16));

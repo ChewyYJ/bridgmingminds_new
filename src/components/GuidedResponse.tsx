@@ -1,12 +1,19 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   isGuidedResponseDraft,
   type GuidedResponseDraft,
 } from "../../shared/guided-response.mjs";
-import { C, Icon, T } from "./ui";
+import { Icon } from "./ui";
 
-const highlights = [C.sage, C.lilac, C.peach, C.yellow, "#E0EDF0"];
+const useHighlightsStyles = createThemedStyles(({ C }) => [
+  C.sage,
+  C.lilac,
+  C.peach,
+  C.yellow,
+  "#E0EDF0",
+]);
 
 export function GuidedResponse({
   draft,
@@ -15,6 +22,10 @@ export function GuidedResponse({
   draft: GuidedResponseDraft;
   children?: React.ReactNode;
 }) {
+  const { C, T } = useTheme();
+  const highlights = useHighlightsStyles();
+  const s = useStyles();
+
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const text = typeof draft.text === "string" ? draft.text : "";
@@ -93,7 +104,9 @@ export function GuidedResponse({
                   <View
                     style={[
                       s.number,
-                      { backgroundColor: highlights[index % highlights.length] },
+                      {
+                        backgroundColor: highlights[index % highlights.length],
+                      },
                     ]}
                     accessible={false}
                     aria-hidden
@@ -133,68 +146,70 @@ export function GuidedResponse({
   );
 }
 
-const s = StyleSheet.create({
-  card: {
-    padding: 18,
-    gap: 18,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 18,
-    backgroundColor: C.paper,
-    minWidth: 0,
-  },
-  header: { flexDirection: "row", alignItems: "center", gap: 11 },
-  mark: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: C.sage,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  answer: { ...T.body, lineHeight: 29 },
-  highlight: {
-    textDecorationLine: "underline",
-    textDecorationColor: C.forest,
-  },
-  annotations: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  annotationButton: {
-    minHeight: 44,
-    flexBasis: 140,
-    flexGrow: 1,
-    maxWidth: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: C.border,
-  },
-  selected: { borderColor: C.forest, backgroundColor: C.cream },
-  focused: { borderColor: C.forest, backgroundColor: C.sage },
-  number: {
-    width: 25,
-    height: 25,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  numberText: { ...T.small, fontFamily: "DMBold", color: C.forest },
-  annotationLabel: {
-    ...T.small,
-    fontFamily: "DMMedium",
-    color: C.ink,
-    flex: 1,
-    minWidth: 0,
-  },
-  explanation: {
-    gap: 8,
-    padding: 14,
-    borderRadius: 12,
-    backgroundColor: C.cream,
-  },
-  explanationLabel: { ...T.small, color: C.forest, fontFamily: "DMBold" },
-  quote: { ...T.small, fontStyle: "italic" },
-});
+const useStyles = createThemedStyles(({ C, T }) =>
+  StyleSheet.create({
+    card: {
+      padding: 18,
+      gap: 18,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 18,
+      backgroundColor: C.paper,
+      minWidth: 0,
+    },
+    header: { flexDirection: "row", alignItems: "center", gap: 11 },
+    mark: {
+      width: 38,
+      height: 38,
+      borderRadius: 12,
+      backgroundColor: C.sage,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    answer: { ...T.body, lineHeight: 29 },
+    highlight: {
+      textDecorationLine: "underline",
+      textDecorationColor: C.forest,
+    },
+    annotations: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    annotationButton: {
+      minHeight: 44,
+      flexBasis: 140,
+      flexGrow: 1,
+      maxWidth: "100%",
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 7,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: C.border,
+    },
+    selected: { borderColor: C.forest, backgroundColor: C.cream },
+    focused: { borderColor: C.forest, backgroundColor: C.sage },
+    number: {
+      width: 25,
+      height: 25,
+      borderRadius: 13,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    numberText: { ...T.small, fontFamily: "DMBold", color: C.forest },
+    annotationLabel: {
+      ...T.small,
+      fontFamily: "DMMedium",
+      color: C.ink,
+      flex: 1,
+      minWidth: 0,
+    },
+    explanation: {
+      gap: 8,
+      padding: 14,
+      borderRadius: 12,
+      backgroundColor: C.cream,
+    },
+    explanationLabel: { ...T.small, color: C.forest, fontFamily: "DMBold" },
+    quote: { ...T.small, fontStyle: "italic" },
+  }),
+);

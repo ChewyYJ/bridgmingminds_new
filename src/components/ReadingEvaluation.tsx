@@ -1,3 +1,4 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useState } from "react";
 import { Linking, Pressable, Text, View } from "react-native";
 import {
@@ -5,7 +6,7 @@ import {
   READING_FOUNDATION,
 } from "../../shared/reading-rubric.mjs";
 import type { ReadingEvaluationResult } from "../types";
-import { Button, C, Card, Icon, T } from "./ui";
+import { Button, Card, Icon } from "./ui";
 import { PrivateRecordingPlayback } from "./PrivateRecording";
 
 export function ReadingEvaluation({
@@ -15,6 +16,8 @@ export function ReadingEvaluation({
   evaluation: ReadingEvaluationResult;
   audioId?: string;
 }) {
+  const { C, T } = useTheme();
+
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [example, setExample] = useState<string | null>(null);

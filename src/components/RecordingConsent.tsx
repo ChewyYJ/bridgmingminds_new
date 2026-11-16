@@ -1,6 +1,7 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useEffect, useId, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import { Button, C, Icon, T } from "./ui";
+import { Button, Icon } from "./ui";
 
 export function RecordingConsent({
   busy,
@@ -11,6 +12,9 @@ export function RecordingConsent({
   onAllow: () => void;
   onWrite?: () => void;
 }) {
+  const { C, T } = useTheme();
+  const s = useStyles();
+
   const [display, setDisplay] = useState<
     "closed" | "hover" | "focus" | "pinned"
   >("closed");
@@ -96,28 +100,32 @@ export function RecordingConsent({
         loading={busy}
         onPress={onAllow}
       />
-      {onWrite && <Button label="Write instead" variant="ghost" onPress={onWrite} />}
+      {onWrite && (
+        <Button label="Write instead" variant="ghost" onPress={onWrite} />
+      )}
     </View>
   );
 }
 
-const s = StyleSheet.create({
-  heading: { flexDirection: "row", alignItems: "center", gap: 10 },
-  info: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: "transparent",
-  },
-  focused: { borderColor: C.forest },
-  details: {
-    marginTop: 10,
-    padding: 14,
-    gap: 9,
-    borderRadius: 12,
-    backgroundColor: "#F3F5EE",
-  },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    heading: { flexDirection: "row", alignItems: "center", gap: 10 },
+    info: {
+      width: 44,
+      height: 44,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 22,
+      borderWidth: 2,
+      borderColor: "transparent",
+    },
+    focused: { borderColor: C.forest },
+    details: {
+      marginTop: 10,
+      padding: 14,
+      gap: 9,
+      borderRadius: 12,
+      backgroundColor: "#F3F5EE",
+    },
+  }),
+);

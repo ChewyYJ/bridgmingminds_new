@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useEffect, useId, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -34,13 +35,11 @@ import { ConfirmedUnlocks } from "../role3/ConfirmedUnlocks";
 import { Article, Attempt, Job, Mode, Prompt, Session } from "../types";
 import {
   Button,
-  C,
   Card,
   ErrorNote,
   Field,
   Heading,
   Icon,
-  T,
   Tag,
 } from "../components/ui";
 import { GrowBreakdown } from "../components/GrowBreakdown";
@@ -48,7 +47,11 @@ import { AssessmentCriteria } from "../components/AssessmentCriteria";
 import { BridgeFeedback } from "../components/BridgeFeedback";
 import { ThoughtTrail } from "../components/ThoughtTrail";
 import { ThoughtGuide } from "../components/ThoughtGuide";
-import { createPlanningBoard, planningBoardNotes, type PlanningBoard } from "../../shared/planning-board.mjs";
+import {
+  createPlanningBoard,
+  planningBoardNotes,
+  type PlanningBoard,
+} from "../../shared/planning-board.mjs";
 import { IdeasBoard, IdeasPreview } from "../components/IdeasBoard";
 import { RecordingConsent } from "../components/RecordingConsent";
 import { SelfReflection } from "../components/SelfReflection";
@@ -117,6 +120,9 @@ function Chip({
   selected: boolean;
   onPress: () => void;
 }) {
+  const { C, T } = useTheme();
+  const s = useStyles();
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -127,7 +133,7 @@ function Chip({
       <Text
         style={[
           T.small,
-          { fontFamily: "DMMedium", color: selected ? "#FFF" : C.forest },
+          { fontFamily: "DMMedium", color: selected ? C.onPrimary : C.forest },
         ]}
       >
         {children}
@@ -145,17 +151,20 @@ function PetalWheel({
   busy: boolean;
   onSpin: () => void;
 }) {
+  const { C } = useTheme();
+  const s = useStyles();
+
   const gradientId = useId().replace(/:/g, "");
   const [focused, setFocused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const colors = [
     ["#DCE7C8", "#B7CDA4"],
     ["#F3DDCD", "#DEBCA7"],
-    ["#E7E0F0", "#C9BDDB"],
+    [C.accentSurface, C.accent],
     ["#F3E8B9", "#DFCE8E"],
     ["#D9E7D6", "#AFCBAF"],
     ["#F3DDCD", "#DEBCA7"],
-    ["#E7E0F0", "#C9BDDB"],
+    [C.accentSurface, C.accent],
     ["#F3E8B9", "#DFCE8E"],
   ];
   return (
@@ -223,7 +232,7 @@ function PetalWheel({
                   <Path
                     d="M125 27 Q140 21 155 27"
                     fill="none"
-                    stroke="#FFFFFF"
+                    stroke={C.paper}
                     strokeOpacity="0.5"
                     strokeWidth="2"
                     strokeLinecap="round"
@@ -266,7 +275,14 @@ function PetalWheel({
 export function Practice(props: React.ComponentProps<typeof ClassicPractice>) {
   const { state } = useApp();
   if (props.mode === "spin_speak" && state?.profile.dailyWorkout)
-    return <DailySpeaking onClose={props.onClose} onComplete={props.onComplete} onStepChange={props.onResultShown} retryAttempt={props.retryAttempt} />;
+    return (
+      <DailySpeaking
+        onClose={props.onClose}
+        onComplete={props.onComplete}
+        onStepChange={props.onResultShown}
+        retryAttempt={props.retryAttempt}
+      />
+    );
   return <ClassicPractice {...props} />;
 }
 
@@ -287,6 +303,9 @@ function ClassicPractice({
   onResultShown?: () => void;
   onGarden: () => void;
 }) {
+  const { C, T } = useTheme();
+  const s = useStyles();
+
   // The router remounts on a new challenge/retry ID. Keep this snapshot stable
   // when a global refresh replaces the same saved attempt with a new object.
   const [startingRetryAttempt] = useState(retryAttempt);
@@ -299,7 +318,9 @@ function ClassicPractice({
   const [session, setSession] = useState<Session | null>(null);
   const [text, setText] = useState("");
   const [planningNotes, setPlanningNotes] = useState("");
-  const [planningBoard, setPlanningBoard] = useState<PlanningBoard>(() => createPlanningBoard());
+  const [planningBoard, setPlanningBoard] = useState<PlanningBoard>(() =>
+    createPlanningBoard(),
+  );
   const [planningGesture, setPlanningGesture] = useState(false);
   const [selfReflection, setSelfReflection] = useState("");
   const [reflectionExpanded, setReflectionExpanded] = useState(false);
@@ -432,8 +453,16 @@ function ClassicPractice({
           if (draft.session?.id && matchesRequested(draft)) {
             setSession(draft.session);
             setText(draft.text || "");
-            setPlanningNotes(draft.planningNotes ?? draft.attempt?.planningNotes ?? "");
-            setPlanningBoard(draft.planningBoard ?? draft.attempt?.planningBoard ?? createPlanningBoard(draft.planningNotes ?? draft.attempt?.planningNotes ?? ""));
+            setPlanningNotes(
+              draft.planningNotes ?? draft.attempt?.planningNotes ?? "",
+            );
+            setPlanningBoard(
+              draft.planningBoard ??
+                draft.attempt?.planningBoard ??
+                createPlanningBoard(
+                  draft.planningNotes ?? draft.attempt?.planningNotes ?? "",
+                ),
+            );
             setTranscriptEdited(
               draft.transcriptEdited ??
                 Boolean(!draft.text?.trim() && draft.attempt?.text?.trim()),
@@ -462,12 +491,17 @@ function ClassicPractice({
             setPrepDeadline(deadline);
             setPrep(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
             setStage(
-              legacyWrittenDraft ? "prep"
-                : draft.audioId && draft.stage === "edit" ? "reflect"
+              legacyWrittenDraft
+                ? "prep"
+                : draft.audioId && draft.stage === "edit"
+                  ? "reflect"
                   : draft.stage,
             );
             if (legacyWrittenDraft) {
-              const notes = [draft.planningNotes, draft.text].filter(Boolean).join("\n\n").slice(0, 2000);
+              const notes = [draft.planningNotes, draft.text]
+                .filter(Boolean)
+                .join("\n\n")
+                .slice(0, 2000);
               setPlanningNotes(notes);
               setPlanningBoard(createPlanningBoard(notes));
             }
@@ -564,7 +598,10 @@ function ClassicPractice({
           if (!active) return;
           setSession(current);
           setPlanningNotes(startingRetryAttempt.planningNotes || "");
-          setPlanningBoard(startingRetryAttempt.planningBoard || createPlanningBoard(startingRetryAttempt.planningNotes));
+          setPlanningBoard(
+            startingRetryAttempt.planningBoard ||
+              createPlanningBoard(startingRetryAttempt.planningNotes),
+          );
           setStage("edit");
           if (startingRetryAttempt.status === "draft") {
             setAttempt(startingRetryAttempt);
@@ -679,9 +716,15 @@ function ClassicPractice({
   useEffect(() => {
     if (stage !== "prep" || !prepDeadline) return;
     const tick = () => {
-      const remaining = Math.max(0, Math.ceil((prepDeadline - Date.now()) / 1000));
+      const remaining = Math.max(
+        0,
+        Math.ceil((prepDeadline - Date.now()) / 1000),
+      );
       setPrep(remaining);
-      if (!remaining) { setPlanningGesture(false); setStage("edit"); }
+      if (!remaining) {
+        setPlanningGesture(false);
+        setStage("edit");
+      }
     };
     tick();
     const timer = setInterval(tick, 250);
@@ -830,8 +873,12 @@ function ClassicPractice({
       setDebateProvider(created.provider || "");
       setPlanningNotes("");
       setPlanningBoard(createPlanningBoard());
-      const duration = mode === "read_reflect" ? 60
-        : created.assessmentFramework === "bridge-v1" ? 45 : 15;
+      const duration =
+        mode === "read_reflect"
+          ? 60
+          : created.assessmentFramework === "bridge-v1"
+            ? 45
+            : 15;
       setPrep(duration);
       setPrepDeadline(Date.now() + duration * 1000);
       if (mode === "read_reflect") setInput("audio");
@@ -1029,7 +1076,7 @@ function ClassicPractice({
           sessionId: session.id,
           text: "",
           planningNotes: planningNotes.trim(),
-            planningBoard: mode === "read_reflect" ? planningBoard : undefined,
+          planningBoard: mode === "read_reflect" ? planningBoard : undefined,
           responseType: "audio",
           audioId: uploaded.id,
           durationSeconds: recording.duration,
@@ -1154,7 +1201,9 @@ function ClassicPractice({
     setInput("text");
     setSelfReflection("");
     setPlanningNotes(current.planningNotes || "");
-    setPlanningBoard(current.planningBoard || createPlanningBoard(current.planningNotes));
+    setPlanningBoard(
+      current.planningBoard || createPlanningBoard(current.planningNotes),
+    );
     setShowResponse(false);
     setTranscriptEdited(false);
     setTranscriptionMessage("");
@@ -1245,11 +1294,38 @@ function ClassicPractice({
           ) : (
             <>
               <ErrorNote message={error} />
-              {session?.learningFocus && (stage === "prep" || stage === "edit") ? <Card testID="practice-learning-focus" style={{ gap: 8 }}><Text style={T.h3}>Practice focus · {session.learningFocus.label}</Text><Text style={T.body}>{session.learningFocus.instruction}</Text><Text style={T.small}>Suggested from repeated provisional feedback. This guided practice does not establish mastery.</Text></Card> : null}
-              {stage !== "processing" && stage !== "reflect" && stage !== "prep" && (
-                <AssessmentCriteria mode={mode} framework={session?.assessmentFramework || (!session && mode === "spin_speak" && appState?.profile.dailyWorkout ? "bridge-v1" : undefined)} />
-              )}
-              {notice && (stage !== "prep" || notice.startsWith("Your written draft")) ? (
+              {session?.learningFocus &&
+              (stage === "prep" || stage === "edit") ? (
+                <Card testID="practice-learning-focus" style={{ gap: 8 }}>
+                  <Text style={T.h3}>
+                    Practice focus · {session.learningFocus.label}
+                  </Text>
+                  <Text style={T.body}>
+                    {session.learningFocus.instruction}
+                  </Text>
+                  <Text style={T.small}>
+                    Suggested from repeated provisional feedback. This guided
+                    practice does not establish mastery.
+                  </Text>
+                </Card>
+              ) : null}
+              {stage !== "processing" &&
+                stage !== "reflect" &&
+                stage !== "prep" && (
+                  <AssessmentCriteria
+                    mode={mode}
+                    framework={
+                      session?.assessmentFramework ||
+                      (!session &&
+                      mode === "spin_speak" &&
+                      appState?.profile.dailyWorkout
+                        ? "bridge-v1"
+                        : undefined)
+                    }
+                  />
+                )}
+              {notice &&
+              (stage !== "prep" || notice.startsWith("Your written draft")) ? (
                 <View style={s.notice}>
                   <Icon name="info" size={18} />
                   <Text style={[T.body, { flex: 1, fontSize: 13 }]}>
@@ -1481,14 +1557,35 @@ function ClassicPractice({
                 ))}
               {stage === "prep" && session && mode === "read_reflect" && (
                 <View style={{ gap: 18 }}>
-                  <Heading sub={session.prompt.question}>Plan your response</Heading>
-                  <View style={{ flexDirection: "row", gap: 8, alignItems: "center", alignSelf: "center" }}>
+                  <Heading sub={session.prompt.question}>
+                    Plan your response
+                  </Heading>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: 8,
+                      alignItems: "center",
+                      alignSelf: "center",
+                    }}
+                  >
                     <Icon name="clock" size={18} />
-                    <Text accessibilityLabel={`${prep} seconds preparation time`} style={T.h3}>
-                      {String(Math.floor(prep / 60)).padStart(2, "0")}:{String(prep % 60).padStart(2, "0")}
+                    <Text
+                      accessibilityLabel={`${prep} seconds preparation time`}
+                      style={T.h3}
+                    >
+                      {String(Math.floor(prep / 60)).padStart(2, "0")}:
+                      {String(prep % 60).padStart(2, "0")}
                     </Text>
                   </View>
-                  <IdeasBoard board={planningBoard} onChange={next => { setPlanningBoard(next); setPlanningNotes(planningBoardNotes(next)); }} onDone={() => setStage("edit")} onInteractionChange={setPlanningGesture} />
+                  <IdeasBoard
+                    board={planningBoard}
+                    onChange={(next) => {
+                      setPlanningBoard(next);
+                      setPlanningNotes(planningBoardNotes(next));
+                    }}
+                    onDone={() => setStage("edit")}
+                    onInteractionChange={setPlanningGesture}
+                  />
                 </View>
               )}
               {stage === "prep" && session && mode !== "read_reflect" && (
@@ -1532,7 +1629,8 @@ function ClassicPractice({
                         style={{ minHeight: 105 }}
                       />
                       <Text style={T.small}>
-                        When AI feedback is enabled, your notes are submitted with your response to build the Thought Map.
+                        When AI feedback is enabled, your notes are submitted
+                        with your response to build the Thought Map.
                       </Text>
                     </Card>
                   ) : null}
@@ -1561,7 +1659,9 @@ function ClassicPractice({
                   >
                     {session.prompt.question}
                   </Heading>
-                  {mode === "read_reflect" && <IdeasPreview board={planningBoard} />}
+                  {mode === "read_reflect" && (
+                    <IdeasPreview board={planningBoard} />
+                  )}
                   {retryOf ? (
                     <ThoughtGuide
                       attemptId={retryOf}
@@ -1572,28 +1672,38 @@ function ClassicPractice({
                     />
                   ) : null}
                   <Card style={{ gap: 20 }}>
-                    {mode !== "read_reflect" && !audioId && !busy && !recordingActive && (
-                      <View style={s.chips}>
-                        <Chip
-                          selected={input === "text"}
-                          onPress={() => setInput("text")}
-                        >
-                          Write a response
-                        </Chip>
-                        <Chip
-                          selected={input === "audio"}
-                          onPress={() => setInput("audio")}
-                        >
-                          Speak a response
-                        </Chip>
-                      </View>
-                    )}
-                    {(mode === "read_reflect" || input === "audio") && !audioId ? (
+                    {mode !== "read_reflect" &&
+                      !audioId &&
+                      !busy &&
+                      !recordingActive && (
+                        <View style={s.chips}>
+                          <Chip
+                            selected={input === "text"}
+                            onPress={() => setInput("text")}
+                          >
+                            Write a response
+                          </Chip>
+                          <Chip
+                            selected={input === "audio"}
+                            onPress={() => setInput("audio")}
+                          >
+                            Speak a response
+                          </Chip>
+                        </View>
+                      )}
+                    {(mode === "read_reflect" || input === "audio") &&
+                    !audioId ? (
                       recordingConsent ? (
                         <AudioInput
-                          appearance={mode === "read_reflect" ? "daily" : "garden"}
+                          appearance={
+                            mode === "read_reflect" ? "daily" : "garden"
+                          }
                           onRecorded={handleAudio}
-                          onCancel={() => mode === "read_reflect" ? planReflection() : setInput("text")}
+                          onCancel={() =>
+                            mode === "read_reflect"
+                              ? planReflection()
+                              : setInput("text")
+                          }
                           onCaptureActive={setRecordingActive}
                           busy={busy}
                         />
@@ -1601,7 +1711,11 @@ function ClassicPractice({
                         <RecordingConsent
                           busy={busy}
                           onAllow={() => void allowRecordingStorage()}
-                          onWrite={mode === "read_reflect" ? undefined : () => setInput("text")}
+                          onWrite={
+                            mode === "read_reflect"
+                              ? undefined
+                              : () => setInput("text")
+                          }
                         />
                       )
                     ) : (
@@ -1885,6 +1999,9 @@ function FeedbackContent({
   onGarden,
   celebrateRewards = false,
 }: FeedbackProps) {
+  const { C, T } = useTheme();
+  const s = useStyles();
+
   const [attempt, setAttempt] = useState(initialAttempt);
   const [previous, setPrevious] = useState<Attempt | null>(null);
   const [debateOpening, setDebateOpening] = useState("");
@@ -2095,7 +2212,7 @@ function FeedbackContent({
               <Icon name="feather" size={17} color="#D4E2C7" />
               <Text style={[T.label, { color: "#D4E2C7" }]}>NEXT STEP</Text>
             </View>
-            <Text style={[T.h2, { color: "#FFF", fontSize: 23 }]}>
+            <Text style={[T.h2, { color: C.onPrimary, fontSize: 23 }]}>
               {evaluation.key_takeaway}
             </Text>
           </MotionView>
@@ -2127,7 +2244,12 @@ function FeedbackContent({
               <Text style={T.label}>LEARNING REWARDS</Text>
               <View style={s.chips}>
                 {Object.entries(attempt.rewards)
-                  .filter((entry): entry is [string, number] => ["coins", "xp"].includes(entry[0]) && typeof entry[1] === "number" && entry[1] > 0)
+                  .filter(
+                    (entry): entry is [string, number] =>
+                      ["coins", "xp"].includes(entry[0]) &&
+                      typeof entry[1] === "number" &&
+                      entry[1] > 0,
+                  )
                   .map(([key, value]) => (
                     <MotionPulse
                       key={key}
@@ -2152,11 +2274,7 @@ function FeedbackContent({
                         ]}
                       >
                         +{value}{" "}
-                        {key === "xp"
-                          ? "XP"
-                          : key === "coins"
-                            ? "Coins"
-                            : key}
+                        {key === "xp" ? "XP" : key === "coins" ? "Coins" : key}
                       </Text>
                     </MotionPulse>
                   ))}
@@ -2425,6 +2543,9 @@ function FeedbackDisclosure({
   disabled?: boolean;
   onPress: () => void;
 }) {
+  const { C, T } = useTheme();
+  const s = useStyles();
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -2453,180 +2574,182 @@ function FeedbackDisclosure({
   );
 }
 
-const s = StyleSheet.create({
-  scroll: {
-    padding: 22,
-    paddingBottom: 60,
-    flexGrow: 1,
-    backgroundColor: C.cream,
-  },
-  container: { width: "100%", maxWidth: 860, alignSelf: "center", gap: 22 },
-  topbar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
-    paddingBottom: 14,
-    marginBottom: 8,
-    flexWrap: "wrap",
-  },
-  inline: { flexDirection: "row", alignItems: "center", gap: 9 },
-  between: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  centered: { alignItems: "center", gap: 12 },
-  centerText: { textAlign: "center" },
-  chips: {
-    flexDirection: "row",
-    gap: 8,
-    flexWrap: "wrap",
-    alignItems: "center",
-  },
-  chip: {
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    minHeight: 44,
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: C.border,
-    backgroundColor: "#FFFEFB",
-  },
-  chipSelected: { backgroundColor: C.forest, borderColor: C.forest },
-  notice: {
-    backgroundColor: C.sage,
-    borderRadius: 14,
-    padding: 17,
-    gap: 12,
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  wheelContainer: {
-    width: 280,
-    maxWidth: "100%",
-    aspectRatio: 1,
-    borderRadius: 150,
-    borderWidth: 2,
-    borderColor: "transparent",
-    alignSelf: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 14,
-    marginBottom: 4,
-  },
-  wheelFocused: { borderColor: C.forest },
-  wheelTrack: { ...StyleSheet.absoluteFill },
-  wheel: { width: "100%", aspectRatio: 1 },
-  wheelHubPosition: {
-    ...StyleSheet.absoluteFill,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  wheelMiddle: {
-    width: 94,
-    height: 94,
-    borderRadius: 47,
-    backgroundColor: C.forest,
-    borderWidth: 5,
-    borderColor: C.cream,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 5,
-  },
-  wheelMiddleActive: { backgroundColor: "#244835" },
-  wheelLabel: { fontFamily: "DMBold", fontSize: 13, color: C.cream },
-  pointer: { position: "absolute", top: -7, alignSelf: "center" },
-  prepClock: {
-    width: 238,
-    height: 238,
-    borderRadius: 119,
-    borderWidth: 10,
-    borderColor: "#DEE6D1",
-    backgroundColor: "#F2F4EA",
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    gap: 10,
-    marginVertical: 18,
-  },
-  countdown: {
-    fontFamily: "Lora",
-    fontSize: 74,
-    lineHeight: 85,
-    color: C.forest,
-  },
-  topicOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    padding: 17,
-    borderRadius: 13,
-    borderWidth: 1,
-    borderColor: C.border,
-    backgroundColor: "#FFFEFB",
-    minHeight: 64,
-  },
-  turn: {
-    padding: 22,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: C.border,
-    gap: 12,
-  },
-  processingIcon: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: C.sage,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  feedbackContainer: {
-    width: "100%",
-    maxWidth: 780,
-    alignSelf: "center",
-    gap: 22,
-    paddingBottom: 20,
-  },
-  feedbackTitle: { ...T.title, fontSize: 30, lineHeight: 39 },
-  takeawayCard: {
-    padding: 24,
-    gap: 15,
-    borderRadius: 22,
-    backgroundColor: C.forest,
-  },
-  rewardStrip: { gap: 10, paddingVertical: 4 },
-  rewardPill: {
-    flexGrow: 1,
-    flexBasis: 130,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: "#EDF0E5",
-  },
-  feedbackNotice: { flexDirection: "row", alignItems: "flex-start", gap: 9 },
-  feedbackDetails: {
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: C.border,
-    paddingTop: 10,
-  },
-  feedbackDisclosure: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    minHeight: 48,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-  },
-});
+const useStyles = createThemedStyles(({ C, T }) =>
+  StyleSheet.create({
+    scroll: {
+      padding: 22,
+      paddingBottom: 60,
+      flexGrow: 1,
+      backgroundColor: C.cream,
+    },
+    container: { width: "100%", maxWidth: 860, alignSelf: "center", gap: 22 },
+    topbar: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: C.border,
+      paddingBottom: 14,
+      marginBottom: 8,
+      flexWrap: "wrap",
+    },
+    inline: { flexDirection: "row", alignItems: "center", gap: 9 },
+    between: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: 10,
+    },
+    centered: { alignItems: "center", gap: 12 },
+    centerText: { textAlign: "center" },
+    chips: {
+      flexDirection: "row",
+      gap: 8,
+      flexWrap: "wrap",
+      alignItems: "center",
+    },
+    chip: {
+      borderRadius: 24,
+      paddingHorizontal: 16,
+      minHeight: 44,
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: C.border,
+      backgroundColor: C.input,
+    },
+    chipSelected: { backgroundColor: C.forest, borderColor: C.forest },
+    notice: {
+      backgroundColor: C.sage,
+      borderRadius: 14,
+      padding: 17,
+      gap: 12,
+      flexDirection: "row",
+      alignItems: "flex-start",
+    },
+    wheelContainer: {
+      width: 280,
+      maxWidth: "100%",
+      aspectRatio: 1,
+      borderRadius: 150,
+      borderWidth: 2,
+      borderColor: "transparent",
+      alignSelf: "center",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 14,
+      marginBottom: 4,
+    },
+    wheelFocused: { borderColor: C.forest },
+    wheelTrack: { ...StyleSheet.absoluteFill },
+    wheel: { width: "100%", aspectRatio: 1 },
+    wheelHubPosition: {
+      ...StyleSheet.absoluteFill,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    wheelMiddle: {
+      width: 94,
+      height: 94,
+      borderRadius: 47,
+      backgroundColor: C.forest,
+      borderWidth: 5,
+      borderColor: C.cream,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 5,
+    },
+    wheelMiddleActive: { backgroundColor: "#244835" },
+    wheelLabel: { fontFamily: "DMBold", fontSize: 13, color: C.cream },
+    pointer: { position: "absolute", top: -7, alignSelf: "center" },
+    prepClock: {
+      width: 238,
+      height: 238,
+      borderRadius: 119,
+      borderWidth: 10,
+      borderColor: "#DEE6D1",
+      backgroundColor: C.successSurface,
+      alignItems: "center",
+      justifyContent: "center",
+      alignSelf: "center",
+      gap: 10,
+      marginVertical: 18,
+    },
+    countdown: {
+      fontFamily: "Lora",
+      fontSize: 74,
+      lineHeight: 85,
+      color: C.forest,
+    },
+    topicOption: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+      padding: 17,
+      borderRadius: 13,
+      borderWidth: 1,
+      borderColor: C.border,
+      backgroundColor: C.input,
+      minHeight: 64,
+    },
+    turn: {
+      padding: 22,
+      borderRadius: 19,
+      borderWidth: 1,
+      borderColor: C.border,
+      gap: 12,
+    },
+    processingIcon: {
+      width: 96,
+      height: 96,
+      borderRadius: 48,
+      backgroundColor: C.sage,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    feedbackContainer: {
+      width: "100%",
+      maxWidth: 780,
+      alignSelf: "center",
+      gap: 22,
+      paddingBottom: 20,
+    },
+    feedbackTitle: { ...T.title, fontSize: 30, lineHeight: 39 },
+    takeawayCard: {
+      padding: 24,
+      gap: 15,
+      borderRadius: 22,
+      backgroundColor: C.forest,
+    },
+    rewardStrip: { gap: 10, paddingVertical: 4 },
+    rewardPill: {
+      flexGrow: 1,
+      flexBasis: 130,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 12,
+      backgroundColor: C.successSurface,
+    },
+    feedbackNotice: { flexDirection: "row", alignItems: "flex-start", gap: 9 },
+    feedbackDetails: {
+      gap: 12,
+      borderTopWidth: 1,
+      borderTopColor: C.border,
+      paddingTop: 10,
+    },
+    feedbackDisclosure: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      minHeight: 48,
+      paddingVertical: 12,
+      paddingHorizontal: 10,
+      borderRadius: 10,
+    },
+  }),
+);

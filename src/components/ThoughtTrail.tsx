@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useState } from "react";
 import {
   Pressable,
@@ -6,7 +7,7 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from "react-native";
-import { C, Icon, T } from "./ui";
+import { Icon } from "./ui";
 
 export function ThoughtTrail({
   earlier,
@@ -17,6 +18,9 @@ export function ThoughtTrail({
   revision: string;
   openingOnly?: boolean;
 }) {
+  const { C, T } = useTheme();
+  const s = useStyles();
+
   const [expanded, setExpanded] = useState(false);
   const [focused, setFocused] = useState(false);
   const { width } = useWindowDimensions();
@@ -80,31 +84,33 @@ export function ThoughtTrail({
   );
 }
 
-const s = StyleSheet.create({
-  card: {
-    backgroundColor: C.paper,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 18,
-    overflow: "hidden",
-  },
-  toggle: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    minHeight: 72,
-    padding: 16,
-    borderWidth: 2,
-    borderColor: "transparent",
-    borderRadius: 17,
-  },
-  focused: { borderColor: C.forest },
-  details: { padding: 18, paddingTop: 2, gap: 12 },
-  version: {
-    minWidth: 0,
-    gap: 10,
-    padding: 16,
-    backgroundColor: "#F7F7F2",
-    borderRadius: 12,
-  },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: C.paper,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 18,
+      overflow: "hidden",
+    },
+    toggle: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      minHeight: 72,
+      padding: 16,
+      borderWidth: 2,
+      borderColor: "transparent",
+      borderRadius: 17,
+    },
+    focused: { borderColor: C.forest },
+    details: { padding: 18, paddingTop: 2, gap: 12 },
+    version: {
+      minWidth: 0,
+      gap: 10,
+      padding: 16,
+      backgroundColor: "#F7F7F2",
+      borderRadius: 12,
+    },
+  }),
+);

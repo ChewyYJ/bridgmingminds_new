@@ -1,3 +1,4 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { router } from "expo-router";
@@ -8,7 +9,7 @@ import type {
 } from "../types";
 import { api, isDraftOwner } from "../lib/api";
 import { useApp } from "../lib/state";
-import { Button, C, Card, ErrorNote, Icon, T } from "./ui";
+import { Button, Card, ErrorNote, Icon } from "./ui";
 
 export function WordBloomPreview({ ids }: { ids?: string[] }) {
   return ids?.length ? <WordBloomPanel ids={ids} /> : null;
@@ -24,6 +25,8 @@ function WordBloomPanel({
   ids?: string[];
   progress?: boolean;
 }) {
+  const { C, T } = useTheme();
+
   const { state, refresh } = useApp();
   const uid = state!.profile.id;
   const enabled = state!.profile.wordBloomEnabled;
@@ -94,7 +97,7 @@ function WordBloomPanel({
   return (
     <Card
       testID={progress ? "wordbloom-progress" : "wordbloom-preview"}
-      style={{ gap: 14, backgroundColor: progress ? "#FFFCF4" : C.sage }}
+      style={{ gap: 14, backgroundColor: progress ? C.yellow : C.sage }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <Icon name="book-open" size={22} />
@@ -278,6 +281,8 @@ export function WordBloomPassage({
   onReview: (id: string, outcome: WordReviewOutcome) => void;
   allowReview: boolean;
 }) {
+  const { C, T } = useTheme();
+
   const [selected, setSelected] = useState<string | null>(null);
   const spans = words
     .flatMap((word) => word.spans.map((span) => ({ ...span, word })))

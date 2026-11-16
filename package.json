@@ -24,6 +24,7 @@
     "expo-secure-store": "^57.0.4",
     "expo-sharing": "~57.0.25",
     "expo-status-bar": "~57.0.1",
+    "expo-system-ui": "~57.0.4",
     "express": "^5.3.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.53.0",
     "pg": "^8.23.1",

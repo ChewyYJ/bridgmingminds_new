@@ -1,7 +1,8 @@
+import { ThemeProvider, useTheme } from "../theme/ThemeProvider";
 import React from "react";
 import { Slot } from "expo-router";
 import Head from "expo-router/head";
-import { C } from "../components/ui";
+
 import { useFonts } from "expo-font";
 import Feather from "@expo/vector-icons/Feather";
 import { DMSans_400Regular } from "@expo-google-fonts/dm-sans/400Regular";
@@ -11,6 +12,16 @@ import { Lora_400Regular } from "@expo-google-fonts/lora/400Regular";
 import { AppProvider } from "../lib/state";
 import { View, ActivityIndicator } from "react-native";
 export default function Layout() {
+  return (
+    <ThemeProvider>
+      <ThemedLayout />
+    </ThemeProvider>
+  );
+}
+
+function ThemedLayout() {
+  const { C } = useTheme();
+
   const [ready, error] = useFonts({
     feather: {
       uri: Feather.font.feather,

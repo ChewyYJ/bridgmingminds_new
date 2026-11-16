@@ -1,7 +1,8 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { type ReactNode, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { AudioPlayback } from "./AudioInput";
-import { Button, C, Card, Field, Icon, T } from "./ui";
+import { Button, Card, Field, Icon } from "./ui";
 
 export function SelfReflection({
   value,
@@ -20,10 +21,10 @@ export function SelfReflection({
   audioUri?: string;
   initiallyExpanded?: boolean;
 }) {
+  const { C, T } = useTheme();
+
   const hasReflection = value.trim().length > 0;
-  const [expanded, setExpanded] = useState(
-    initiallyExpanded || hasReflection,
-  );
+  const [expanded, setExpanded] = useState(initiallyExpanded || hasReflection);
   const [focused, setFocused] = useState(false);
 
   return (
@@ -82,9 +83,7 @@ export function SelfReflection({
         </View>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
           <Button
-            label={
-              hasReflection ? "Save & get feedback" : "Get feedback"
-            }
+            label={hasReflection ? "Save & get feedback" : "Get feedback"}
             loading={busy}
             onPress={() => onSubmit(false)}
           />

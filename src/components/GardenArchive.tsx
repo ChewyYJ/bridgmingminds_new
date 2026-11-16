@@ -1,7 +1,8 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useState } from "react";
 import { View, Text } from "react-native";
 import { ArchivedPlant } from "../types";
-import { Button, C, Card, T } from "./ui";
+import { Button, Card } from "./ui";
 import { MeadowPlant } from "./GardenIsland";
 
 export function GardenArchive({
@@ -15,6 +16,8 @@ export function GardenArchive({
   hasSpace: boolean;
   onRestore: (plant: ArchivedPlant) => void;
 }) {
+  const { C, T } = useTheme();
+
   const [visible, setVisible] = useState(6);
   return (
     <View testID="garden-archive" style={{ gap: 14 }}>

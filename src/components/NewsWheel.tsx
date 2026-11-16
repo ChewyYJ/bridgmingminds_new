@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useEffect, useState } from "react";
 import {
   Animated,
@@ -9,14 +10,19 @@ import {
 } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import { useReducedMotion } from "../hooks/useReducedMotion";
-import { C, Icon, T } from "./ui";
+import { Icon } from "./ui";
 
 const segments = Array.from({ length: 8 }, (_, index) => {
   const start = ((index * 45 - 90) * Math.PI) / 180;
   const end = start + Math.PI / 4;
   return `M100 100 L${100 + 92 * Math.cos(start)} ${100 + 92 * Math.sin(start)} A92 92 0 0 1 ${100 + 92 * Math.cos(end)} ${100 + 92 * Math.sin(end)} Z`;
 });
-const colors = [C.sage, C.peach, C.cream, C.yellow];
+const useColorsStyles = createThemedStyles(({ C }) => [
+  C.sage,
+  C.peach,
+  C.cream,
+  C.yellow,
+]);
 
 export function NewsWheel({
   busy,
@@ -27,6 +33,9 @@ export function NewsWheel({
   disabled: boolean;
   onSpin: () => void;
 }) {
+  const { C, T } = useTheme();
+  const colors = useColorsStyles();
+
   const reduced = useReducedMotion();
   const [rotation] = useState(() => new Animated.Value(0));
   const [focused, setFocused] = useState(false);

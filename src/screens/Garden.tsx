@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
@@ -6,16 +7,7 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from "react-native";
-import {
-  C,
-  T,
-  Card,
-  Button,
-  Tag,
-  Icon,
-  ErrorNote,
-  Resource,
-} from "../components/ui";
+import { Card, Button, Tag, Icon, ErrorNote, Resource } from "../components/ui";
 import { GardenIsland, MeadowPlant } from "../components/GardenIsland";
 import { GardenArchive } from "../components/GardenArchive";
 import { PlantStudio } from "../components/PlantStudio";
@@ -107,6 +99,8 @@ function PlantCategories({
   value: "greenery" | "flowers";
   onChange: (value: "greenery" | "flowers") => void;
 }) {
+  const { C, T } = useTheme();
+
   return (
     <View style={{ flexDirection: "row", gap: 6 }}>
       {(["greenery", "flowers"] as const).map((item) => (
@@ -154,6 +148,9 @@ export function Garden({
   startPractice: () => void;
   onInteractionChange?: (active: boolean) => void;
 }) {
+  const { C, T } = useTheme();
+  const s = useStyles();
+
   const { width } = useWindowDimensions();
   const [snapshot, setSnapshot] = useState<{
     data: AppState;
@@ -470,7 +467,9 @@ export function Garden({
         },
       },
       {
-        water: data.profile.dailyWorkout ? "A little care, just for enjoyment. Your plant stays safe." : "Watered. Next care in 2 days.",
+        water: data.profile.dailyWorkout
+          ? "A little care, just for enjoyment. Your plant stays safe."
+          : "Watered. Next care in 2 days.",
         archive: "Plant archived. Care paused.",
         clear: "Space cleared.",
         replant: "Replanted. A fresh start.",
@@ -519,7 +518,12 @@ export function Garden({
           {planted.length} / {data.plots.length} planted
         </Tag>
       </View>
-      {data.profile.dailyWorkout ? <Text style={T.body}>A little space to make your own. Your plants stay safe while you take a break.</Text> : null}
+      {data.profile.dailyWorkout ? (
+        <Text style={T.body}>
+          A little space to make your own. Your plants stay safe while you take
+          a break.
+        </Text>
+      ) : null}
       <View
         style={{
           flexDirection: "row",
@@ -559,7 +563,11 @@ export function Garden({
           <Icon name={showArchive ? "chevron-up" : "chevron-down"} size={15} />
         </Pressable>
       </View>
-      <Text style={T.small}>{data.profile.dailyWorkout ? "Water and decorate whenever you like." : "Water every 2 days to keep your plants healthy."}</Text>
+      <Text style={T.small}>
+        {data.profile.dailyWorkout
+          ? "Water and decorate whenever you like."
+          : "Water every 2 days to keep your plants healthy."}
+      </Text>
       {showArchive ? actionFeedback : null}
       {showArchive ? (
         <GardenArchive
@@ -1001,10 +1009,10 @@ export function Garden({
                   {plot.carePolicy === "non_punitive_v1"
                     ? "Optional care · your plant stays safe"
                     : care === "dead"
-                    ? "Dead · 48h without water"
-                    : care === "thirsty"
-                      ? `Needs water · ${timeLeft(careRemainingMs(plot, now))} left`
-                      : `Water within ${timeLeft(careRemainingMs(plot, now))}`}
+                      ? "Dead · 48h without water"
+                      : care === "thirsty"
+                        ? `Needs water · ${timeLeft(careRemainingMs(plot, now))} left`
+                        : `Water within ${timeLeft(careRemainingMs(plot, now))}`}
                 </Text>
               </View>
               <View style={s.row}>
@@ -1034,9 +1042,16 @@ export function Garden({
                 ) : (
                   <>
                     <Button
-                      label={data.profile.dailyWorkout ? "Water · free" : "Water · 1 water"}
+                      label={
+                        data.profile.dailyWorkout
+                          ? "Water · free"
+                          : "Water · 1 water"
+                      }
                       icon="droplet"
-                      disabled={disabled || (!data.profile.dailyWorkout && data.wallet.water < 1)}
+                      disabled={
+                        disabled ||
+                        (!data.profile.dailyWorkout && data.wallet.water < 1)
+                      }
                       loading={busy}
                       onPress={() => careAction("water")}
                     />
@@ -1355,80 +1370,87 @@ export function Garden({
     </View>
   );
 }
-const s = StyleSheet.create({
-  headingRow: {
-    flexDirection: "row",
-    gap: 16,
-    alignItems: "center",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-  },
-  row: { flexDirection: "row", gap: 9, alignItems: "center", flexWrap: "wrap" },
-  workspace: {
-    gap: 24,
-    borderTopWidth: 1,
-    borderColor: C.border,
-    paddingTop: 24,
-    alignItems: "stretch",
-  },
-  worldFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    padding: 12,
-    paddingHorizontal: 18,
-    borderRadius: 30,
-    backgroundColor: "#EBEFDFA0",
-    marginTop: 6,
-  },
-  studio: {
-    backgroundColor: "#F6F4EB",
-    borderRadius: 21,
-    borderWidth: 1,
-    borderColor: "#E6E6D8",
-    padding: 18,
-    gap: 17,
-  },
-  tabs: {
-    flexDirection: "row",
-    gap: 4,
-    backgroundColor: "#E9EBDD",
-    padding: 4,
-    borderRadius: 11,
-  },
-  tab: {
-    flex: 1,
-    minHeight: 40,
-    borderRadius: 8,
-    flexDirection: "row",
-    gap: 6,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dropMarker: {
-    position: "absolute",
-    width: 34,
-    height: 22,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderStyle: "dashed",
-    borderColor: "#FFF7DD",
-    backgroundColor: "#FCFFD960",
-  },
-  notice: {
-    borderRadius: 12,
-    backgroundColor: C.sage,
-    padding: 13,
-    flexDirection: "row",
-    gap: 10,
-    alignItems: "center",
-  },
-  moveButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 9,
-    backgroundColor: C.sage,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    headingRow: {
+      flexDirection: "row",
+      gap: 16,
+      alignItems: "center",
+      justifyContent: "space-between",
+      flexWrap: "wrap",
+    },
+    row: {
+      flexDirection: "row",
+      gap: 9,
+      alignItems: "center",
+      flexWrap: "wrap",
+    },
+    workspace: {
+      gap: 24,
+      borderTopWidth: 1,
+      borderColor: C.border,
+      paddingTop: 24,
+      alignItems: "stretch",
+    },
+    worldFooter: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      padding: 12,
+      paddingHorizontal: 18,
+      borderRadius: 30,
+      backgroundColor: "#EBEFDFA0",
+      marginTop: 6,
+    },
+    studio: {
+      backgroundColor: "#F6F4EB",
+      borderRadius: 21,
+      borderWidth: 1,
+      borderColor: "#E6E6D8",
+      padding: 18,
+      gap: 17,
+    },
+    tabs: {
+      flexDirection: "row",
+      gap: 4,
+      backgroundColor: "#E9EBDD",
+      padding: 4,
+      borderRadius: 11,
+    },
+    tab: {
+      flex: 1,
+      minHeight: 40,
+      borderRadius: 8,
+      flexDirection: "row",
+      gap: 6,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    dropMarker: {
+      position: "absolute",
+      width: 34,
+      height: 22,
+      borderRadius: 50,
+      borderWidth: 2,
+      borderStyle: "dashed",
+      borderColor: "#FFF7DD",
+      backgroundColor: "#FCFFD960",
+    },
+    notice: {
+      borderRadius: 12,
+      backgroundColor: C.sage,
+      padding: 13,
+      flexDirection: "row",
+      gap: 10,
+      alignItems: "center",
+    },
+    moveButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 9,
+      backgroundColor: C.sage,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  }),
+);

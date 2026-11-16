@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, {
   useId,
   useLayoutEffect,
@@ -35,7 +36,7 @@ import {
   MAX_PLAN_POINTS,
   MAX_PLAN_STROKES,
 } from "../../shared/planning-board.mjs";
-import { C, Icon, T } from "./ui";
+import { Icon } from "./ui";
 
 const WIDTH = 320,
   HEIGHT = 300;
@@ -65,6 +66,9 @@ export function CanvasAction({
   disabled?: boolean;
   selected?: boolean;
 }) {
+  const { C, T } = useTheme();
+  const s = useStyles();
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -169,6 +173,10 @@ function MovableIdea({
   onTextChange?: (text: string) => void;
   onInteractionChange?: (active: boolean) => void;
 }) {
+  const { C } = useTheme();
+
+  const s = useStyles();
+
   const [editing, setEditing] = useState(false);
   const didDrag = useRef(false);
   const origin = useRef({ x: node.x, y: node.y });
@@ -249,7 +257,7 @@ function MovableIdea({
               lineHeight: Math.max(14, 14 * scale),
               textAlignVertical: "center",
               textAlign: node.shape === "circle" ? "center" : "left",
-              color: "#3F4854",
+              color: C.ink,
             },
           ]}
         />
@@ -272,7 +280,10 @@ function MovableIdea({
           }}
           onPress={() => {
             // Browsers may emit a click after a drag has finished.
-            if (didDrag.current) { didDrag.current = false; return; }
+            if (didDrag.current) {
+              didDrag.current = false;
+              return;
+            }
             if (selected && !connecting && onTextChange) setEditing(true);
             else onSelect();
           }}
@@ -318,7 +329,7 @@ function MovableIdea({
               borderRadius: node.shape === "circle" ? 100 : 7,
               borderWidth: targeted ? 2 : 1,
               borderColor: selected || targeted ? "#68737D" : "#E2E5E8",
-              backgroundColor: "#FFFFFF",
+              backgroundColor: C.paper,
             },
           ]}
         >
@@ -330,6 +341,8 @@ function MovableIdea({
 }
 
 function NodeContent({ node, scale }: { node: PlanNode; scale: number }) {
+  const { C } = useTheme();
+
   const [title, ...detail] = node.text.split("\n");
   const circle = node.shape === "circle";
   return (
@@ -348,7 +361,7 @@ function NodeContent({ node, scale }: { node: PlanNode; scale: number }) {
           <Icon
             name="file-text"
             size={Math.max(11, 12 * scale)}
-            color="#78828D"
+            color={C.muted}
           />
         )}
         <Text
@@ -358,7 +371,7 @@ function NodeContent({ node, scale }: { node: PlanNode; scale: number }) {
             fontFamily: "DMBold",
             fontSize: Math.max(11, 11 * scale),
             lineHeight: Math.max(14, 14 * scale),
-            color: "#3F4854",
+            color: C.ink,
             textAlign: circle ? "center" : "left",
           }}
         >
@@ -372,7 +385,7 @@ function NodeContent({ node, scale }: { node: PlanNode; scale: number }) {
             fontFamily: "DM",
             fontSize: Math.max(10, 9 * scale),
             lineHeight: Math.max(12, 12 * scale),
-            color: "#7A828C",
+            color: C.muted,
           }}
         >
           {detail.join("\n") || "Add a supporting detail…"}
@@ -413,6 +426,9 @@ function ConnectionDot({
   onPick: () => void;
   onCancel: () => void;
 }) {
+  const { C } = useTheme();
+  const s = useStyles();
+
   const point = portPoint(node, port);
   const current = (dx: number, dy: number): Connection => ({
     from: node.id,
@@ -443,10 +459,10 @@ function ConnectionDot({
         s.nodePosition,
         touchStyle,
         {
-          left: point.x * scale - 16,
-          top: point.y * scale - 16,
-          width: 32,
-          height: 32,
+          left: point.x * scale - 22,
+          top: point.y * scale - 22,
+          width: 44,
+          height: 44,
         },
       ]}
     >
@@ -502,6 +518,9 @@ export function MindMapCanvas({
   onTextChange?: (id: string, text: string) => void;
   onInteractionChange?: (active: boolean) => void;
 }) {
+  const { T, C } = useTheme();
+  const s = useStyles();
+
   const [width, setWidth] = useState(280);
   const [connection, setConnection] = useState<Connection | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -570,7 +589,7 @@ export function MindMapCanvas({
               height={22}
               patternUnits="userSpaceOnUse"
             >
-              <Circle cx={2} cy={2} r={1} fill="#E9ECEF" />
+              <Circle cx={2} cy={2} r={1} fill={C.border} />
             </Pattern>
           </Defs>
           <Rect width="100%" height="100%" fill={`url(#${gridId})`} />
@@ -606,7 +625,7 @@ export function MindMapCanvas({
                 testID="mind-map-link"
                 d={curve(start, end, link.fromPort, link.toPort)}
                 fill="none"
-                stroke="#343B47"
+                stroke={C.ink}
                 strokeWidth={1.8}
                 strokeLinecap="round"
               />
@@ -621,7 +640,7 @@ export function MindMapCanvas({
                 connection.port,
               )}
               fill="none"
-              stroke="#343B47"
+              stroke={C.ink}
               strokeWidth={1.8}
               strokeDasharray="4 4"
             />
@@ -714,7 +733,7 @@ export function MindMapCanvas({
             onPress={() => setZoom((value) => Math.max(0.75, value - 0.25))}
             style={s.zoomButton}
           >
-            <Icon name="minus" size={17} color="#525C67" />
+            <Icon name="minus" size={17} color={C.muted} />
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -725,7 +744,7 @@ export function MindMapCanvas({
             }}
             style={[s.zoomButton, { minWidth: 48 }]}
           >
-            <Text style={[T.small, { color: "#525C67" }]}>
+            <Text style={[T.small, { color: C.muted }]}>
               {Math.round(zoom * 100)}%
             </Text>
           </Pressable>
@@ -737,7 +756,7 @@ export function MindMapCanvas({
             onPress={() => setZoom((value) => Math.min(2, value + 0.25))}
             style={s.zoomButton}
           >
-            <Icon name="plus" size={17} color="#525C67" />
+            <Icon name="plus" size={17} color={C.muted} />
           </Pressable>
         </View>
       )}
@@ -754,6 +773,9 @@ export function DrawingCanvas({
   onChange?: (strokes: PlanStroke[]) => void;
   onInteractionChange?: (active: boolean) => void;
 }) {
+  const { C, T } = useTheme();
+  const s = useStyles();
+
   const [width, setWidth] = useState(280);
   const [redo, setRedo] = useState<PlanStroke[]>([]);
   const [confirmClear, setConfirmClear] = useState(false);
@@ -918,78 +940,80 @@ export function DrawingCanvas({
   );
 }
 
-const s = StyleSheet.create({
-  action: {
-    flex: 1,
-    minHeight: 44,
-    padding: 8,
-    gap: 5,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 9,
-    backgroundColor: C.paper,
-  },
-  active: { backgroundColor: C.forest, borderColor: C.forest },
-  tools: { flexDirection: "row", gap: 8 },
-  mapViewport: {
-    width: "100%",
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  zoomBar: {
-    position: "absolute",
-    right: 8,
-    top: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.96)",
-    borderWidth: 1,
-    borderColor: "#ECEFF2",
-  },
-  zoomButton: {
-    minWidth: 36,
-    minHeight: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  canvas: {
-    width: "100%",
-    aspectRatio: WIDTH / HEIGHT,
-    backgroundColor: C.paper,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  empty: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    padding: 16,
-  },
-  nodePosition: { position: "absolute" },
-  node: {
-    flex: 1,
-    borderWidth: 1.5,
-    borderColor: C.border,
-    backgroundColor: "#FFFFFF",
-    boxShadow: "0 2px 5px rgba(35, 45, 55, 0.05)",
-    padding: 7,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  center: { textAlign: "center" },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    action: {
+      flex: 1,
+      minHeight: 44,
+      padding: 8,
+      gap: 5,
+      flexDirection: "row",
+      flexWrap: "wrap",
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 9,
+      backgroundColor: C.paper,
+    },
+    active: { backgroundColor: C.forest, borderColor: C.forest },
+    tools: { flexDirection: "row", gap: 8 },
+    mapViewport: {
+      width: "100%",
+      backgroundColor: C.paper,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 12,
+      overflow: "hidden",
+    },
+    zoomBar: {
+      position: "absolute",
+      right: 8,
+      top: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      borderRadius: 8,
+      backgroundColor: C.paper,
+      borderWidth: 1,
+      borderColor: C.border,
+    },
+    zoomButton: {
+      minWidth: 44,
+      minHeight: 44,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    canvas: {
+      width: "100%",
+      aspectRatio: WIDTH / HEIGHT,
+      backgroundColor: C.paper,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 12,
+      overflow: "hidden",
+    },
+    empty: {
+      position: "absolute",
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      padding: 16,
+    },
+    nodePosition: { position: "absolute" },
+    node: {
+      flex: 1,
+      borderWidth: 1.5,
+      borderColor: C.border,
+      backgroundColor: C.paper,
+      boxShadow: "0 2px 5px rgba(35, 45, 55, 0.05)",
+      padding: 7,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    center: { textAlign: "center" },
+  }),
+);

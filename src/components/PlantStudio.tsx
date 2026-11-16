@@ -1,3 +1,4 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, {
   useEffect,
   useLayoutEffect,
@@ -17,7 +18,7 @@ import {
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { Doodle, GardenPosition } from "../types";
-import { C, Icon, T } from "./ui";
+import { Icon } from "./ui";
 
 export type { Doodle } from "../types";
 export interface PlantStudioProps {
@@ -49,6 +50,9 @@ export function PlantStudio({
   onDrawingChange,
   disabled = false,
 }: PlantStudioProps) {
+  const { T } = useTheme();
+  const styles = useStyles();
+
   const [color, setColor] = useState(PALETTE[0].color);
   const [preview, setPreview] = useState<Stroke | null>(null);
   const [notice, setNotice] = useState("");
@@ -296,63 +300,65 @@ const webCanvasStyle = {
   userSelect: "none",
   cursor: "crosshair",
 } as unknown as ViewStyle;
-const styles = StyleSheet.create({
-  studio: { gap: 9, width: "100%" },
-  drawingRow: { flexDirection: "row", gap: 8, alignItems: "center" },
-  palette: { gap: 2, width: 44, alignItems: "center" },
-  colorButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 24,
-    borderWidth: 2,
-    borderColor: "transparent",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  selectedColor: { borderColor: C.ink, backgroundColor: "#FFFDF8" },
-  swatch: {
-    width: 29,
-    height: 29,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#5C6E50",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  canvas: {
-    flex: 1,
-    aspectRatio: 1,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderStyle: "dashed",
-    borderColor: "#AAB79B",
-    backgroundColor: "#FFFEF9",
-    overflow: "hidden",
-  },
-  blankHint: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    padding: 12,
-  },
-  hintText: { color: C.muted, textAlign: "center" },
-  toolbar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    gap: 2,
-  },
-  counter: { flex: 1, fontSize: 10 },
-  tool: {
-    minHeight: 44,
-    paddingHorizontal: 7,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    borderRadius: 10,
-  },
-  toolText: { fontFamily: "DMMedium", fontSize: 12, color: C.forest },
-  disabled: { opacity: 0.4 },
-  notice: { color: C.forest, fontSize: 11 },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    studio: { gap: 9, width: "100%" },
+    drawingRow: { flexDirection: "row", gap: 8, alignItems: "center" },
+    palette: { gap: 2, width: 44, alignItems: "center" },
+    colorButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 24,
+      borderWidth: 2,
+      borderColor: "transparent",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    selectedColor: { borderColor: C.ink, backgroundColor: "#FFFDF8" },
+    swatch: {
+      width: 29,
+      height: 29,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: "#5C6E50",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    canvas: {
+      flex: 1,
+      aspectRatio: 1,
+      borderRadius: 14,
+      borderWidth: 2,
+      borderStyle: "dashed",
+      borderColor: "#AAB79B",
+      backgroundColor: "#FFFEF9",
+      overflow: "hidden",
+    },
+    blankHint: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+      padding: 12,
+    },
+    hintText: { color: C.muted, textAlign: "center" },
+    toolbar: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      gap: 2,
+    },
+    counter: { flex: 1, fontSize: 10 },
+    tool: {
+      minHeight: 44,
+      paddingHorizontal: 7,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      borderRadius: 10,
+    },
+    toolText: { fontFamily: "DMMedium", fontSize: 12, color: C.forest },
+    disabled: { opacity: 0.4 },
+    notice: { color: C.forest, fontSize: 11 },
+  }),
+);

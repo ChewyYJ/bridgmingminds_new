@@ -1,3 +1,4 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -9,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { api } from "../lib/api";
-import { Button, C, Card, ErrorNote, Icon, T, Tag } from "./ui";
+import { Button, Card, ErrorNote, Icon, Tag } from "./ui";
 
 export type NewsResult = {
   articles: {
@@ -55,6 +56,8 @@ function nextDayBoundary(now: number, timezone: string) {
 }
 
 export function NewsFeed() {
+  const { C, T } = useTheme();
+
   const [feed, setFeed] = useState<NewsResult | null>(null);
   const [source, setSource] = useState<(typeof SOURCES)[number]>("All sources");
   const [loading, setLoading] = useState(true);
@@ -215,7 +218,7 @@ export function NewsFeed() {
                   T.small,
                   {
                     fontFamily: "DMBold",
-                    color: source === publisher ? "#FFF" : C.forest,
+                    color: source === publisher ? C.onPrimary : C.forest,
                   },
                 ]}
               >

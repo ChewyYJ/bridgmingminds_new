@@ -1,6 +1,13 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useEffect, useState } from "react";
-import { Platform, Pressable, Text, View, useWindowDimensions } from "react-native";
-import { C, T, Button, Card } from "../components/ui";
+import {
+  Platform,
+  Pressable,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { Button, Card } from "../components/ui";
 import { AvatarSprite, PixelImage } from "../avatar/AvatarSprite";
 import {
   AVATAR_PORTRAIT,
@@ -11,20 +18,26 @@ import { useReducedMotion } from "../hooks/useReducedMotion";
 import { WardrobeStudio } from "../avatar/WardrobeStudio";
 
 export function AvatarLab({ onBack }: { onBack: () => void }) {
+  const { C } = useTheme();
+
   const [tab, setTab] = useState<"studio" | "original">("studio");
   return (
     <View style={{ gap: 20 }}>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-        {([
-          ["studio", "Customise avatar"],
-          ["original", "Original preview"],
-        ] as const).map(([value, label]) => (
+        {(
+          [
+            ["studio", "Customise avatar"],
+            ["original", "Original preview"],
+          ] as const
+        ).map(([value, label]) => (
           <Pressable
             key={value}
             accessibilityRole="button"
             accessibilityLabel={label}
             accessibilityState={{ selected: tab === value }}
-            {...(Platform.OS === "web" ? { "aria-pressed": tab === value } : {})}
+            {...(Platform.OS === "web"
+              ? { "aria-pressed": tab === value }
+              : {})}
             onPress={() => setTab(value)}
             style={{
               minHeight: 44,
@@ -32,15 +45,23 @@ export function AvatarLab({ onBack }: { onBack: () => void }) {
               paddingVertical: 11,
               borderRadius: 10,
               borderWidth: 1,
-              borderColor: tab === value ? "#D8CBBE" : "#E7E7E7",
-              backgroundColor: tab === value ? "#EDE6DD" : "#FFFFFF",
+              borderColor: tab === value ? C.border : C.sage,
+              backgroundColor: tab === value ? C.sage : C.onPrimary,
             }}
           >
-            <Text style={{ fontFamily: "DMMedium", fontSize: 13, color: "#242424" }}>{label}</Text>
+            <Text
+              style={{ fontFamily: "DMMedium", fontSize: 13, color: C.ink }}
+            >
+              {label}
+            </Text>
           </Pressable>
         ))}
       </View>
-      {tab === "studio" ? <WardrobeStudio onBack={onBack} /> : <OriginalAvatarPreview onBack={onBack} />}
+      {tab === "studio" ? (
+        <WardrobeStudio onBack={onBack} />
+      ) : (
+        <OriginalAvatarPreview onBack={onBack} />
+      )}
     </View>
   );
 }
@@ -75,6 +96,8 @@ const CHIBI: {
 
 /** Preview of every avatar animation, styled after the BridgingMinds mock. */
 function OriginalAvatarPreview({ onBack }: { onBack: () => void }) {
+  const { C, T } = useTheme();
+
   const { width } = useWindowDimensions();
   const compact = width < 520;
   return (
@@ -152,6 +175,8 @@ function OriginalAvatarPreview({ onBack }: { onBack: () => void }) {
 
 /** Debate Street strip: stand still or walk back and forth. */
 function Street({ scale }: { scale: number }) {
+  const { T, C } = useTheme();
+
   const reduced = useReducedMotion();
   const [walking, setWalking] = useState(true);
   const [stripWidth, setStripWidth] = useState(0);
@@ -206,7 +231,7 @@ function Street({ scale }: { scale: number }) {
           height: spriteH + 26,
           borderRadius: 14,
           overflow: "hidden",
-          backgroundColor: "#EFE9E0",
+          backgroundColor: C.sage,
         }}
       >
         <View
@@ -216,7 +241,7 @@ function Street({ scale }: { scale: number }) {
             right: 0,
             bottom: 0,
             height: 34,
-            backgroundColor: "#E2DBD0",
+            backgroundColor: C.border,
           }}
         />
         <View
@@ -226,7 +251,7 @@ function Street({ scale }: { scale: number }) {
             right: 0,
             bottom: 34,
             height: 2,
-            backgroundColor: "#D6CEC1",
+            backgroundColor: C.border,
           }}
         />
         <View

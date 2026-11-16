@@ -1,3 +1,4 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useEffect, useRef, useState } from "react";
 import { READING_CRITERIA } from "../../shared/reading-rubric.mjs";
 import {
@@ -9,16 +10,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { router } from "expo-router";
-import {
-  Button,
-  C,
-  Card,
-  ErrorNote,
-  Field,
-  Icon,
-  T,
-  Tag,
-} from "../components/ui";
+import { Button, Card, ErrorNote, Field, Icon, Tag } from "../components/ui";
 import AudioInput, {
   AudioPlayback,
   RecordedAudio,
@@ -43,7 +35,13 @@ import type {
   WordReviewOutcome,
 } from "../types";
 
-export function DailyPlanIntro({ onStart, companion }: { onStart?: () => void; companion?: React.ReactNode }) {
+export function DailyPlanIntro({
+  onStart,
+  companion,
+}: {
+  onStart?: () => void;
+  companion?: React.ReactNode;
+}) {
   const { state, refresh } = useApp();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -99,77 +97,267 @@ export function DailyHome({
 }
 
 function ChallengeHub({
-  state, onRead, onSpin, busy, companion,
+  state,
+  onRead,
+  onSpin,
+  busy,
+  companion,
 }: {
-  state: AppState; onRead: () => void; onSpin: () => void;
-  busy?: string | null; companion?: React.ReactNode;
+  state: AppState;
+  onRead: () => void;
+  onSpin: () => void;
+  busy?: string | null;
+  companion?: React.ReactNode;
 }) {
+  const { C, T } = useTheme();
+
   const { width } = useWindowDimensions();
   const wide = width >= 1100;
   const daily = state.dailyWorkout;
   const complete = Boolean(daily && daily.completed === daily.required);
   const first = state.profile.displayName.trim().split(" ")[0];
-  const [savedDraft, setSavedDraft] = useState<{ owner: string; day: string; pending: boolean } | null>(null);
-  const savedSpeaking = savedDraft?.owner === state.profile.id && savedDraft.day === daily?.day && savedDraft.pending;
+  const [savedDraft, setSavedDraft] = useState<{
+    owner: string;
+    day: string;
+    pending: boolean;
+  } | null>(null);
+  const savedSpeaking =
+    savedDraft?.owner === state.profile.id &&
+    savedDraft.day === daily?.day &&
+    savedDraft.pending;
   useEffect(() => {
     let active = true;
     const day = daily?.day;
-    if (day) void loadDraft("daily-speaking-v2:" + day + ":new").then(raw => {
-      if (!active || !isDraftOwner(state.profile.id)) return;
-      let pending = false;
-      try {
-        const saved = raw ? JSON.parse(raw) : null;
-        pending = saved?.version === 1 && ["board", "speak", "transcript", "processing"].includes(saved.step) && saved.attempt?.status !== "completed";
-      } catch { /* An unreadable draft must not claim resumable work. */ }
-      setSavedDraft({ owner: state.profile.id, day, pending });
-    }).catch(() => undefined);
-    return () => { active = false; };
+    if (day)
+      void loadDraft("daily-speaking-v2:" + day + ":new")
+        .then((raw) => {
+          if (!active || !isDraftOwner(state.profile.id)) return;
+          let pending = false;
+          try {
+            const saved = raw ? JSON.parse(raw) : null;
+            pending =
+              saved?.version === 1 &&
+              ["board", "speak", "transcript", "processing"].includes(
+                saved.step,
+              ) &&
+              saved.attempt?.status !== "completed";
+          } catch {
+            /* An unreadable draft must not claim resumable work. */
+          }
+          setSavedDraft({ owner: state.profile.id, day, pending });
+        })
+        .catch(() => undefined);
+    return () => {
+      active = false;
+    };
   }, [state.profile.id, daily?.day, daily?.completed]);
-  const readDone = Boolean(daily?.activities.find(item => item.type === "read_aloud")?.completed);
-  const spinDone = Boolean(daily?.activities.find(item => item.type === "spin_speak")?.completed);
-  const next = savedSpeaking && !spinDone ? "spin_speak" : !readDone ? "read_aloud" : !spinDone ? "spin_speak" : null;
-  const continuePractice = () => next === "read_aloud" ? onRead() : next === "spin_speak" ? onSpin() : router.push("/play" as never);
-  const reviewWords = () => router.push(state.profile.dailyWorkout && state.profile.wordBloomEnabled !== false ? "/vocabulary-review" : "/progress" as never);
+  const readDone = Boolean(
+    daily?.activities.find((item) => item.type === "read_aloud")?.completed,
+  );
+  const spinDone = Boolean(
+    daily?.activities.find((item) => item.type === "spin_speak")?.completed,
+  );
+  const next =
+    savedSpeaking && !spinDone
+      ? "spin_speak"
+      : !readDone
+        ? "read_aloud"
+        : !spinDone
+          ? "spin_speak"
+          : null;
+  const continuePractice = () =>
+    next === "read_aloud"
+      ? onRead()
+      : next === "spin_speak"
+        ? onSpin()
+        : router.push("/play" as never);
+  const reviewWords = () =>
+    router.push(
+      state.profile.dailyWorkout && state.profile.wordBloomEnabled !== false
+        ? "/vocabulary-review"
+        : ("/progress" as never),
+    );
   return (
-    <View style={{ width: "100%", maxWidth: 1040, alignSelf: "center", gap: 20 }} testID="daily-hub">
+    <View
+      style={{ width: "100%", maxWidth: 1040, alignSelf: "center", gap: 20 }}
+      testID="daily-hub"
+    >
       <View style={{ gap: 4 }}>
         <Text style={T.body}>Hello{first ? ", " + first : ""}</Text>
-        <Text accessibilityRole="header" style={T.title}>A little practice today.</Text>
-        <Text style={T.small} testID="daily-streak-status">{complete ? "Both daily activities are complete. Make the next step your own." : "One small step, at your pace."}</Text>
+        <Text accessibilityRole="header" style={T.title}>
+          A little practice today.
+        </Text>
+        <Text style={T.small} testID="daily-streak-status">
+          {complete
+            ? "Both daily activities are complete. Make the next step your own."
+            : "One small step, at your pace."}
+        </Text>
       </View>
-      <View style={{ flexDirection: wide ? "row" : "column", alignItems: "stretch", gap: 20 }}>
+      <View
+        style={{
+          flexDirection: wide ? "row" : "column",
+          alignItems: "stretch",
+          gap: 20,
+        }}
+      >
         <View style={{ flex: wide ? 1 : undefined, gap: 14 }}>{companion}</View>
         <View style={{ flex: wide ? 1.2 : undefined, gap: 16, minWidth: 0 }}>
           <Card style={{ padding: 16, gap: 14 }}>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
-              <Text accessibilityRole="header" style={[T.h2, { fontSize: 20 }]}>Today’s practice</Text>
-              <Text testID="daily-progress" style={T.small}>{daily?.completed ?? 0} of {daily?.required ?? 2} complete</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <Text accessibilityRole="header" style={[T.h2, { fontSize: 20 }]}>
+                Today’s practice
+              </Text>
+              <Text testID="daily-progress" style={T.small}>
+                {daily?.completed ?? 0} of {daily?.required ?? 2} complete
+              </Text>
             </View>
             {[
-              { id: "read_aloud", title: "Read aloud", duration: "About 3 min", icon: "book-open", action: onRead },
-              { id: "spin_speak", title: "Spin & Speak", duration: "About 4 min", icon: "mic", action: onSpin },
-            ].map(item => {
-              const activity = daily?.activities.find(entry => entry.type === item.id);
+              {
+                id: "read_aloud",
+                title: "Read aloud",
+                duration: "About 3 min",
+                icon: "book-open",
+                action: onRead,
+              },
+              {
+                id: "spin_speak",
+                title: "Spin & Speak",
+                duration: "About 4 min",
+                icon: "mic",
+                action: onSpin,
+              },
+            ].map((item) => {
+              const activity = daily?.activities.find(
+                (entry) => entry.type === item.id,
+              );
               const isNext = next === item.id;
-              return <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.title}
-                accessibilityHint={activity?.completed ? "Completed today. Practise again." : isNext ? "Your next daily activity" : "Start this daily activity"}
-                accessibilityState={{ disabled: Boolean(busy), busy: busy === item.id }} disabled={Boolean(busy)} onPress={item.action}
-                style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, minHeight: 76, borderRadius: 13, backgroundColor: isNext ? C.sage : "#F5F1EC", opacity: pressed || (busy && busy !== item.id) ? 0.65 : 1 })}>
-                <View style={{ width: 38, height: 42, alignItems: "center", justifyContent: "center", backgroundColor: C.paper, borderRadius: 10 }}><Icon name={activity?.completed ? "check" : item.icon} size={21} /></View>
-                <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-                  <Text style={[T.h3, { fontSize: 16 }]}>{item.title}</Text>
-                  <Text style={T.small}>{activity?.completed ? "Completed · practise again" : savedSpeaking && item.id === "spin_speak" ? "Your saved plan · resume" : item.duration + (isNext ? " · Next up" : "")}</Text>
-                  {!activity?.completed && activity && <Text style={T.small}>+{activity.coins ?? 0} Coins{activity.xp ? " · +" + activity.xp + " XP" : ""}</Text>}
-                </View>
-                {busy === item.id ? <ActivityIndicator color={C.forest} /> : <Icon name={activity?.completed ? "check" : "chevron-right"} size={19} />}
-              </Pressable>;
+              return (
+                <Pressable
+                  key={item.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={item.title}
+                  accessibilityHint={
+                    activity?.completed
+                      ? "Completed today. Practise again."
+                      : isNext
+                        ? "Your next daily activity"
+                        : "Start this daily activity"
+                  }
+                  accessibilityState={{
+                    disabled: Boolean(busy),
+                    busy: busy === item.id,
+                  }}
+                  disabled={Boolean(busy)}
+                  onPress={item.action}
+                  style={({ pressed }) => ({
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: 12,
+                    minHeight: 76,
+                    borderRadius: 13,
+                    backgroundColor: isNext ? C.sage : C.quiet,
+                    opacity: pressed || (busy && busy !== item.id) ? 0.65 : 1,
+                  })}
+                >
+                  <View
+                    style={{
+                      width: 38,
+                      height: 42,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: C.paper,
+                      borderRadius: 10,
+                    }}
+                  >
+                    <Icon
+                      name={activity?.completed ? "check" : item.icon}
+                      size={21}
+                    />
+                  </View>
+                  <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+                    <Text style={[T.h3, { fontSize: 16 }]}>{item.title}</Text>
+                    <Text style={T.small}>
+                      {activity?.completed
+                        ? "Completed · practise again"
+                        : savedSpeaking && item.id === "spin_speak"
+                          ? "Your saved plan · resume"
+                          : item.duration + (isNext ? " · Next up" : "")}
+                    </Text>
+                    {!activity?.completed && activity && (
+                      <Text style={T.small}>
+                        +{activity.coins ?? 0} Coins
+                        {activity.xp ? " · +" + activity.xp + " XP" : ""}
+                      </Text>
+                    )}
+                  </View>
+                  {busy === item.id ? (
+                    <ActivityIndicator color={C.forest} />
+                  ) : (
+                    <Icon
+                      name={activity?.completed ? "check" : "chevron-right"}
+                      size={19}
+                    />
+                  )}
+                </Pressable>
+              );
             })}
-            <Button label={complete ? "Explore more practice" : daily ? "Continue practice" : "Start daily practice"} icon="arrow-right" disabled={Boolean(busy)} loading={Boolean(busy)} onPress={continuePractice} />
+            <Button
+              label={
+                complete
+                  ? "Explore more practice"
+                  : daily
+                    ? "Continue practice"
+                    : "Start daily practice"
+              }
+              icon="arrow-right"
+              disabled={Boolean(busy)}
+              loading={Boolean(busy)}
+              onPress={continuePractice}
+            />
           </Card>
-          <Pressable accessibilityRole="button" accessibilityLabel="Word review" onPress={reviewWords} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, minHeight: 78, borderWidth: 1, borderColor: C.border, backgroundColor: C.paper, borderRadius: 16, opacity: pressed ? 0.7 : 1 })}>
-            <Icon name="book-open" size={23} /><View style={{ flex: 1, gap: 2 }}><Text style={T.h3}>Word review</Text><Text style={T.small}>{state.profile.dailyWorkout && state.profile.wordBloomEnabled !== false ? "Use the words you’ve saved · about 2 min" : "Find your saved words in My Dictionary"}</Text></View><Icon name="chevron-right" size={18} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Word review"
+            onPress={reviewWords}
+            style={({ pressed }) => ({
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              padding: 16,
+              minHeight: 78,
+              borderWidth: 1,
+              borderColor: C.border,
+              backgroundColor: C.paper,
+              borderRadius: 16,
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <Icon name="book-open" size={23} />
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={T.h3}>Word review</Text>
+              <Text style={T.small}>
+                {state.profile.dailyWorkout &&
+                state.profile.wordBloomEnabled !== false
+                  ? "Use the words you’ve saved · about 2 min"
+                  : "Find your saved words in My Dictionary"}
+              </Text>
+            </View>
+            <Icon name="chevron-right" size={18} />
           </Pressable>
-          <Button label="Your progress" variant="ghost" onPress={() => router.push("/progress" as never)} />
+          <Button
+            label="Your progress"
+            variant="ghost"
+            onPress={() => router.push("/progress" as never)}
+          />
         </View>
       </View>
     </View>
@@ -177,6 +365,8 @@ function ChallengeHub({
 }
 
 export function ReadAloud() {
+  const { C, T } = useTheme();
+
   const { height } = useWindowDimensions();
   const { state, refresh } = useApp();
   const uid = state!.profile.id;
@@ -423,7 +613,8 @@ export function ReadAloud() {
               }}
             >
               <Text testID="reading-reward" style={T.h3}>
-                +{result.rewards.coins || 0} Coins{result.rewards.xp ? ` · +${result.rewards.xp} XP` : ""}
+                +{result.rewards.coins || 0} Coins
+                {result.rewards.xp ? ` · +${result.rewards.xp} XP` : ""}
               </Text>
               <Text style={T.small}>Practice complete</Text>
             </View>

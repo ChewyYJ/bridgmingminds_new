@@ -1,9 +1,10 @@
+import { useTheme, createThemedStyles } from "../theme/ThemeProvider";
 import React, { useState } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { getAssessmentRubric } from "../../shared/assessment-rubrics.mjs";
 import { getBridgeRubric } from "../../shared/bridge-rubric.mjs";
 import type { Evaluation, Mode } from "../types";
-import { C, ErrorNote, Icon, T } from "./ui";
+import { ErrorNote, Icon } from "./ui";
 
 export function AssessmentCriteria({
   mode,
@@ -16,10 +17,17 @@ export function AssessmentCriteria({
   disclosure?: boolean;
   framework?: string;
 }) {
+  const { C, T } = useTheme();
+  const s = useStyles();
+
   const [expanded, setExpanded] = useState(false);
   const [focused, setFocused] = useState(false);
   const [error, setError] = useState("");
-  const rubric = framework === "bridge-v1" || evaluation?.assessment?.framework_id === "bridge-v1" ? getBridgeRubric() : getAssessmentRubric(mode);
+  const rubric =
+    framework === "bridge-v1" ||
+    evaluation?.assessment?.framework_id === "bridge-v1"
+      ? getBridgeRubric()
+      : getAssessmentRubric(mode);
   const matchingVersion =
     !evaluation || evaluation.assessment?.framework_id === rubric.id;
   const foundations = evaluation?.assessment?.foundations || rubric.foundations;
@@ -66,8 +74,8 @@ export function AssessmentCriteria({
             {evaluation?.assessment?.title || rubric.title}
           </Text>
           <Text style={T.small}>
-            {rubric.criteria.length} criteria for this response. AI ratings are provisional; local
-            coaching has no scores.
+            {rubric.criteria.length} criteria for this response. AI ratings are
+            provisional; local coaching has no scores.
           </Text>
           {matchingVersion ? (
             rubric.criteria.map((criterion) => (
@@ -145,46 +153,48 @@ export function AssessmentCriteria({
   );
 }
 
-const s = StyleSheet.create({
-  container: {
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 15,
-    backgroundColor: C.paper,
-    overflow: "hidden",
-  },
-  toggle: {
-    minHeight: 48,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    borderWidth: 2,
-    borderColor: "transparent",
-    borderRadius: 14,
-  },
-  toggleText: { flex: 1, color: C.forest, fontFamily: "DMBold" },
-  details: { gap: 14 },
-  inset: { padding: 16, paddingTop: 4 },
-  criterion: {
-    gap: 8,
-    borderTopWidth: 1,
-    borderColor: C.border,
-    paddingTop: 13,
-  },
-  criterionTitle: { color: C.ink, fontFamily: "DMBold" },
-  anchor: { flexDirection: "row", alignItems: "flex-start", gap: 9 },
-  number: { color: C.forest, fontFamily: "DMBold", width: 14 },
-  anchorText: { flex: 1 },
-  sources: { gap: 4 },
-  source: {
-    minHeight: 44,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  sourceText: { flex: 1, color: C.forest, textDecorationLine: "underline" },
-});
+const useStyles = createThemedStyles(({ C }) =>
+  StyleSheet.create({
+    container: {
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: 15,
+      backgroundColor: C.paper,
+      overflow: "hidden",
+    },
+    toggle: {
+      minHeight: 48,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      borderWidth: 2,
+      borderColor: "transparent",
+      borderRadius: 14,
+    },
+    toggleText: { flex: 1, color: C.forest, fontFamily: "DMBold" },
+    details: { gap: 14 },
+    inset: { padding: 16, paddingTop: 4 },
+    criterion: {
+      gap: 8,
+      borderTopWidth: 1,
+      borderColor: C.border,
+      paddingTop: 13,
+    },
+    criterionTitle: { color: C.ink, fontFamily: "DMBold" },
+    anchor: { flexDirection: "row", alignItems: "flex-start", gap: 9 },
+    number: { color: C.forest, fontFamily: "DMBold", width: 14 },
+    anchorText: { flex: 1 },
+    sources: { gap: 4 },
+    source: {
+      minHeight: 44,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      paddingVertical: 8,
+      borderRadius: 6,
+    },
+    sourceText: { flex: 1, color: C.forest, textDecorationLine: "underline" },
+  }),
+);

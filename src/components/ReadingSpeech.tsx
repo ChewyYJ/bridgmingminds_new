@@ -1,9 +1,10 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { api, isDraftOwner } from "../lib/api";
 import { useApp } from "../lib/state";
 import type { ReadAloudAttempt, SpeechAssessment } from "../types";
-import { Button, C, Card, ErrorNote, T } from "./ui";
+import { Button, Card, ErrorNote } from "./ui";
 import { ReadingEvaluation } from "./ReadingEvaluation";
 import { ReadingSample } from "./ReadingSample";
 import { PrivateRecordingPlayback } from "./PrivateRecording";
@@ -29,6 +30,8 @@ export function ReadingSpeech({
   feedbackRequested?: boolean;
   onComplete?: () => void;
 }) {
+  const { C, T } = useTheme();
+
   const { state } = useApp();
   const uid = state!.profile.id;
   const [job, setJob] = useState<SpeechJob | null>(null);

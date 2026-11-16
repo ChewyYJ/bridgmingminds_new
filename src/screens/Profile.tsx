@@ -1,7 +1,8 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React, { useState } from "react";
 import { View, Text, Pressable, Platform } from "react-native";
 import Svg, { Polyline, Circle, Line, Text as SvgText } from "react-native-svg";
-import { C, T, Card, Button, Tag, Icon } from "../components/ui";
+import { Card, Button, Tag, Icon } from "../components/ui";
 import { AppState, Attempt, Mode } from "../types";
 import { modeNames } from "./Dashboard";
 import { PracticeWeek } from "../components/PracticeWeek";
@@ -28,6 +29,8 @@ export function ProfileScreen({
   openAvatar?: () => void;
   start: (m: Mode) => void;
 }) {
+  const { C, T } = useTheme();
+
   const [mode, setMode] = useState<Mode>("spin_speak");
   const [range, setRange] = useState("30 days");
   const [now] = useState(() => Date.now());
@@ -60,23 +63,81 @@ export function ProfileScreen({
     Array.from(groups.values()).sort((a, b) => b.length - a.length)[0] || [];
   const show = comparable.length >= 3;
   const plot = comparable.slice(0, 7).reverse();
-  const badges = (state.gamification?.achievements || []).map((achievement) => ({
-    icon: "award",
-    title: achievement.title,
-    copy: achievement.description,
-    earned: !!achievement.earnedAt,
-  }));
+  const badges = (state.gamification?.achievements || []).map(
+    (achievement) => ({
+      icon: "award",
+      title: achievement.title,
+      copy: achievement.description,
+      earned: !!achievement.earnedAt,
+    }),
+  );
   return (
     <View style={{ gap: 24 }}>
-      <AvatarPanelHeader title="My profile" subtitle={`${state.profile.displayName} · Level ${state.gamification?.level || 1}`} onSettings={openSettings} />
-      {openAvatar && <View style={{ flexDirection: "row", padding: 3, backgroundColor: C.cream, borderRadius: 12, borderWidth: 1, borderColor: C.border }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Avatar" accessibilityState={{ selected: false }} onPress={openAvatar} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center" }}><Text style={[T.small, { color: C.ink, fontSize: 14 }]}>Avatar</Text></Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Progress" accessibilityState={{ selected: true }} {...(Platform.OS === "web" ? { "aria-pressed": true } : {})} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center", borderRadius: 9, backgroundColor: C.forest }}><Text style={[T.small, { color: C.paper, fontFamily: "DMBold", fontSize: 14 }]}>Progress</Text></Pressable>
-      </View>}
+      <AvatarPanelHeader
+        title="My profile"
+        subtitle={`${state.profile.displayName} · Level ${state.gamification?.level || 1}`}
+        onSettings={openSettings}
+      />
+      {openAvatar && (
+        <View
+          style={{
+            flexDirection: "row",
+            padding: 3,
+            backgroundColor: C.cream,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: C.border,
+          }}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Avatar"
+            accessibilityState={{ selected: false }}
+            onPress={openAvatar}
+            style={{
+              flex: 1,
+              minHeight: 44,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text style={[T.small, { color: C.ink, fontSize: 14 }]}>
+              Avatar
+            </Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Progress"
+            accessibilityState={{ selected: true }}
+            {...(Platform.OS === "web" ? { "aria-pressed": true } : {})}
+            style={{
+              flex: 1,
+              minHeight: 44,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 9,
+              backgroundColor: C.forest,
+            }}
+          >
+            <Text
+              style={[
+                T.small,
+                { color: C.paper, fontFamily: "DMBold", fontSize: 14 },
+              ]}
+            >
+              Progress
+            </Text>
+          </Pressable>
+        </View>
+      )}
       <Text style={T.h2}>Your progress</Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 14 }}>
         {[
-          [completed.length + (state.readAloudAttempts?.length || 0), "Practices completed", "book-open"],
+          [
+            completed.length + (state.readAloudAttempts?.length || 0),
+            "Practices completed",
+            "book-open",
+          ],
           [
             state.practiceWeek?.days.length || 0,
             "Practice days this week",
@@ -90,7 +151,7 @@ export function ProfileScreen({
           [state.xp, "Practice XP", "feather"],
         ].map(([n, l, icon]) => (
           <Card key={String(l)} style={{ flex: 1, minWidth: 140, gap: 12 }}>
-            <Icon name={icon} />
+            <Icon name={String(icon)} />
             <Text style={[T.title, { fontSize: 31 }]}>{n}</Text>
             <Text style={T.small}>{l}</Text>
           </Card>
@@ -98,21 +159,47 @@ export function ProfileScreen({
       </View>
       <PracticeWeek week={state.practiceWeek} />
       {state.profile.dailyWorkout ? <WordBloomProgress /> : null}
-      {state.profile.dailyWorkout ? <LearnerProfile start={() => start("spin_speak")} /> : null}
-      {state.dailyWorkout ? <Card style={{ gap: 10 }}>
-        <Text style={T.h2}>Daily workout · {state.dailyWorkout.completed}/2</Text>
-        <Text style={T.body}>{state.dailyWorkout.streak.securedToday ? "Today’s streak is secured." : "One eligible learning activity keeps your streak going. Both daily activities together earn 5 Coins."}</Text>
-        <Text style={T.small}>{state.dailyWorkout.streak.current} day streak · longest {state.dailyWorkout.streak.longest} · {state.dailyWorkout.timezone}. XP recognises participation; it does not measure mastery.</Text>
-      </Card> : null}
-      {!!state.readAloudAttempts?.length ? <Card style={{ gap: 12 }}>
-        <Text style={T.h2}>Read Aloud history</Text>
-        <Text style={T.small}>Self-review observations · no acoustic scores or mastery claims.</Text>
-        {state.readAloudAttempts.slice(0, 10).map((reading) => <View key={reading.id} style={{ gap: 4 }}>
-          <Text style={T.h3}>{reading.passage.title}</Text>
-          <Text style={T.small}>{new Date(reading.createdAt).toLocaleDateString(undefined, { timeZone: state.profile.timezone })}</Text>
-          <Text selectable style={T.body}>{reading.text}</Text>
-        </View>)}
-      </Card> : null}
+      {state.profile.dailyWorkout ? (
+        <LearnerProfile start={() => start("spin_speak")} />
+      ) : null}
+      {state.dailyWorkout ? (
+        <Card style={{ gap: 10 }}>
+          <Text style={T.h2}>
+            Daily workout · {state.dailyWorkout.completed}/2
+          </Text>
+          <Text style={T.body}>
+            {state.dailyWorkout.streak.securedToday
+              ? "Today’s streak is secured."
+              : "One eligible learning activity keeps your streak going. Both daily activities together earn 5 Coins."}
+          </Text>
+          <Text style={T.small}>
+            {state.dailyWorkout.streak.current} day streak · longest{" "}
+            {state.dailyWorkout.streak.longest} · {state.dailyWorkout.timezone}.
+            XP recognises participation; it does not measure mastery.
+          </Text>
+        </Card>
+      ) : null}
+      {!!state.readAloudAttempts?.length ? (
+        <Card style={{ gap: 12 }}>
+          <Text style={T.h2}>Read Aloud history</Text>
+          <Text style={T.small}>
+            Self-review observations · no acoustic scores or mastery claims.
+          </Text>
+          {state.readAloudAttempts.slice(0, 10).map((reading) => (
+            <View key={reading.id} style={{ gap: 4 }}>
+              <Text style={T.h3}>{reading.passage.title}</Text>
+              <Text style={T.small}>
+                {new Date(reading.createdAt).toLocaleDateString(undefined, {
+                  timeZone: state.profile.timezone,
+                })}
+              </Text>
+              <Text selectable style={T.body}>
+                {reading.text}
+              </Text>
+            </View>
+          ))}
+        </Card>
+      ) : null}
       <Card style={{ gap: 19 }}>
         <View
           style={{
@@ -226,7 +313,7 @@ export function ProfileScreen({
             style={{
               padding: 26,
               borderRadius: 15,
-              backgroundColor: "#F7F8F2",
+              backgroundColor: C.quiet,
               alignItems: "center",
               gap: 12,
             }}
@@ -300,19 +387,19 @@ export function ProfileScreen({
                 minWidth: 150,
                 alignItems: "center",
                 gap: 10,
-                backgroundColor: b.earned ? "#F4F3E6" : "#F8F8F5",
+                backgroundColor: b.earned ? "#F4F3E6" : C.quiet,
               }}
             >
               <View
                 style={{
                   borderRadius: 40,
                   padding: 16,
-                  backgroundColor: b.earned ? C.yellow : "#ECEEE7",
+                  backgroundColor: b.earned ? C.yellow : C.sage,
                 }}
               >
                 <Icon
                   name={b.icon}
-                  color={b.earned ? "#947B48" : "#ABB2A2"}
+                  color={b.earned ? C.orange : "#ABB2A2"}
                   size={23}
                 />
               </View>
@@ -320,7 +407,7 @@ export function ProfileScreen({
               <Text style={[T.small, { textAlign: "center", fontSize: 11 }]}>
                 {b.copy}
               </Text>
-              <Tag color={b.earned ? C.sage : "#ECEEE7"}>
+              <Tag color={b.earned ? C.sage : C.sage}>
                 {b.earned ? "Earned" : "Not yet"}
               </Tag>
             </Card>
