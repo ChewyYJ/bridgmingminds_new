@@ -221,7 +221,7 @@ for (const viewport of [{ name: "mobile", width: 390, height: 1000 }, { name: "d
     await page.getByRole("button", { name: "Spin & Speak", exact: true }).click();
     await expect.poll(() => new URL(page.url()).searchParams.get("mode")).toBe("spin_speak");
     await expect(page.getByTestId("daily-screen-entry")).toBeVisible();
-    await page.getByRole("button", { name: "Start brainstorming", exact: true }).click();
+    await page.getByRole("button", { name: "Plan your response", exact: true }).click();
     await expect(page.getByTestId("daily-screen-board")).toBeVisible();
     const enrolled = await (await page.request.get(`${base}/api/state`)).json();
     const draftKey = `mind-garden-draft:${enrolled.profile.id}:daily-speaking-v2:${enrolled.dailyWorkout.day}:new`;

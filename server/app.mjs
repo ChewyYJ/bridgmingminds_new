@@ -2,6 +2,8 @@ import express from "express";
 import { AsyncResource } from "node:async_hooks";
 import { Buffer } from "node:buffer";
 import { z } from "zod";
+import { planningBoardSchema } from "./planning-board-schema.mjs";
+import { planningBoardNotes } from "../shared/planning-board.mjs";
 import {
   randomUUID,
   randomBytes,
@@ -701,7 +703,7 @@ export function createApp(options = {}) {
     }),
   );
   app.use(
-    "/api/garden/plant",
+    ["/api/garden/plant", "/api/attempts", "/api/sessions"],
     express.json({
       limit: "128kb",
     }),
@@ -1088,9 +1090,10 @@ export function createApp(options = {}) {
       const point = z.object({ x: z.number().finite().min(-20).max(2000), y: z.number().finite().min(-20).max(2000) }).strict();
       const board = z.object({
         version: z.literal("daily-whiteboard-v1"),
+        planningBoard: planningBoardSchema.optional(),
         startedAt: z.string().datetime(), expiresAt: z.string().datetime(), completedAt: z.string().datetime().optional(),
         strokes: z.array(z.object({ id: z.string().max(80), points: z.array(point).min(2).max(1500) }).strict()).max(120),
-        notes: z.array(z.object({ id: z.string().max(80), text: z.string().max(240), x: z.number().finite().min(-20).max(2000), y: z.number().finite().min(-20).max(2000) }).strict()).max(40),
+        notes: z.array(z.object({ id: z.string().max(80), text: z.string().max(2000), x: z.number().finite().min(-20).max(2000), y: z.number().finite().min(-20).max(2000) }).strict()).max(40),
         connectors: z.array(z.object({ id: z.string().max(80), from: z.string().max(80), to: z.string().max(80) }).strict()).max(80),
         snapshot: z.object({ version: z.literal(1), savedAt: z.string().datetime(), elementCount: z.number().int().min(0).max(240) }).strict(),
       }).strict().parse(req.body);
@@ -1114,6 +1117,7 @@ export function createApp(options = {}) {
           text: z.string().trim().max(10000).default(""),
           selfReflection: selfReflectionSchema.optional(),
           planningNotes: z.string().trim().max(2000).optional(),
+          planningBoard: planningBoardSchema.optional(),
           responseType: z.enum(["text", "audio"]).default("text"),
           retryOf: z.string().uuid().optional(),
           audioId: z.string().uuid().optional(),
@@ -1129,6 +1133,7 @@ export function createApp(options = {}) {
       if (data.audioId)
         await audioRoutes.assertOwnAudio(data.audioId, req.userId);
       let planningNotes = data.planningNotes;
+      let planningBoard = data.planningBoard;
       if (data.retryOf) {
         const original = await getAttempt(data.retryOf, req.userId);
         if (
@@ -1137,7 +1142,10 @@ export function createApp(options = {}) {
         )
           throw failure(400, "Retry a completed answer from this challenge.");
         planningNotes ??= original.planningNotes;
+        planningBoard ??= original.planningBoard;
       }
+      planningBoard ??= session.dailySpeakingJourney?.brainstorm?.planningBoard;
+      if (planningBoard) planningNotes = planningBoardNotes(planningBoard);
       planningNotes ??= session.dailySpeakingJourney?.brainstorm?.notes
         .map(({ text }) => text.trim()).filter(Boolean).join("\n").slice(0, 2000);
       if (data.idempotencyKey) {
@@ -1154,7 +1162,8 @@ export function createApp(options = {}) {
       }
       const attempt = {
         ...data,
-        planningNotes: session.assessmentFramework === "bridge-v1" ? planningNotes : undefined,
+        planningBoard,
+        planningNotes: session.assessmentFramework === "bridge-v1" || session.mode === "read_reflect" ? planningNotes : undefined,
         id: id(),
         mode: session.mode,
         prompt: session.prompt.question,

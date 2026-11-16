@@ -15,7 +15,7 @@ test("news wheel changes the saved question, retains it on failure, and plans th
     .getByRole("textbox", { name: "Your name", exact: true })
     .fill("News preview");
   await page
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   const initialResponse = page.waitForResponse(
     (response) =>
@@ -23,7 +23,7 @@ test("news wheel changes the saved question, retains it on failure, and plans th
       response.request().method() === "POST",
   );
   await page
-    .getByRole("button", { name: "Spin and reflect", exact: true })
+    .getByRole("button", { name: "Spin & Speak", exact: true })
     .click();
   const initial = await (await initialResponse).json();
   expect(initial.newsSource).toBeTruthy();
@@ -41,7 +41,7 @@ test("news wheel changes the saved question, retains it on failure, and plans th
   await wheel.click();
   await expect(wheel).toBeDisabled();
   await expect(
-    page.getByRole("button", { name: "Start brainstorming", exact: true }),
+    page.getByRole("button", { name: "Plan your response", exact: true }),
   ).toBeDisabled();
   const next = await (await nextResponse).json();
   expect(next.newsSource.id).not.toBe(initial.newsSource.id);
@@ -92,7 +92,7 @@ test("news wheel changes the saved question, retains it on failure, and plans th
   expect(keys).toHaveLength(2);
   expect(keys[0]).toBe(keys[1]);
   await page
-    .getByRole("button", { name: "Start brainstorming", exact: true })
+    .getByRole("button", { name: "Plan your response", exact: true })
     .click();
   await expect(page.getByTestId("daily-screen-board")).toContainText(
     last.newsSource.title,

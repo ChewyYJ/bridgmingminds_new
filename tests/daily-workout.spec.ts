@@ -74,8 +74,8 @@ async function read(page: Page) {
 }
 async function speak(page: Page) {
   await page.getByRole("button", { name: "Spin and reflect", exact: true }).click();
-  await page.getByRole("button", { name: "Start brainstorming", exact: true }).click();
-  await page.getByRole("button", { name: "Done brainstorming", exact: true }).click();
+  await page.getByRole("button", { name: "Plan your response", exact: true }).click();
+  await page.getByRole("button", { name: "Ready to speak", exact: true }).click();
   const consent = page.getByRole("button", { name: "Allow Private Recording", exact: true });
   if (await consent.count()) await consent.click();
   await page.getByRole("button", { name: "Record my response", exact: true }).click();
