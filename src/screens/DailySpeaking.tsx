@@ -32,6 +32,8 @@ import type {
 import { getThoughtGuide } from "../../shared/thought-guide.mjs";
 import { getBridgeRubric } from "../../shared/bridge-rubric.mjs";
 import {
+  DAILY_VOCABULARY_TIER,
+  dailyVocabularyMinimum,
   isGuidedResponseDraft,
   type GuidedResponseDraft,
 } from "../../shared/guided-response.mjs";
@@ -1292,10 +1294,10 @@ export function DailySpeaking({
                 {script ? (
                   <>
                     <Text style={s.name}>
-                      New vocabulary ({script.vocabulary?.length || 0})
+                      New words and phrases ({script.vocabulary?.length || 0})
                     </Text>
                     {script.vocabulary?.length ? (
-                      <Text style={s.small}>Pick words to save to My Dictionary.</Text>
+                      <Text style={s.small}>Pick words or phrases to save to My Dictionary.</Text>
                     ) : null}
                     {(script.vocabulary || []).map((word) => {
                       const saved = savedWordIds.includes(word.wordId);
@@ -1349,24 +1351,25 @@ export function DailySpeaking({
                         </Pressable>
                       );
                     })}
-                    {!script.vocabulary?.length ? (
-                      script.vocabularyEligibleCount === 0 ? (
-                        <Text style={s.small}>There are no eligible new words for this sample.</Text>
-                      ) : (
-                        <Action
-                          label="Regenerate with vocabulary"
-                          secondary
-                          disabled={busy}
-                          onPress={() => void generateScript()}
-                        />
-                      )
-                    ) : (
+                    {script.vocabulary?.length ? (
                       <Action
                         label="Save selected words"
                         disabled={busy || !selectedWordIds.length}
                         onPress={() => void saveWords()}
                       />
-                    )}
+                    ) : script.vocabularyEligibleCount === 0 ? (
+                      <Text style={s.small}>There are no eligible new words for this sample.</Text>
+                    ) : null}
+                    {script.vocabularyTier !== DAILY_VOCABULARY_TIER ||
+                    (script.vocabulary?.length ?? 0) <
+                      dailyVocabularyMinimum(script.vocabularyEligibleCount ?? 0) ? (
+                      <Action
+                        label="Regenerate with advanced vocabulary"
+                        secondary
+                        disabled={busy}
+                        onPress={() => void generateScript()}
+                      />
+                    ) : null}
                   </>
                 ) : null}
                 <Action

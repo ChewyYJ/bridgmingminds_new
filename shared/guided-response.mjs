@@ -4,6 +4,8 @@ export const GUIDED_RESPONSE_LIMITS = {
   label: 60,
   explanation: 500,
 };
+export const DAILY_VOCABULARY_TIER = "advanced-phrases";
+export const dailyVocabularyMinimum = (eligibleCount) => Math.min(2, eligibleCount);
 
 // Hermes-compatible Unicode check; exact offsets always use JavaScript UTF-16.
 function wellFormed(text) {
@@ -38,6 +40,9 @@ export function isGuidedResponseDraft(value) {
     typeof value.createdAt !== "string" ||
     !Number.isFinite(Date.parse(value.createdAt)) ||
     !Array.isArray(value.annotations) ||
+    (value.vocabularyTier !== undefined &&
+      value.vocabularyTier !== "advanced" &&
+      value.vocabularyTier !== DAILY_VOCABULARY_TIER) ||
     (value.vocabularyEligibleCount === undefined && value.annotations.length < 2) ||
     value.annotations.length > 5
   )

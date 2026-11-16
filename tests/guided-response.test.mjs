@@ -154,49 +154,87 @@ async function fixture(t, options = {}) {
   };
 }
 
-test("daily sample words require explicit selection, persist once and reach Read Aloud", async (t) => {
+test("daily samples require two advanced items and phrases can be saved, read aloud and reviewed", async (t) => {
   const f = await fixture(t);
   const token = await f.guest();
   const { attempt } = await f.completed(token);
   await f.request("/daily-workout/enroll", token, {});
-  const dailyInput = { ...input("spin_speak", ["", "", ""]), daily: true };
+  const dailyInput = {
+    ...input("spin_speak", ["We could extrapolate from our results.", "", ""]),
+    daily: true,
+  };
   f.respond((request) => {
-    const { response_format } = JSON.parse(request.body);
+    const { response_format, messages } = JSON.parse(request.body);
     const schema = response_format.json_schema.schema.properties.vocabulary;
-    assert.equal(schema.minItems, 1);
+    assert.equal(schema.minItems, 2);
     assert.equal(schema.maxItems, 3);
-    assert.ok(schema.items.enum.includes("evidence"));
-    assert.deepEqual(response_format.json_schema.schema.required, ["text", "vocabulary"]);
+    const ids = schema.items.properties.id.enum;
+    assert.ok(ids.includes("corroborate"));
+    assert.ok(ids.includes("on the face of it"));
+    assert.match(messages[0].content, /with 2 to 3 distinct catalogue items/);
+    assert.ok(!ids.includes("evidence"));
+    assert.ok(!ids.includes("quantify"));
+    assert.ok(!ids.includes("extrapolate"));
+    assert.deepEqual(response_format.json_schema.schema.required, ["opening_text", "vocabulary"]);
     assert.equal(response_format.json_schema.schema.properties.annotations, undefined);
-    return response({ text: draftText, vocabulary: [] });
+    return response({ opening_text: draftText, vocabulary: [] });
   });
   assert.equal((await f.generate(token, attempt, dailyInput)).status, 502);
-  const sample = "A small trial could provide evidence. We can examine our assumption that it represents everyone.";
-  f.respond(() => response({ text: sample, vocabulary: ["evidence", "assumption"] }));
+  f.respond(() => response({
+    opening_text: "A small trial could ",
+    vocabulary: [
+      { id: "quantify", following_text: " the change and " },
+      { id: "corroborate", following_text: " our findings." },
+    ],
+  }));
+  assert.equal((await f.generate(token, attempt, dailyInput)).status, 502);
+  const phrase = "on the face of it";
+  f.respond(() => response({
+    opening_text: "",
+    vocabulary: [{ id: phrase, following_text: ", the trial looks promising." }],
+  }));
+  assert.equal((await f.generate(token, attempt, dailyInput)).status, 502, "at least two verified items must appear in the script");
+  const sample = "On the face of it, the trial looks promising. We can use later measurements to corroborate our findings.";
+  f.respond(() => response({
+    opening_text: "",
+    vocabulary: [
+      { id: phrase, following_text: ", the trial looks promising. We can use later measurements to" },
+      { id: "corroborate", following_text: "our findings." },
+    ],
+  }));
   const result = await f.generate(token, attempt, dailyInput);
   assert.equal(result.status, 200);
+  assert.equal(result.data.text, sample);
   assert.equal(isGuidedResponseDraft(result.data), true);
   assert.ok(result.data.vocabularyEligibleCount >= 2);
   assert.deepEqual(result.data.annotations, []);
-  assert.deepEqual(result.data.vocabulary.map((word) => word.wordId), ["evidence", "assumption"]);
+  assert.equal(result.data.vocabularyTier, "advanced-phrases");
+  assert.deepEqual(result.data.vocabulary.map((word) => word.wordId), [phrase, "corroborate"]);
+  assert.deepEqual(result.data.vocabulary[0].spans, [{ start: 0, end: phrase.length }]);
   assert.equal((await f.request("/wordbloom/summary", token)).data.words.length, 0, "viewing a script does not save words");
   const path = `/attempts/${attempt.id}/vocabulary`;
   assert.equal((await f.request(path, token, { wordIds: ["collaborate"] })).status, 400);
   const other = await f.guest();
-  assert.equal((await f.request(path, other, { wordIds: ["evidence"] })).status, 404);
+  assert.equal((await f.request(path, other, { wordIds: [phrase] })).status, 404);
   for (let i = 0; i < 2; i++) {
-    const saved = await f.request(path, token, { wordIds: ["evidence"] });
+    const saved = await f.request(path, token, { wordIds: [phrase] });
     assert.equal(saved.status, 200);
-    assert.deepEqual(saved.data.words.map((word) => word.wordId), ["evidence"]);
+    assert.deepEqual(saved.data.words.map((word) => word.wordId), [phrase]);
     assert.equal(saved.data.words[0].source.kind, "selected_sample");
   }
   const reading = await f.request("/read-aloud/assignment", token);
   assert.equal(reading.status, 200);
-  assert.deepEqual(reading.data.wordbloom.words.map((word) => word.wordId), ["evidence"]);
+  assert.deepEqual(reading.data.wordbloom.words.map((word) => word.wordId), [phrase]);
   const review = await f.request("/wordbloom/reviews", token, {});
   assert.equal(review.status, 200);
-  assert.equal(review.data.title, "A plant experiment");
+  assert.equal(review.data.title, "The cheaper printer");
   assert.equal(review.data.word, undefined);
+  const recalled = await f.request(`/wordbloom/reviews/${review.data.id}`, token, {
+    step: "recall",
+    answer: "On the face of it",
+  });
+  assert.equal(recalled.status, 200);
+  assert.equal(recalled.data.recall.correct, true);
   const after = (await f.request(`/attempts/${attempt.id}`, token)).data;
   assert.deepEqual(after.evaluation, attempt.evaluation);
   assert.deepEqual(after.rewards, attempt.rewards);
@@ -215,7 +253,7 @@ test("daily samples can have zero words when no catalogue words are eligible", a
     const schema = body.response_format.json_schema.schema.properties.vocabulary;
     assert.equal(schema.minItems, 0);
     assert.equal(schema.maxItems, 0);
-    return response({ text: draftText, vocabulary: [] });
+    return response({ opening_text: draftText, vocabulary: [] });
   });
   const result = await f.generate(token, attempt, { ...input("spin_speak", ["", "", ""]), daily: true });
   assert.equal(result.status, 200);
