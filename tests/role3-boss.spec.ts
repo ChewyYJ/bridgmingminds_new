@@ -56,8 +56,14 @@ test("Singapore tournament starts one Chair Lin challenge and preserves its vali
   await page.getByRole("button", { name: "Read background", exact: true }).click();
   await expect(page.getByRole("link", { name: /URA/ })).toHaveAttribute("href", /ura\.gov\.sg/);
   await page.getByRole("button", { name: "Change match setup", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Argue for", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Argue against", exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Close match setup", exact: true }).click();
+  const created = page.waitForResponse(response => response.url().endsWith("/api/debate/tournaments") && response.request().method() === "POST");
   await page.getByTestId("start-debate-tournament").click();
+  const createdResponse = await created;
+  expect(createdResponse.ok()).toBe(true);
+  expect(createdResponse.request().postDataJSON().position).toBe("random");
 
   await expect(page.getByTestId("debate-preparation")).toBeVisible();
   const history = await get<{ sessions: DebateSession[]; tournaments: DebateTournament[] }>(page, "/debate/history");
@@ -69,9 +75,28 @@ test("Singapore tournament starts one Chair Lin challenge and preserves its vali
   expect(session.opponent.id).toBe("chair-lin");
   expect(session.topic.region).toBe("Singapore");
   expect(session.opponent.fictional).toBe(true);
-  await expect(page.getByText("Chair Lin", { exact: true }).first()).toBeVisible();
+  expect(["for", "against"]).toContain(session.position);
+  expect(run.position).toBe(session.position);
+  expect(session.preparation?.durationSeconds).toBe(300);
+  expect(session.preparation?.completedAt).toBeNull();
+  expect(session.turns).toHaveLength(0);
+  await expect(page.getByTestId("assigned-debate-position")).toHaveText(`Argue ${session.position}`);
+  await expect(page.getByTestId("debate-preparation")).toContainText("Chair Lin");
+  const beforeBattle = await page.request.get(`${base}/__role3_boss/status`, { headers: { "X-Offline-Fixture": "role3-boss-browser-only" } });
+  expect((await beforeBattle.json()).calls).toEqual({ replies: 0, judges: 0, bossReplies: 0 });
+  await page.getByRole("textbox", { name: "Your ideas", exact: true }).fill("Consider access, maintenance and the opportunity cost of land.");
+  await page.getByTestId("save-leave-preparation").click();
+  await page.reload();
+  await page.getByTestId("start-debate-tournament").click();
+  await expect(page.getByTestId("assigned-debate-position")).toHaveText(`Argue ${session.position}`);
+  await expect(page.getByRole("textbox", { name: "Your ideas", exact: true })).toHaveValue("Consider access, maintenance and the opportunity cost of land.");
+  const resumed = await get<DebateSession>(page, `/debate/sessions/${session.id}`);
+  expect(resumed.position).toBe(session.position);
+  expect(resumed.preparation?.endsAt).toBe(session.preparation?.endsAt);
   await screenshot(page, "boss-preparation-mobile");
-  await page.getByTestId("start-debate-opening").click();
+  await page.getByRole("button", { name: "Start battle", exact: true }).click();
+  await expect(page.getByTestId("start-debate-opening")).toHaveCount(0);
+  await expect(page.getByTestId("speaking-notes")).toContainText("Consider access, maintenance");
   for (const [stage, text] of Object.entries(answers)) {
     await expect(page.getByText(`Your turn · ${stage[0].toUpperCase()}${stage.slice(1)}`, { exact: true })).toBeVisible();
     const input = page.getByRole("textbox", { name: "Your argument", exact: true });

@@ -32,11 +32,17 @@ export function IdeasBoard({
   onChange,
   onDone,
   onInteractionChange,
+  doneLabel = "Ready to speak",
+  doneDisabled = false,
+  hint = "Notes are optional. You can start speaking anytime.",
 }: {
   board: PlanningBoard;
   onChange: (board: PlanningBoard) => void;
   onDone: () => void;
   onInteractionChange?: (active: boolean) => void;
+  doneLabel?: string;
+  doneDisabled?: boolean;
+  hint?: string;
 }) {
   const [selectedId, setSelectedId] = useState<string>();
   const [connecting, setConnecting] = useState(false);
@@ -306,7 +312,8 @@ export function IdeasBoard({
         />
       )}
       <Button
-        label="Ready to speak"
+        label={doneLabel}
+        disabled={doneDisabled}
         icon="mic"
         onPress={() => {
           Keyboard.dismiss();
@@ -314,7 +321,7 @@ export function IdeasBoard({
         }}
       />
       <Text style={[T.small, s.hint]}>
-        Notes are optional. You can start speaking anytime.
+        {hint}
       </Text>
     </View>
   );

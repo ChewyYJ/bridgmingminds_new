@@ -55,6 +55,16 @@ async function wardrobeCategory(page: Page, category: string) {
   if (!await target.isVisible()) await page.getByTestId("wardrobe-more-categories").click();
   await target.click();
 }
+async function beginRolledDebate(page: Page) {
+  await expect(page.getByTestId("debate-preparation")).toBeVisible();
+  await expect(page.getByTestId("assigned-debate-position")).toHaveText(/^Argue (for|against)$/);
+  await expect(page.getByRole("button", { name: "Argue for", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Argue against", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Start battle", exact: true }).click();
+  await expect(page.getByTestId("debate-match")).toBeVisible();
+  await expect(page.getByText("Your turn · Opening", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("start-debate-opening")).toHaveCount(0);
+}
 
 for (const width of [320, 390]) {
   test(`${width}px street reaches all six neighbours and starts a far-end practice`, async ({ page }) => {
@@ -87,13 +97,14 @@ for (const width of [320, 390]) {
     await expect.poll(async () => (await world.boundingBox())!.x).toBeCloseTo(before, 0);
     await page.getByTestId("street-visit-kai").click();
     await page.getByRole("button", { name: "Practise with Kai", exact: true }).click();
-    await expect(page.getByRole("button", { name: "Start practice with Kai", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Roll my position", exact: true })).toBeVisible();
     const created = page.waitForResponse(response => response.url().endsWith("/api/debate/sessions") && response.request().method() === "POST");
     await page.getByTestId("start-debate-practice").click();
     const response = await created;
     expect(response.ok()).toBe(true);
+    expect(response.request().postDataJSON().position).toBe("random");
     expect((await response.json()).opponent.id).toBe("kai");
-    await expect(page.getByTestId("debate-match")).toBeVisible();
+    await beginRolledDebate(page);
   });
 }
 
@@ -173,12 +184,12 @@ test("mobile learner equips owned items, completes a recoverable local debate, a
   await screenshot(page, "street-mobile"); await noOverflow(page);
   await page.getByRole("button", { name: /^Walk to Mina,/ }).click();
   await page.getByRole("button", { name: "Practise with Mina", exact: true }).click();
-  await page.getByRole("button", { name: "Change topic", exact: true }).click();
-  await page.getByRole("button", { name: "Students should choose between different homework formats.", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Change topic", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Roll my position", exact: true })).toBeVisible();
   await screenshot(page, "challenger-mobile");
-  await page.getByTestId("start-debate-practice").click(); await expect(page.getByTestId("debate-match")).toBeVisible();
+  await page.getByTestId("start-debate-practice").click();
   await expect(page.getByTestId("debate-preparation")).toBeVisible(); await screenshot(page, "preparation-mobile");
-  await page.getByTestId("start-debate-opening").click();
+  await beginRolledDebate(page);
   const argument = page.getByRole("textbox", { name: "Your argument", exact: true });
   // Explicit exit flushes an edited draft without waiting for autosave.
   await expect(page.getByRole("button", { name: "Navigate to Home", exact: true })).toHaveCount(0);
@@ -239,7 +250,7 @@ test("mobile learner equips owned items, completes a recoverable local debate, a
   await page.getByTestId("food-done").click(); await expect(page.getByTestId("avatar-wardrobe-screen")).toBeVisible();
   await page.goto(`${base}/tournament`); await expect(page.getByTestId("tournament-lobby")).toBeVisible();
   await expect(page.getByTestId("start-debate-tournament")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Practise with Chair Lin", exact: true })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "Roll to practise with Chair Lin", exact: true })).toBeEnabled();
   await screenshot(page, "lobby-mobile"); await noOverflow(page);
   await expect(page.getByTestId("tournament-current-boss")).toContainText("Chair Lin · Boss challenge");
   for (const name of ["1. Mina", "2. Leo", "3. Chair Lin"]) await expect(page.getByText(name, { exact: true })).toHaveCount(0);
@@ -457,7 +468,7 @@ test("spoken debate turn keeps its private recording when local transcription re
   await account(page); await context.grantPermissions(["microphone"], { origin: base });
   await page.goto(`${base}/debate-street`); await page.getByRole("button", { name: "Tournament", exact: true }).click();
   await page.getByTestId("start-debate-practice").click();
-  await page.getByTestId("start-debate-opening").click();
+  await beginRolledDebate(page);
   await page.getByTestId("debate-input-record").click();
   await page.getByRole("button", { name: "Allow private recording", exact: true }).click();
   await page.getByRole("button", { name: "Record my response", exact: true }).click();

@@ -275,11 +275,7 @@ test.describe('touch furniture gestures', () => {
     });
     const cdp = await page.context().newCDPSession(page);
     async function touchTap(target: Locator) {
-      await target.tap({ trial: true });
-      const box = await bounds(target);
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: box.x + box.width / 2, y: box.y + box.height / 2, id: 1, radiusX: 4, radiusY: 4, force: .7 }] });
-      await page.evaluate(() => new Promise<void>(done => requestAnimationFrame(() => requestAnimationFrame(() => done()))));
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await target.tap();
     }
     async function touchDrag(source: Locator, target: { x: number; y: number }, fromTray = false) {
       const box = await bounds(source);
@@ -297,6 +293,9 @@ test.describe('touch furniture gestures', () => {
         await page.evaluate(() => new Promise<void>(done => requestAnimationFrame(() => done())));
       }
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      // Separate gestures: Edge suppresses the next tap's click when a new
+      // synthetic touch follows the drag inside its gesture-recognition interval.
+      await page.waitForTimeout(400);
     }
     try {
       await touchTap(page.getByRole('button', { name: 'Decor', exact: true }));

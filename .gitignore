@@ -59,3 +59,7 @@ artifacts/tech-stack/.build/
 artifacts/room/browser-results/
 artifacts/room/touch-diag*
 artifacts/home-feature/preview-*.log
+
+# Local preservation snapshots, traces and logs for branch integration
+artifacts/ui-polish-merge/*.zip
+artifacts/ui-polish-merge/*.log
