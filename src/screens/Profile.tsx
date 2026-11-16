@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Pressable, Platform } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import Svg, { Polyline, Circle, Line, Text as SvgText } from "react-native-svg";
 import { C, T, Card, Button, Tag, Icon } from "../components/ui";
 import { AppState, Attempt, Mode } from "../types";
@@ -19,13 +19,13 @@ export function ProfileScreen({
   state,
   openAttempt,
   openSettings,
-  openAvatar,
+  onBack,
   start,
 }: {
   state: AppState;
   openAttempt: (a: Attempt) => void;
   openSettings: () => void;
-  openAvatar?: () => void;
+  onBack?: () => void;
   start: (m: Mode) => void;
 }) {
   const [mode, setMode] = useState<Mode>("spin_speak");
@@ -68,12 +68,7 @@ export function ProfileScreen({
   }));
   return (
     <View style={{ gap: 24 }}>
-      <AvatarPanelHeader title="My profile" subtitle={`${state.profile.displayName} · Level ${state.gamification?.level || 1}`} onSettings={openSettings} />
-      {openAvatar && <View style={{ flexDirection: "row", padding: 3, backgroundColor: C.cream, borderRadius: 12, borderWidth: 1, borderColor: C.border }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Avatar" accessibilityState={{ selected: false }} onPress={openAvatar} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center" }}><Text style={[T.small, { color: C.ink, fontSize: 14 }]}>Avatar</Text></Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Progress" accessibilityState={{ selected: true }} {...(Platform.OS === "web" ? { "aria-pressed": true } : {})} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center", borderRadius: 9, backgroundColor: C.forest }}><Text style={[T.small, { color: C.paper, fontFamily: "DMBold", fontSize: 14 }]}>Progress</Text></Pressable>
-      </View>}
-      <Text style={T.h2}>Your progress</Text>
+      <AvatarPanelHeader title="Your progress" subtitle={`${state.profile.displayName} · Level ${state.gamification?.level || 1}`} onBack={onBack} onSettings={openSettings} />
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 14 }}>
         {[
           [completed.length + (state.readAloudAttempts?.length || 0), "Practices completed", "book-open"],

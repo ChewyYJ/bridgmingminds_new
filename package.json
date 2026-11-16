@@ -66,6 +66,7 @@
     "test:e2e:daily-access": "playwright test --config tests/daily-access.config.ts",
     "test:e2e:role3": "playwright test --config tests/role3.config.ts",
     "test:e2e:role3-boss": "playwright test --config tests/role3-boss.config.ts",
+    "test:e2e:room": "playwright test --config tests/room-ui.config.ts",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint"
   },

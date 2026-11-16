@@ -260,14 +260,43 @@ const compiledApi = ts.transpileModule(
     },
   },
 ).outputText;
+const compiledRoomDraft = ts.transpileModule(
+  readFileSync(new URL("../src/room/draft.ts", import.meta.url), "utf8"),
+  {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+      esModuleInterop: true,
+    },
+  },
+).outputText;
 
 function clientFixture({ platform = "web", admission, upload, complete } = {}) {
   const calls = [];
   const blob = new Blob([bytes], { type: "audio/webm" });
   const exports = {};
+  const stored = new Map();
+  const storage = {
+    getItem: async key => stored.get(key) ?? null,
+    setItem: async (key, value) => { stored.set(key, value); },
+    removeItem: async key => { stored.delete(key); },
+    getAllKeys: async () => [...stored.keys()],
+    multiRemove: async keys => { for (const key of keys) stored.delete(key); },
+  };
+  // Load the production draft queue with the same account storage as the API.
+  // Account cleanup must keep its real behavior rather than a no-op import stub.
+  const roomDraft = {};
+  new Script(compiledRoomDraft).runInNewContext({
+    exports: roomDraft,
+    require: name => {
+      assert.equal(name, "@react-native-async-storage/async-storage");
+      return storage;
+    },
+  });
   const dependencies = {
     "react-native": { Platform: { OS: platform } },
-    "@react-native-async-storage/async-storage": {},
+    "@react-native-async-storage/async-storage": storage,
+    "../room/draft": roomDraft,
     "expo-secure-store": { setItemAsync: async () => {} },
     "expo-file-system": {
       File: class {
@@ -290,7 +319,7 @@ function clientFixture({ platform = "web", admission, upload, complete } = {}) {
     Error,
     process: { env: { EXPO_PUBLIC_API_URL: "https://garden.invalid" } },
     require: (name) => {
-      assert.ok(Object.hasOwn(dependencies, name));
+      assert.ok(Object.hasOwn(dependencies, name), `Unexpected import: ${name}`);
       return dependencies[name];
     },
     fetch: async (url, options) => {

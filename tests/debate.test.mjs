@@ -192,42 +192,33 @@ test('no-key local coaching is labelled, argument-aware, unscored and cannot sta
   await assert.rejects(f.service.createTournament('learner', { requestId: 'tournament-1', topicId: 'school-gardens', position: 'for' }), { code: 'debate_tournament_unavailable' });
 });
 
-test('Singapore cup reaches the fictional final boss and completes only after a validated boss win', async t => {
+test('Singapore cup starts at the boss and completes after one validated match with idempotent rewards', async t => {
   const f = await fixture(t), input = { requestId: 'tournament-1', topicId: 'sg-inclusive-housing', position: 'for' };
   let current = await f.service.createTournament('learner', input);
   assert.equal(current.run.title, 'Singapore Civic Cup');
-  assert.deepEqual(current.run.bracket.map(opponent => opponent.id), ['mina', 'leo', 'chair-lin']);
+  assert.deepEqual(current.run.bracket.map(opponent => opponent.id), ['chair-lin']);
+  assert.equal(f.service.catalog().rules.rounds, 1);
   assert.equal((await f.service.createTournament('learner', input)).run.id, current.run.id);
   await assert.rejects(f.service.advance('learner', current.run.id, { requestId: 'early-advance' }), { code: 'debate_progression' });
-  for (let round = 1; round <= 3; round++) {
-    assert.equal(current.session.round, round);
-    if (round === 3) {
-      assert.equal(current.session.opponent.id, 'chair-lin');
-      assert.equal(current.session.opponent.fictional, true);
-      f.setFailJudge(true);
-      await assert.rejects(f.complete(current.session, singaporeArgumentsByStage), { code: 'debate_invalid_provider_response' });
-      assert.equal((await f.service.tournament('learner', current.run.id)).run.status, 'active');
-      assert.equal(f.calls.awards, 2, 'an invalid boss judgement cannot complete or reward the final');
-      f.setFailJudge(false);
-      await f.service.finish('learner', current.session.id);
-    } else await f.complete(current.session, singaporeArgumentsByStage);
-    current = await f.service.tournament('learner', current.run.id);
-    if (round < 3) {
-      current = await f.service.advance('learner', current.run.id, { requestId: `advance-round-${round}` });
-      const duplicate = await f.service.advance('learner', current.run.id, { requestId: `advance-round-${round}` });
-      assert.equal(duplicate.session.id, current.session.id);
-      await f.restart(); current = await f.service.tournament('learner', current.run.id);
-    }
-  }
-  assert.equal(current.run.status, 'completed'); assert.equal(current.run.matches.length, 3); assert.equal(f.calls.awards, 3);
-  assert.equal(current.run.matches[2].opponentId, 'chair-lin');
+  assert.equal(current.session.round, 1);
+  assert.equal(current.session.opponent.id, 'chair-lin');
+  assert.equal(current.session.opponent.fictional, true);
+  f.setFailJudge(true);
+  await assert.rejects(f.complete(current.session, singaporeArgumentsByStage), { code: 'debate_invalid_provider_response' });
+  assert.equal((await f.service.tournament('learner', current.run.id)).run.status, 'active');
+  assert.equal(f.calls.awards, 0, 'an invalid boss judgement cannot complete or reward the challenge');
+  f.setFailJudge(false);
+  await f.service.finish('learner', current.session.id);
+  current = await f.service.tournament('learner', current.run.id);
+  assert.equal(current.run.status, 'completed'); assert.equal(current.run.matches.length, 1); assert.equal(f.calls.awards, 1);
+  assert.equal(current.run.matches[0].opponentId, 'chair-lin');
   const bossRequests = f.requests.filter(request => JSON.parse(request.messages[1].content).opponent?.boss);
   assert.equal(bossRequests.length, 3);
   assert.equal(JSON.parse(bossRequests[0].messages[1].content).topic.sources[0].url, current.run.topic.sources[0].url);
   assert.match(bossRequests[0].messages[0].content, /fictional, not a public official/);
   await f.restart();
   assert.equal((await f.service.finish('learner', current.session.id)).evaluation.outcome, 'win');
-  assert.equal(f.calls.awards, 3);
+  assert.equal(f.calls.awards, 1);
   await assert.rejects(f.service.advance('learner', current.run.id, { requestId: 'advance-final' }), { code: 'debate_progression' });
 });
 
@@ -237,6 +228,10 @@ test('draws replay the same round, uncertainty never eliminates, and a judged lo
   await f.complete(current.session);
   current = await f.service.advance('learner', current.run.id, { requestId: 'draw-replay-1' });
   assert.equal(current.run.round, 1); assert.equal(current.run.matches.length, 2);
+  assert.equal(current.session.opponent.id, 'chair-lin');
+  const duplicate = await f.service.advance('learner', current.run.id, { requestId: 'draw-replay-1' });
+  assert.equal(duplicate.session.id, current.session.id);
+  assert.equal(duplicate.run.matches.length, 2);
   f.settings.confidence = 'low'; f.settings.userScore = 0; f.settings.aiScore = 4;
   let completed = await f.complete(current.session); assert.equal(completed.evaluation.outcome, 'draw'); assert.equal(completed.evaluation.uncertain, true);
   current = await f.service.advance('learner', current.run.id, { requestId: 'uncertain-replay' }); assert.equal(current.run.round, 1);
@@ -249,9 +244,9 @@ test('draws replay the same round, uncertainty never eliminates, and a judged lo
 test('catalog keeps street practice and adds sourced Singapore topics plus honest no-key boss practice', async t => {
   const f = await fixture(t, { local: true });
   const catalog = f.service.catalog();
-  assert.deepEqual(catalog.opponents.map(opponent => opponent.id), ['mina', 'leo', 'ari']);
+  assert.deepEqual(catalog.opponents.map(opponent => opponent.id), ['mina', 'leo', 'ari', 'safiya', 'daniel', 'kai']);
   assert.equal(catalog.tournamentTopics.length, 6);
-  assert.equal(catalog.tournamentOpponents.at(-1).id, catalog.boss.id);
+  assert.deepEqual(catalog.tournamentOpponents.map(opponent => opponent.id), [catalog.boss.id]);
   assert.equal(catalog.boss.id, DEBATE_BOSS.id);
   for (const topic of catalog.tournamentTopics) {
     assert.equal(topic.region, 'Singapore');
@@ -283,11 +278,13 @@ test('new cups require Singapore topics while saved legacy runs retain their tit
   const run = JSON.parse((await f.db.prepare('SELECT data FROM sessions WHERE id=?').get(current.run.id)).data);
   // Persist a pre-Singapore-cup snapshot, including its original request hash.
   run.title = 'The Common Ground Cup';
-  run.bracket = structuredClone(DEBATE_OPPONENTS);
+  run.bracket = structuredClone(DEBATE_OPPONENTS.slice(0, 3));
   run.topic = { ...DEBATE_TOPICS.find(topic => topic.id === input.topicId), context: 'Historical topic context preserved in this saved run.' };
   run.internal.requestHash = createHash('sha256').update(JSON.stringify(input)).digest('hex');
   const match = JSON.parse((await f.db.prepare('SELECT data FROM sessions WHERE id=?').get(current.session.id)).data);
   match.topic = run.topic;
+  match.opponent = run.bracket[0];
+  run.matches[0].opponentId = match.opponent.id;
   await f.db.prepare('UPDATE sessions SET data=? WHERE id=?').run(JSON.stringify(run), run.id);
   await f.db.prepare('UPDATE sessions SET data=? WHERE id=?').run(JSON.stringify(match), match.id);
   await f.restart();

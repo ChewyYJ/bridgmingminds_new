@@ -1,0 +1,17 @@
+
+Running 8 tests using 1 worker
+
+(node:3744) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\role3.spec.ts:59:5 › mobile learner equips owned items, completes a recoverable local debate, and buys a confirmed onigiri meal (5.0s)
+[WebServer] (node:47896) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ok 2 tests\role3.spec.ts:185:7 › mobile four-tab navigation connects Home learning, Progress and My Space (5.2s)
+  ok 3 tests\role3.spec.ts:185:7 › desktop four-tab navigation connects Home learning, Progress and My Space (4.0s)
+  ok 4 tests\role3.spec.ts:338:5 › 320px Home keeps the Coins header, daily choices and companion card within the viewport (474ms)
+  ok 5 tests\role3.spec.ts:355:7 › Ramen purchase uses its matching eating action and the server price (782ms)
+  ok 6 tests\role3.spec.ts:355:7 › Bento purchase uses its matching eating action and the server price (794ms)
+  ok 7 tests\role3.spec.ts:375:5 › spoken debate turn keeps its private recording when local transcription requires a reviewed text (2.2s)
+  ok 8 tests\role3.spec.ts:400:5 › wardrobe purchase confirms its price, retries a lost receipt once, and equips only on request (1.3s)
+
+  8 passed (20.9s)

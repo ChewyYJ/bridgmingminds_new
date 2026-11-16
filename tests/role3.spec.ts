@@ -56,6 +56,86 @@ async function wardrobeCategory(page: Page, category: string) {
   await target.click();
 }
 
+for (const width of [320, 390]) {
+  test(`${width}px street reaches all six neighbours and starts a far-end practice`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 1000 });
+    await account(page, `Street ${width}`);
+    await page.goto(`${base}/debate-street`);
+    await expect(page.getByTestId("debate-street")).toBeVisible();
+    const world = page.getByTestId("street-world");
+    await expect(world.locator('[data-testid^="street-npc-"]')).toHaveCount(6);
+    expect((await world.boundingBox())?.width).toBe(1920);
+    expect((await world.boundingBox())?.height).toBe(320);
+    for (const [id, name] of [["mina", "Mina"], ["leo", "Leo"], ["ari", "Ari"], ["safiya", "Safiya"], ["daniel", "Daniel"], ["kai", "Kai"]]) {
+      await page.getByTestId(`street-visit-${id}`).click();
+      await expect(page.getByTestId("street-challenger")).toContainText(name);
+      await expect(page.getByRole("button", { name: `Practise with ${name}`, exact: true })).toBeVisible();
+      await expect.poll(async () => {
+        const viewport = await page.getByTestId("street-viewport").boundingBox();
+        const npc = await page.getByTestId(`street-npc-${id}`).boundingBox();
+        const player = await page.getByTestId("street-player").boundingBox();
+        return !!viewport && !!npc && !!player && npc.x >= viewport.x && npc.x + npc.width <= viewport.x + viewport.width
+          && player.x >= viewport.x && player.x + player.width <= viewport.x + viewport.width;
+      }).toBe(true);
+      await noOverflow(page);
+    }
+    await screenshot(page, `street-far-end-${width}`);
+    const before = (await world.boundingBox())!.x;
+    await page.getByTestId("street-walk-left").click();
+    await expect.poll(async () => (await world.boundingBox())!.x).toBeGreaterThan(before);
+    await page.getByTestId("street-walk-right").click();
+    await expect.poll(async () => (await world.boundingBox())!.x).toBeCloseTo(before, 0);
+    await page.getByTestId("street-visit-kai").click();
+    await page.getByRole("button", { name: "Practise with Kai", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Start practice with Kai", exact: true })).toBeVisible();
+    const created = page.waitForResponse(response => response.url().endsWith("/api/debate/sessions") && response.request().method() === "POST");
+    await page.getByTestId("start-debate-practice").click();
+    const response = await created;
+    expect(response.ok()).toBe(true);
+    expect((await response.json()).opponent.id).toBe("kai");
+    await expect(page.getByTestId("debate-match")).toBeVisible();
+  });
+}
+
+test("normal-motion street keeps the walking player in view across the long street", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await account(page, "Street motion learner");
+  const preference = await page.request.patch(`${base}/api/me`, { headers, data: { reducedMotion: false } });
+  expect(preference.ok(), await preference.text()).toBeTruthy();
+  await page.goto(`${base}/debate-street`);
+  await expect(page.getByTestId("street-visit-kai")).toBeVisible();
+  await expect(page.getByText(/Reduced motion is on/)).toHaveCount(0);
+  const actor = page.getByTestId("street-player").getByTestId("layered-avatar-big");
+  const location = () => page.evaluate(() => {
+    const world = document.querySelector('[data-testid="street-world"]')!.getBoundingClientRect();
+    const player = document.querySelector('[data-testid="street-player"]')!.getBoundingClientRect();
+    const viewport = document.querySelector('[data-testid="street-viewport"]')!.getBoundingClientRect();
+    return { center: player.x - world.x + player.width / 2, camera: world.x,
+      visible: player.left >= viewport.left && player.right <= viewport.right };
+  });
+  const initial = await location();
+  await page.getByTestId("street-visit-kai").click();
+  await expect(actor).toHaveAttribute("aria-label", /walk, facing right/);
+  // Observe an intermediate frame, not just a final position: both the actor and
+  // camera must advance while the player remains inside the clipped viewport.
+  await expect.poll(async () => {
+    const moving = await location();
+    return moving.center > 250 && moving.center < 1500 && moving.camera < initial.camera - 50 && moving.visible;
+  }, { intervals: [50, 100, 100] }).toBe(true);
+  await expect(actor).toHaveAttribute("aria-label", /idle, facing right/, { timeout: 7000 });
+  await expect.poll(async () => (await location()).center).toBeCloseTo(1640, 0);
+  const arrived = await location();
+  expect(arrived.visible).toBe(true);
+  await page.getByTestId("street-walk-left").click();
+  await expect(actor).toHaveAttribute("aria-label", /walk, facing left/);
+  await expect(actor).toHaveAttribute("aria-label", /idle, facing left/);
+  await expect.poll(async () => (await location()).center).toBeCloseTo(1490, 0);
+  const returned = await location();
+  expect(returned.camera).toBeGreaterThan(arrived.camera);
+  expect(returned.visible).toBe(true);
+  await noOverflow(page);
+});
+
 test("mobile learner equips owned items, completes a recoverable local debate, and buys a confirmed onigiri meal", async ({ page }) => {
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
   await account(page); await page.goto(base);
@@ -161,7 +241,8 @@ test("mobile learner equips owned items, completes a recoverable local debate, a
   await expect(page.getByTestId("start-debate-tournament")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Practise with Chair Lin", exact: true })).toBeEnabled();
   await screenshot(page, "lobby-mobile"); await noOverflow(page);
-  for (const name of ["1. Mina", "2. Leo", "3. Chair Lin"]) await expect(page.getByText(name, { exact: true })).toBeVisible();
+  await expect(page.getByTestId("tournament-current-boss")).toContainText("Chair Lin · Boss challenge");
+  for (const name of ["1. Mina", "2. Leo", "3. Chair Lin"]) await expect(page.getByText(name, { exact: true })).toHaveCount(0);
   await page.goto(`${base}/achievements`); await expect(page.getByTestId("achievements-screen")).toBeVisible(); await page.getByRole("button", { name: "Earned", exact: true }).click(); await expect(page.getByText("Make your case", { exact: true })).toBeVisible();
   await screenshot(page, "achievements-mobile");
   const savedHistory = await (await page.request.get(`${base}/api/debate/history`)).json();
@@ -182,15 +263,17 @@ test("mobile learner equips owned items, completes a recoverable local debate, a
 });
 
 for (const viewport of [{ name: "mobile", width: 390, height: 1000 }, { name: "desktop", width: 1440, height: 1000 }]) {
-  test(`${viewport.name} five-tab navigation preserves daily learning, discovery and profile wardrobe`, async ({ page }) => {
+  test(`${viewport.name} four-tab navigation connects Home learning, Progress and My Space`, async ({ page }) => {
     await page.setViewportSize(viewport);
     const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
     await account(page, `Navigation ${viewport.name}`);
     await page.goto(base);
-    const tabNames = ["Home", "Play", "Discover", "Debate", "Profile"];
+    const tabNames = ["Home", "Discover", "Debate", "My Space"];
     async function shell() {
       for (const name of tabNames) await expect(page.getByRole("button", { name: `Navigate to ${name}`, exact: true })).toBeVisible();
-      await expect(page.getByRole("button", { name: /^Navigate to (Homeland|Garden|Avatar|Progress)$/ })).toHaveCount(0);
+      // Desktop Settings is a separate footer utility, outside the four destinations.
+      await expect(page.getByRole("button", { name: /^Navigate to (?!Settings$)/ })).toHaveCount(4);
+      await expect(page.getByRole("button", { name: /^Navigate to (Play|Profile|Homeland|Garden|Avatar|Progress|My Room)$/ })).toHaveCount(0);
       await expect(page.getByTestId("shell-coin-balance")).toBeVisible();
       await expect(page.getByTestId("shell-coin-balance")).toContainText("Coins");
       await expect(page.getByTestId("shell-coin-balance")).not.toContainText(/seeds|water|sunlight/i);
@@ -210,6 +293,19 @@ for (const viewport of [{ name: "mobile", width: 390, height: 1000 }, { name: "d
       const scene = await page.getByTestId("pixel-scene-skyline").boundingBox();
       return !!card && !!scene && Math.abs(card.width - scene.width) < 3 && Math.abs(card.height - scene.height) < 3;
     }).toBe(true);
+    const activityButtons = page.getByTestId("home-activity-grid").getByRole("button");
+    await expect(activityButtons).toHaveCount(4);
+    expect(await activityButtons.evaluateAll(nodes => {
+      const boxes = nodes.map(node => node.getBoundingClientRect());
+      return Math.abs(boxes[0].top - boxes[1].top) < 2 && Math.abs(boxes[2].top - boxes[3].top) < 2
+        && boxes[0].right <= boxes[1].left && boxes[2].right <= boxes[3].left && boxes[2].top >= boxes[0].bottom;
+    })).toBe(true);
+    await page.getByRole("button", { name: "Open your progress", exact: true }).click();
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/progress");
+    await expect(page.getByRole("heading", { name: "Your progress", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Progress", exact: true })).toHaveCount(0);
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/");
     await expect(page.getByTestId("daily-progress")).toHaveText("0 of 2 complete");
     await page.getByRole("button", { name: "Start daily practice", exact: true }).click();
     await expect.poll(() => new URL(page.url()).pathname).toBe("/read-aloud");
@@ -233,20 +329,19 @@ for (const viewport of [{ name: "mobile", width: 390, height: 1000 }, { name: "d
     await page.getByRole("button", { name: "Continue practice", exact: true }).click();
     await expect(page.getByTestId("daily-screen-board")).toBeVisible();
     await page.goto(base);
-    await navigate("Play", "/play");
-    await expect(page.getByText("Spin & Speak", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Spin & Speak", exact: true })).toBeVisible();
     await expect(page.getByText("AI Debate", { exact: true })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Start practice", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Debate with friends", exact: true })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Read aloud", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Word review", exact: true })).toBeVisible();
-    await screenshot(page, `navigation-play-${viewport.name}`);
+    await screenshot(page, `navigation-activities-${viewport.name}`);
     await page.getByRole("button", { name: "Word review", exact: true }).click();
     await expect.poll(() => new URL(page.url()).pathname).toBe("/vocabulary-review");
     await expect(page.getByRole("heading", { name: "Word review", exact: true })).toBeVisible();
     await expect(page.getByText("You’re caught up", { exact: true })).toBeVisible();
     await page.goto(`${base}/play`);
-    await page.getByRole("button", { name: "Explore a topic in Discover", exact: true }).click();
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/");
+    await page.getByRole("button", { name: "Read & respond", exact: true }).click();
     await expect.poll(() => new URL(page.url()).pathname).toBe("/discover");
     await shell();
     await expect(page.getByRole("heading", { name: "Something to think about.", exact: true })).toBeVisible();
@@ -273,20 +368,39 @@ for (const viewport of [{ name: "mobile", width: 390, height: 1000 }, { name: "d
     await page.goto(base);
     await navigate("Debate", "/debate");
     await expect(page.getByTestId("debate-street")).toBeVisible();
-    await navigate("Profile", "/profile");
+    await navigate("My Space", "/space");
     await expect(page.getByTestId("avatar-wardrobe-screen")).toBeVisible();
-    await page.getByRole("button", { name: "Progress", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "My Space", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Avatar", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("button", { name: "Progress", exact: true })).toHaveCount(0);
+    await screenshot(page, `navigation-space-${viewport.name}`);
+    await page.getByRole("button", { name: "Room", exact: true }).click();
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/room");
+    await expect(page.getByTestId("room-screen")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Room", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await shell();
+    await screenshot(page, `navigation-room-${viewport.name}`);
+    await page.getByRole("button", { name: "Avatar", exact: true }).click();
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/space");
+    await expect(page.getByTestId("avatar-wardrobe-screen")).toBeVisible();
+    await navigate("Home", "/");
+    await page.getByTestId("home-avatar-card").click();
     await expect.poll(() => new URL(page.url()).pathname).toBe("/progress");
     await expect(page.getByText("Your progress", { exact: true })).toBeVisible();
     await expect(page.getByTestId("wordbloom-progress")).toBeVisible();
     await shell();
-    await navigate("Profile", "/profile");
+    await navigate("My Space", "/space");
     await page.getByRole("button", { name: "Settings", exact: true }).click();
     await expect.poll(() => new URL(page.url()).pathname).toBe("/settings");
     await expect(page.getByRole("textbox", { name: "Display name", exact: true })).toBeVisible();
     await shell();
     // Old bookmarked URLs must continue to reach their replacement feature.
     await page.goto(`${base}/avatar`);
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/space");
+    await expect(page.getByTestId("avatar-wardrobe-screen")).toBeVisible();
+    await shell();
+    await page.goto(`${base}/profile`);
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/space");
     await expect(page.getByTestId("avatar-wardrobe-screen")).toBeVisible();
     await shell();
     for (const path of ["garden", "homeland", "debate-street"]) {
@@ -312,7 +426,7 @@ test("320px Home keeps the Coins header, daily choices and companion card within
     const box = await target.boundingBox(); expect(box).not.toBeNull();
     expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.x + box!.width).toBeLessThanOrEqual(320);
   }
-  for (const name of ["Home", "Play", "Discover", "Debate", "Profile"])
+  for (const name of ["Home", "Discover", "Debate", "My Space"])
     await expect(page.getByRole("button", { name: `Navigate to ${name}`, exact: true })).toBeVisible();
   await noOverflow(page); await screenshot(page, "navigation-home-320");
   await page.getByTestId("home-avatar-card").screenshot({ path: "artifacts/role3/home-avatar-320.png" });

@@ -1,0 +1,23 @@
+
+> mind-garden@1.0.0 test:e2e:role3
+> playwright test --config tests/role3.config.ts
+
+
+Running 10 tests using 1 worker
+
+(node:12628) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 tests\role3.spec.ts:60:7 › 320px street reaches all six neighbours and starts a far-end practice (1.3s)
+  ok  2 tests\role3.spec.ts:60:7 › 390px street reaches all six neighbours and starts a far-end practice (1.2s)
+  ok  3 tests\role3.spec.ts:100:5 › mobile learner equips owned items, completes a recoverable local debate, and buys a confirmed onigiri meal (5.7s)
+[WebServer] (node:14924) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ok  4 tests\role3.spec.ts:227:7 › mobile four-tab navigation connects Home learning, Progress and My Space (5.3s)
+  ok  5 tests\role3.spec.ts:227:7 › desktop four-tab navigation connects Home learning, Progress and My Space (5.2s)
+  ok  6 tests\role3.spec.ts:380:5 › 320px Home keeps the Coins header, daily choices and companion card within the viewport (643ms)
+  ok  7 tests\role3.spec.ts:397:7 › Ramen purchase uses its matching eating action and the server price (921ms)
+  ok  8 tests\role3.spec.ts:397:7 › Bento purchase uses its matching eating action and the server price (871ms)
+  ok  9 tests\role3.spec.ts:417:5 › spoken debate turn keeps its private recording when local transcription requires a reviewed text (2.4s)
+  ok 10 tests\role3.spec.ts:442:5 › wardrobe purchase confirms its price, retries a lost receipt once, and equips only on request (1.4s)
+
+  10 passed (26.5s)

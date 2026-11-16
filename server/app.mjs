@@ -21,6 +21,7 @@ import { installReadingSample } from "./reading-sample.mjs";
 import { createUsageService } from "./usage.mjs";
 import { createDailyWorkoutService } from "./daily-workout.mjs";
 import { createGamificationService } from "./gamification.mjs";
+import { createRoomService } from "./room.mjs";
 import { installAIDebate } from "./ai-debate.mjs";
 import { installReadAloud } from "./read-aloud.mjs";
 import { evaluateBridge } from "./bridge-evaluator.mjs";
@@ -315,6 +316,7 @@ export function createApp(options = {}) {
   const getUser = async (uid) =>
     await db.prepare("SELECT * FROM users WHERE id=?").get(uid);
   const gamification = createGamificationService({ db, now: options.dailyNow });
+  const room = createRoomService({ db, gamification, now: options.dailyNow });
   const awardCompletion = gamification.awardValidatedCompletion;
   const dailyWorkout = createDailyWorkoutService({ db, now: options.dailyNow, awardCompletion, getProgression: gamification.summary });
   const wordBloom = createWordBloomService({ db, now: options.wordBloomNow || options.dailyNow, awardCompletion });
@@ -1806,6 +1808,9 @@ export function createApp(options = {}) {
     resolveAuth, awardValidatedCompletion: awardCompletion, now: options.debateNow,
     providerRequest: options.debateProviderRequest, rewardPreview: gamification.rewardPreview("ai_debate") });
   app.get("/api/gamification", wrap(async (req, res) => res.json(await gamification.summary(req.userId))));
+  app.get("/api/room", wrap(async (req, res) => res.json(await room.summary(req.userId))));
+  app.put("/api/room/layout", wrap(async (req, res) => res.json(await room.saveLayout(req.userId, req.body))));
+  app.post("/api/room/purchase", wrap(async (req, res) => res.json(await room.purchase(req.userId, req.body))));
   app.put("/api/avatar/equipment", mutate(async (req, res) => {
     res.json(await gamification.equip(req.userId, req.body.selection || req.body));
   }));
@@ -2419,6 +2424,7 @@ export function createApp(options = {}) {
         exportedAt: now(),
         ...(await getState(req.userId)),
         gamificationData: await gamification.exportData(req.userId),
+        roomData: await room.exportData(req.userId),
         wordBloom: await wordBloom.exportData(req.userId),
         skillObservations: await learner.exportData(req.userId),
         speechJobs: (await db.prepare("SELECT * FROM speech_jobs WHERE user_id=? ORDER BY created_at").all(req.userId)).map((row) => ({ ...row, data: JSON.parse(row.data) })),
@@ -2503,7 +2509,7 @@ export function createApp(options = {}) {
       );
     res.status(error.status || 500).json({
       ...(error.code?.startsWith("provider_") ||
-      error.code?.startsWith("guided_response_") || error.code?.startsWith("debate_")
+      error.code?.startsWith("guided_response_") || error.code?.startsWith("debate_") || error.code?.startsWith("room_")
         ? {
             code: error.code,
           }

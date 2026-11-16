@@ -1,0 +1,12 @@
+
+> mind-garden@1.0.0 test:e2e:role3
+> playwright test --config tests/role3.config.ts --grep normal-motion street
+
+
+Running 1 test using 1 worker
+
+(node:50724) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\role3.spec.ts:100:5 › normal-motion street keeps the walking player in view across the long street (5.0s)
+
+  1 passed (6.3s)

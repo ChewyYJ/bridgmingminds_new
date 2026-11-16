@@ -27,9 +27,10 @@ test('installed debate routes require authentication and keep sessions, audio an
   assert.equal((await f.request('/debate/history')).status, 401);
   const catalog = await f.ok('/debate/catalog', token);
   assert.equal(catalog.providerMode, 'local'); assert.equal(catalog.tournamentAvailable, false);
-  assert.equal(catalog.stages.length, 3); assert.equal(catalog.opponents.length, 3);
+  assert.equal(catalog.stages.length, 3); assert.equal(catalog.opponents.length, 6);
   assert.equal(catalog.tournamentTopics.length, 6);
-  assert.equal(catalog.tournamentOpponents.at(-1).id, catalog.boss.id);
+  assert.deepEqual(catalog.tournamentOpponents.map(opponent => opponent.id), [catalog.boss.id]);
+  assert.equal(catalog.rules.rounds, 1);
   assert.equal(catalog.boss.fictional, true);
   const session = await f.ok('/debate/sessions', token, { requestId: 'api-create-1', mode: 'practice', topicId: catalog.topics[0].id, opponentId: catalog.opponents[0].id, position: 'for' });
   assert.equal((await f.request(`/debate/sessions/${session.id}`, other)).status, 404);

@@ -1,0 +1,18 @@
+
+> mind-garden@1.0.0 test:e2e:room
+> playwright test --config tests/room-ui.config.ts
+
+
+Running 7 tests using 1 worker
+
+(node:40976) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\room-ui.spec.ts:123:5 › dragging furniture validates space, saves across reload, restores tray items and cancels changes (3.3s)
+  ok 2 tests\room-ui.spec.ts:165:5 › furniture shop confirms, cancels and retries a lost receipt without a second debit (2.4s)
+  ok 3 tests\room-ui.spec.ts:207:5 › room drafts recover, stale saves retain edits and another account cannot inherit them (1.7s)
+  ok 4 tests\room-ui.spec.ts:238:5 › 320px room keeps editing controls and inventory reachable without horizontal overflow (1.6s)
+  ok 5 tests\room-ui.spec.ts:263:7 › touch furniture gestures › touch dragging moves placed and tray furniture and saves the arrangement (3.0s)
+  ok 6 tests\room-ui.spec.ts:336:7 › sign out removes this owner's room draft without clearing another owner's draft (1.6s)
+  ok 7 tests\room-ui.spec.ts:336:7 › delete account removes this owner's room draft without clearing another owner's draft (1.7s)
+
+  7 passed (16.5s)

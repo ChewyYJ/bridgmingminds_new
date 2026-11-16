@@ -54,3 +54,8 @@ dist-native/
 
 # Generated presentation build workspace (the final artifact is under output/)
 artifacts/tech-stack/.build/
+
+# Local room browser traces and temporary gesture diagnostics
+artifacts/room/browser-results/
+artifacts/room/touch-diag*
+artifacts/home-feature/preview-*.log

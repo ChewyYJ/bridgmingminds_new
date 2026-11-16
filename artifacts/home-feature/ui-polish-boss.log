@@ -1,0 +1,14 @@
+
+> mind-garden@1.0.0 test:e2e:role3-boss
+> playwright test --config tests/role3-boss.config.ts
+
+[WebServer] (node:48528) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:46492) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\role3-boss.spec.ts:31:5 › Singapore tournament starts one Chair Lin challenge and preserves its validated victory (1.9s)
+
+  1 passed (3.1s)

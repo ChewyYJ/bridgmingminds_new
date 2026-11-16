@@ -208,7 +208,7 @@ export function createAIDebateService({ db, providerConfig, usage, audioRoutes, 
         return { run: publicData(run), session: publicData(await owned(uid, run.currentSessionId)) };
       }
       // Old request IDs return their saved run above. Only newly created cups
-      // use the Singapore bank; saved topics and brackets remain immutable.
+      // use the single-boss bracket; saved topics and brackets stay immutable.
       if (!SINGAPORE_DEBATE_TOPICS.some(topic => topic.id === input.topicId))
         throw error(400, 'debate_tournament_topic', 'Choose a Singapore topic for this tournament. Other topics remain available in street practice.');
       const session = newSession(uid, { ...input, opponentId: TOURNAMENT_OPPONENTS[0].id }, deterministicId('debate', uid, `${id}:1`), id);

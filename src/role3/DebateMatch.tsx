@@ -181,7 +181,7 @@ export function DebateMatch({ session, selection, catalog, onSession, onFinish, 
       <Text style={[T.small, { fontFamily: "DMBold" }]}>with</Text>
       <View style={{ alignItems: "center" }}><LayeredAvatar selection={opponentLook(session.opponent)} variant="chibi" animation={waiting ? "speak" : "idle"} facing="left" scale={0.3} /><Text style={T.h3}>{session.opponent.name}</Text></View>
     </View>
-    {session.mode === "tournament" && <Text style={[T.small, { textAlign: "center", backgroundColor: C.sage, borderRadius: 10, padding: 8 }]}>{session.opponent.boss ? "Final match" : "Cup match"} · {session.round} of 3</Text>}
+    {session.mode === "tournament" && <Text style={[T.small, { textAlign: "center", backgroundColor: C.sage, borderRadius: 10, padding: 8 }]}>{session.opponent.boss ? "Boss challenge" : `Saved cup · match ${session.round}`} · Opening, rebuttal, closing</Text>}
     <DebateSteps completed={userTurns} />
     <View style={{ gap: 6 }}><Text accessibilityRole="header" style={[T.h2, { fontSize: 21, lineHeight: 28 }]}>{session.topic.title}</Text><Text style={T.small}>Your stance · {session.position === "for" ? "For" : "Against"}</Text></View>
     <ErrorNote message={error || parentError} />

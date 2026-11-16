@@ -1,26 +1,41 @@
-import { writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { chromium } from '@playwright/test';
 import { BRAND } from '../shared/brand.mjs';
 
-// Original vector artwork; the same geometry renders in the native app.
-const mark = `<path d="${BRAND.stem}" fill="${BRAND.forest}"/><path d="${BRAND.leaf}" fill="${BRAND.sage}"/><circle cx="24" cy="12" r="4" fill="${BRAND.gold}"/>`;
-const svg = (body, width, height) => `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${body}</svg>\n`;
+// Package the approved original artwork into platform canvases. Never redraw it.
+const output = 'assets/brand';
+const png = await readFile(`${output}/approved-logo-source.png`);
+const image = `<image href="data:image/png;base64,${png.toString('base64')}" width="${BRAND.sourceWidth}" height="${BRAND.sourceHeight}"/>`;
+const mark = (x, y, size) => `<svg x="${x}" y="${y}" width="${size}" height="${size}" viewBox="${BRAND.viewBox}" preserveAspectRatio="xMidYMid meet">${image}</svg>`;
+const background = (width, height) => `<rect width="${width}" height="${height}" fill="${BRAND.cream}"/>`;
 const artwork = [
-  ['mark', 64, 64, mark],
-  ['icon', 1024, 1024, `<rect width="1024" height="1024" fill="${BRAND.cream}"/><g transform="translate(128 128) scale(12)">${mark}</g>`],
-  ['adaptive', 1024, 1024, `<g transform="translate(212 212) scale(9.375)">${mark}</g>`],
-  ['monochrome', 1024, 1024, `<g transform="translate(212 212) scale(9.375)">${mark.replace(/#[0-9A-F]{6}/g, '#000000')}</g>`],
-  ['lockup', 650, 180, `<rect width="650" height="180" rx="24" fill="${BRAND.cream}"/><g transform="translate(28 24) scale(2)">${mark}</g><text x="175" y="106" font-family="Georgia,serif" font-size="65" letter-spacing="-2" fill="#293C32">MindGarden</text>`],
+  ['mark', 256, 256, mark(0, 0, 256)],
+  ['icon', 1024, 1024, `${background(1024, 1024)}${mark(128, 128, 768)}`],
+  ['favicon', 256, 256, `${background(256, 256)}${mark(8, 8, 240)}`],
+  ['adaptive', 1024, 1024, mark(224, 224, 576)],
+  ['monochrome', 1024, 1024, `<defs><filter id="mono"><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"/></filter></defs><g filter="url(#mono)">${mark(224, 224, 576)}</g>`],
+  ['lockup', 720, 180, `${background(720, 180)}${mark(20, 20, 140)}<text x="180" y="110" font-family="Arial,sans-serif" font-weight="700" font-size="56" fill="${BRAND.ink}">BridgingMinds</text>`],
 ];
-const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || 'chrome' });
+const executablePath = process.env.AVATAR_BROWSER_PATH;
+const browser = await chromium.launch(executablePath ? { executablePath } : { channel: process.env.PLAYWRIGHT_CHANNEL || 'msedge' });
 try {
+  await mkdir(output, { recursive: true });
   const page = await browser.newPage({ deviceScaleFactor: 1 });
   for (const [name, width, height, body] of artwork) {
-    const content = svg(body, width, height);
-    await writeFile(`assets/mindgarden-${name}.svg`, content);
+    const content = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${body}</svg>\n`;
+    await writeFile(`${output}/bridgingminds-${name}.svg`, content);
     await page.setViewportSize({ width, height });
     await page.setContent(`<style>html,body{margin:0;background:transparent}svg{display:block}</style>${content}`);
-    await page.screenshot({ path: `assets/mindgarden-${name}.png`, omitBackground: true });
+    await page.evaluate(async () => {
+      await Promise.all([...document.querySelectorAll('image')].map(element => new Promise((resolve, reject) => {
+        const img = new Image(); img.onload = resolve; img.onerror = reject;
+        img.src = element.getAttribute('href');
+      })));
+      await document.fonts.ready;
+      await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)));
+    });
+    await page.screenshot({ path: `${output}/bridgingminds-${name}.png`, omitBackground: true });
+    console.log(`${output}/bridgingminds-${name}.png (${width}x${height})`);
   }
 } finally {
   await browser.close();

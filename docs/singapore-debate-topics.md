@@ -17,17 +17,17 @@ IMDA's full May 2026 factsheet was available in the official search-indexed page
 
 ## Opponents and API contract
 
-The original street NPCs remain Mina, Leo and Ari. New tournaments use Mina, Leo and **Chair Lin**, the final boss. Chair Lin (`chair-lin`) is a fictional policy chair, not a public official or a representation of a real person. The shared character uses the existing girl avatar collection. The interface supplies the professional outfit; no new sprite ownership or player inventory entitlement is implied by an NPC's appearance.
+Street practice includes Mina, Leo, Ari, Safiya, Daniel and Kai. Each new tournament is **one match against Chair Lin**. Chair Lin (`chair-lin`) is a fictional policy chair, not a public official or a representation of a real person. The shared character uses the existing girl avatar collection. The interface supplies the professional outfit; no new sprite ownership or player inventory entitlement is implied by an NPC's appearance.
 
 The chair asks about implementation, affected groups, opportunity cost and alternatives. The tone stays calm, age-appropriate and focused on the argument. Difficulty does not change the six equally weighted judge criteria or reward agreement with a policy or the opponent.
 
 `GET /api/debate/catalog` adds:
 
 - `tournamentTopics`: the six Singapore topic objects.
-- `tournamentOpponents`: Mina, Leo and Chair Lin, in round order.
+- `tournamentOpponents`: Chair Lin only. `rules.rounds` is 1 for new cups.
 - `boss`: the Chair Lin object, including `boss: true` and `fictional: true`.
 
-Existing `topics` includes all earlier topics plus the Singapore bank. Existing `opponents` remains the three original street NPCs. A practice request may use `opponentId: "chair-lin"` with a Singapore topic. With no provider key it remains rule-based, unscored local practice; it cannot grant a competitive win or start a tournament.
+Existing `topics` includes all earlier topics plus the Singapore bank. `opponents` contains six street NPCs. A practice request may use `opponentId: "chair-lin"` with a Singapore topic. With no provider key it remains rule-based, unscored local practice; it cannot grant a competitive win or start a tournament.
 
 New competitive cups require a Singapore topic. An old request ID still returns its saved run. Saved runs keep their title, topic context and bracket; advancing a pre-change Common Ground Cup continues to Ari, rather than silently substituting Chair Lin. New and resumed rounds copy the saved topic and opponent snapshot, so a later content update cannot change an ongoing run's brief.
 
@@ -35,4 +35,4 @@ AI requests receive the dated background, but do not fetch source pages during a
 
 ## Verification
 
-The focused Node 24 debate/API suite passes 16 tests. It includes a complete mocked three-round boss run, rejection/recovery of unsupported final-round evidence, reward idempotency after restart, a full saved legacy run, official-source metadata, local boss practice with no provider calls, and existing account/audio ownership checks. No paid AI request or live fact-checking call was used by the test suite.
+The focused Node 24 debate/API suite covers a complete mocked single-boss challenge, rejection/recovery of unsupported judging evidence, draw replay against the same boss, reward idempotency after restart, a full saved legacy three-match run, official-source metadata, local boss practice with no provider calls, and existing account/audio ownership checks. No paid AI request or live fact-checking call is needed by the test suite.

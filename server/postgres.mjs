@@ -16,6 +16,7 @@ const tables = new Set([
   "daily_attempt_receipts", "daily_activity_completions", "daily_workout_days", "skill_observations",
   "economy_accounts", "legacy_currency_archives", "coin_ledger", "economy_streak_days",
   "avatar_item_catalog", "avatar_profiles", "avatar_inventory", "achievement_grants", "food_transactions",
+  "room_profiles", "room_inventory",
 ]);
 
 /** Convert only SQL code, never quoted values or comments, to the cloud dialect. */

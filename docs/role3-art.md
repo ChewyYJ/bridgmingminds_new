@@ -1,5 +1,7 @@
 # Role 3 scene art
 
+Current Home, Discover, Street and Tournament scenes use the coordinated five-image set in `assets/role3/scenes/`. Exact prompts and provenance are recorded in [the scene asset manifest](../assets/role3/scenes/ASSETS.md). See [the polish implementation note](ui-polish-2026-11-16.md) for sizing and verification. The earlier source below is retained as historical artwork.
+
 `assets/role3/debate-street.png` was generated with built-in ImageGen for this app. It contains no third-party logo, character or downloaded art. Existing avatars and food retain their provenance in `avatar-modular.md` and `avatar-food-assets.md`. The source remains unaltered; native layout crops it responsively.
 
 ## Exact generation prompt
