@@ -29,7 +29,7 @@ export function RoomItemArt({ itemId, width, height, rotation = 0 }: { itemId: s
   if (!box || !sources[itemId]) return null;
   const scale = Math.min(width / box.width, height / box.height);
   return <View pointerEvents="none" accessible={false} style={{ width, height, overflow: 'hidden', transform: [{ scaleX: rotation === 1 ? -1 : 1 }] }}>
-    <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} accessible={false} {...(Platform.OS === 'web' ? { 'aria-hidden': true } : {})}>
+    <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} {...(Platform.OS === 'web' ? { 'aria-hidden': true } : { accessible: false })}>
       <Defs><Filter id={filterId} x="0%" y="0%" width="100%" height="100%" {...(Platform.OS === 'web' ? { colorInterpolationFilters: 'sRGB' } : {})}><FeColorMatrix type="matrix" values={FURNITURE_PALETTE} /></Filter></Defs>
       <SvgImage href={sources[itemId]} x={(width - box.width * scale) / 2 - box.x * scale} y={height - box.height * scale - box.y * scale}
         width={box.sourceWidth * scale} height={box.sourceHeight * scale} preserveAspectRatio="none" filter={`url(#${filterId})`}

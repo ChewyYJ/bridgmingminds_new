@@ -38,6 +38,9 @@ async function currentRoom(page: Page): Promise<RoomSummary> {
 }
 function watchErrors(page: Page) {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => {
+    if (/non-boolean attribute/.test(message.text()) && /accessible/.test(message.text())) errors.push(message.text());
+  });
   return errors;
 }
 async function shot(page: Page, name: string) {
