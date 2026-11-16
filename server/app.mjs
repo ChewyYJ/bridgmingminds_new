@@ -703,7 +703,7 @@ export function createApp(options = {}) {
     }),
   );
   app.use(
-    ["/api/garden/plant", "/api/attempts", "/api/sessions"],
+    ["/api/garden/plant", "/api/attempts", "/api/sessions", "/api/debate/sessions"],
     express.json({
       limit: "128kb",
     }),

@@ -19,8 +19,8 @@ export function TopicContext({ topic }: { topic: DebateTopic }) {
   </View>;
 }
 
-export function DebateSetup({ topics, topic, position, proficiency, busy, onTopic, onPosition, onProficiency }: {
-  topics: DebateTopic[]; topic: DebateTopic; position: "for" | "against"; proficiency: DebateProficiency; busy: boolean;
+export function DebateSetup({ randomPosition = false, topics, topic, position, proficiency, busy, onTopic, onPosition, onProficiency }: {
+  randomPosition?: boolean; topics: DebateTopic[]; topic: DebateTopic; position: "for" | "against"; proficiency: DebateProficiency; busy: boolean;
   onTopic: (id: string) => void; onPosition: (value: "for" | "against") => void; onProficiency: (value: DebateProficiency) => void;
 }) {
   const [choosing, setChoosing] = useState(false), [background, setBackground] = useState(false);
@@ -31,7 +31,7 @@ export function DebateSetup({ topics, topic, position, proficiency, busy, onTopi
       {background && <TopicContext topic={topic} />}
       {choosing && <View style={{ gap: 8 }}>{topics.map(entry => <Action key={entry.id} label={entry.title} selected={topic.id === entry.id} disabled={busy} onPress={() => { onTopic(entry.id); setChoosing(false); }} />)}</View>}
     </View>
-    <Text style={T.h3}>Your position</Text><View style={R.row}><Action label="Argue for" selected={position === "for"} disabled={busy} onPress={() => onPosition("for")} style={{ flex: 1 }} /><Action label="Argue against" selected={position === "against"} disabled={busy} onPress={() => onPosition("against")} style={{ flex: 1 }} /></View>
+    {!randomPosition && <><Text style={T.h3}>Your position</Text><View style={R.row}><Action label="Argue for" selected={position === "for"} disabled={busy} onPress={() => onPosition("for")} style={{ flex: 1 }} /><Action label="Argue against" selected={position === "against"} disabled={busy} onPress={() => onPosition("against")} style={{ flex: 1 }} /></View></>}
     <Text style={T.h3}>Speaking confidence</Text><View style={R.row}>{(Object.entries(confidence) as [DebateProficiency, string][]).map(([value, label]) => <Action key={value} label={label} selected={proficiency === value} disabled={busy} onPress={() => onProficiency(value)} />)}</View>
   </View>;
 }

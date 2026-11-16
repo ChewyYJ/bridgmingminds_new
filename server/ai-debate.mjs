@@ -1,16 +1,18 @@
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash, randomInt, randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { transaction } from './database.mjs';
 import { createDebateProvider, LOCAL_PRACTICE_EXPLANATION } from './debate-judge.mjs';
 import { requireProviderConfig } from './provider.mjs';
 import { localDay } from './daily-workout.mjs';
+import { planningBoardSchema } from './planning-board-schema.mjs';
 import { DEBATE_VERSION, DEBATE_STAGES, DEBATE_TOPICS, DEBATE_OPPONENTS, DEBATE_BOSS, SINGAPORE_DEBATE_TOPICS, TOURNAMENT_OPPONENTS, DEBATE_RULES, decideDebateOutcome } from '../shared/debate.mjs';
 
 const MATCH_MODE = 'ai_debate_v1', RUN_MODE = 'debate_tournament_v1';
 const allOpponents = [...DEBATE_OPPONENTS, DEBATE_BOSS];
 const requestId = z.string().regex(/^[a-zA-Z0-9_-]{8,100}$/);
 const briefing = { topicId: z.enum(DEBATE_TOPICS.map(item => item.id)), position: z.enum(['for', 'against']), proficiency: z.enum(['beginner', 'developing', 'confident']).default('beginner') };
-const createSchema = z.strictObject({ requestId, mode: z.literal('practice').default('practice'), opponentId: z.enum(allOpponents.map(item => item.id)), ...briefing });
+const createSchema = z.strictObject({ requestId, mode: z.literal('practice').default('practice'), opponentId: z.enum(allOpponents.map(item => item.id)), ...briefing, position: z.enum(['for', 'against', 'random']) });
+const preparationSchema = z.strictObject({ action: z.enum(['reveal', 'save', 'begin']), planningBoard: planningBoardSchema.optional() });
 const tournamentSchema = z.strictObject({ requestId, ...briefing });
 const wordTokens = text => text.toLocaleLowerCase('en').match(/[\p{L}\p{N}]+(?:['’][\p{L}]+)*/gu) ?? [];
 const substantive = text => { const words = wordTokens(text); return words.length >= 3 && new Set(words).size >= 2; };
@@ -45,7 +47,8 @@ export function createAIDebateService({ db, providerConfig, usage, audioRoutes, 
   function newSession(uid, input, id, tournamentId, round = 1, snapshot = {}) {
     return { version: DEBATE_VERSION, id, mode: tournamentId ? 'tournament' : 'practice',
       topic: snapshot.topic ?? DEBATE_TOPICS.find(item => item.id === input.topicId), opponent: snapshot.opponent ?? allOpponents.find(item => item.id === input.opponentId),
-      position: input.position, proficiency: input.proficiency, providerMode: provider.mode,
+      position: input.position === 'random' ? (randomInt(2) === 0 ? 'for' : 'against') : input.position, proficiency: input.proficiency, providerMode: provider.mode,
+      ...(input.position === 'random' ? { preparation: { durationSeconds: 300, startedAt: null, endsAt: null, completedAt: null } } : {}),
       providerLabel: provider.mode === 'local' ? 'Rule-based local practice — no AI judging' : 'AI opponent · separate evidence-based judge',
       stage: 'opening', status: 'ready', turns: [], evaluation: null, reward: null, ...(tournamentId ? { tournamentId } : {}), round,
       createdAt: instant(), updatedAt: instant(), recovery: null, internal: { requestHash: digest(input), requestId: input.requestId } };
@@ -67,6 +70,26 @@ export function createAIDebateService({ db, providerConfig, usage, audioRoutes, 
     if (!lease) throw error(409, 'debate_busy', 'This match is still processing a saved request. Reopen it or retry shortly.');
     const assertLease = async () => { if (!(await db.ownsLease(name, lease.token))) throw error(409, 'debate_lease_lost', 'The saved match is being recovered elsewhere. Reopen it to continue.'); };
     try { return await work(assertLease); } finally { await db.releaseLease(name, lease.token); }
+  }
+  async function preparation(uid, sid, body) {
+    const input = parse(preparationSchema, body);
+    return transaction(db, async () => {
+      await lockUser(uid); await db.lockSession(sid);
+      const session = await owned(uid, sid), plan = session.preparation;
+      if (!plan) throw error(409, 'debate_preparation_missing', 'This match does not have a position roll.');
+      // Retries never reroll, reset the deadline, or replace notes after battle starts.
+      if (plan.completedAt) return publicData(session);
+      if (input.action === 'reveal' && !plan.startedAt) {
+        const start = now();
+        plan.startedAt = new Date(start).toISOString();
+        plan.endsAt = new Date(start + plan.durationSeconds * 1000).toISOString();
+      }
+      if (!plan.startedAt) throw error(409, 'debate_position_unrevealed', 'Reveal your position before preparing.');
+      if (input.planningBoard) plan.planningBoard = input.planningBoard;
+      if (input.action === 'begin') plan.completedAt = instant();
+      session.updatedAt = instant(); await save(uid, session);
+      return publicData(session);
+    });
   }
   async function storeRecovery(uid, sid, cause) {
     await transaction(db, async () => {
@@ -108,6 +131,7 @@ export function createAIDebateService({ db, providerConfig, usage, audioRoutes, 
       const prepared = await transaction(db, async () => {
         await lockUser(uid); await db.lockSession(sid); await assertLease();
         const session = await owned(uid, sid), hash = digest(input);
+        if (session.preparation && !session.preparation.completedAt) throw error(409, 'debate_preparing', 'Finish preparing before starting your opening.');
         const previous = session.turns.find(turn => turn.speaker === 'user' && turn.requestId === input.requestId);
         if (previous) {
           if (previous.requestHash !== hash) throw error(409, 'debate_request_conflict', 'Retry with the same saved argument, stage and recording.');
@@ -257,7 +281,7 @@ export function createAIDebateService({ db, providerConfig, usage, audioRoutes, 
       return { deleted: true, audioNotice: 'Recordings remain available through your private audio controls until deleted or their 30-day retention ends. Deleting a match does not remove recordings used in other activities.' };
     });
   }
-  return { create, get: async (uid, id) => publicData(await owned(uid, id)), submitTurn, recover, finish, createTournament, tournament, advance, history, remove,
+  return { create, preparation, get: async (uid, id) => publicData(await owned(uid, id)), submitTurn, recover, finish, createTournament, tournament, advance, history, remove,
     catalog: () => ({ version: DEBATE_VERSION, providerMode: provider.mode, tournamentAvailable: provider.mode === 'openai' && !providerConfig.issues.length,
       topics: DEBATE_TOPICS, opponents: DEBATE_OPPONENTS, stages: DEBATE_STAGES, rules: DEBATE_RULES,
       tournamentTopics: SINGAPORE_DEBATE_TOPICS, tournamentOpponents: TOURNAMENT_OPPONENTS, boss: DEBATE_BOSS,
@@ -271,6 +295,7 @@ export function installAIDebate({ app, wrap, resolveAuth, ...options }) {
   app.get('/api/debate/history', wrap(async (req, res) => res.json(await service.history(req.userId, { limit: req.query.limit === undefined ? 30 : Number(req.query.limit), offset: req.query.offset === undefined ? 0 : Number(req.query.offset) }))));
   app.post('/api/debate/sessions', wrap(async (req, res) => res.status(201).json(await service.create(req.userId, req.body))));
   app.get('/api/debate/sessions/:id', wrap(async (req, res) => res.json(await service.get(req.userId, req.params.id))));
+  app.post('/api/debate/sessions/:id/preparation', wrap(async (req, res) => res.json(await service.preparation(req.userId, req.params.id, req.body))));
   app.post('/api/debate/sessions/:id/turns', wrap(async (req, res) => res.json(await service.submitTurn(req.userId, req.params.id, req.body, authorize(req)))));
   app.post('/api/debate/sessions/:id/recover', wrap(async (req, res) => { parse(emptySchema, req.body); res.json(await service.recover(req.userId, req.params.id, authorize(req))); }));
   app.post('/api/debate/sessions/:id/finish', wrap(async (req, res) => { parse(emptySchema, req.body); res.json(await service.finish(req.userId, req.params.id, authorize(req))); }));

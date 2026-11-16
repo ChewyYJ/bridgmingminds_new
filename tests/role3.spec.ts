@@ -96,9 +96,9 @@ test("mobile learner equips owned items, completes a recoverable local debate, a
   await page.getByRole("button", { name: "Change topic", exact: true }).click();
   await page.getByRole("button", { name: "Students should choose between different homework formats.", exact: true }).click();
   await screenshot(page, "challenger-mobile");
-  await page.getByTestId("start-debate-practice").click(); await expect(page.getByTestId("debate-match")).toBeVisible();
+  await page.getByTestId("start-debate-practice").click();
   await expect(page.getByTestId("debate-preparation")).toBeVisible(); await screenshot(page, "preparation-mobile");
-  await page.getByTestId("start-debate-opening").click();
+  await page.getByRole("button", { name: "Start battle", exact: true }).click();
   const argument = page.getByRole("textbox", { name: "Your argument", exact: true });
   // Explicit exit flushes an edited draft without waiting for autosave.
   await expect(page.getByRole("button", { name: "Navigate to Home", exact: true })).toHaveCount(0);
@@ -343,7 +343,7 @@ test("spoken debate turn keeps its private recording when local transcription re
   await account(page); await context.grantPermissions(["microphone"], { origin: base });
   await page.goto(`${base}/debate-street`); await page.getByRole("button", { name: "Tournament", exact: true }).click();
   await page.getByTestId("start-debate-practice").click();
-  await page.getByTestId("start-debate-opening").click();
+  await page.getByRole("button", { name: "Start battle", exact: true }).click();
   await page.getByTestId("debate-input-record").click();
   await page.getByRole("button", { name: "Allow private recording", exact: true }).click();
   await page.getByRole("button", { name: "Record my response", exact: true }).click();
