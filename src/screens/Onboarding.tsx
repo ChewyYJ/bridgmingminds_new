@@ -3,9 +3,8 @@ import React, { useState } from "react";
 import { View, Text, ScrollView, useWindowDimensions } from "react-native";
 import { Button, Field, ErrorNote } from "../components/ui";
 import { BridgingMindsMark } from "../components/art";
-import { LayeredAvatar } from "../avatar/LayeredAvatar";
-import { defaultSelection } from "../avatar/pack";
-import { PixelScene } from "../role3/PixelScene";
+import { WelcomeArt } from "../components/WelcomeArt";
+import Head from "expo-router/head";
 import { MotionView } from "../components/Motion";
 import { api, storeToken } from "../lib/api";
 import { AppState } from "../types";
@@ -92,9 +91,13 @@ export function Onboarding({
   }
   return (
     <ScrollView
+      role="main"
       style={{ flex: 1, backgroundColor: C.cream }}
       contentContainerStyle={{ flexGrow: 1 }}
     >
+      <Head>
+        <title>Welcome · BridgingMinds</title>
+      </Head>
       <View
         style={{
           flex: 1,
@@ -105,7 +108,7 @@ export function Onboarding({
         <View
           style={{
             flex: 1,
-            backgroundColor: C.sage,
+            backgroundColor: C.accentSurface,
             padding: width > 800 ? 55 : 26,
             justifyContent: "center",
             gap: 20,
@@ -117,33 +120,10 @@ export function Onboarding({
           </View>
           <MotionView
             distance={10}
-            duration={500}
+            duration={220}
             testID="welcome-avatar-motion"
           >
-            <View
-              style={{
-                height: width > 800 ? 340 : 210,
-                justifyContent: "flex-end",
-                alignItems: "center",
-                overflow: "hidden",
-                borderRadius: 16,
-              }}
-            >
-              <PixelScene
-                scene="street"
-                width={
-                  width > 800 ? Math.max(360, width / 2 - 110) : width - 52
-                }
-                height={width > 800 ? 340 : 210}
-                absolute
-              />
-              <LayeredAvatar
-                selection={defaultSelection("girl")}
-                variant="big"
-                animation="idle"
-                scale={width > 800 ? 0.72 : 0.48}
-              />
-            </View>
+            <WelcomeArt />
           </MotionView>
         </View>
         <View
@@ -157,7 +137,7 @@ export function Onboarding({
         >
           {step === "welcome" ? (
             <>
-              <Text accessibilityRole="header" style={T.title}>
+              <Text role="heading" aria-level={1} style={T.display}>
                 Grow your point of view.
               </Text>
               <Text style={[T.body, { color: C.muted }]}>
@@ -202,7 +182,7 @@ export function Onboarding({
                 icon="arrow-left"
                 onPress={() => setStep("welcome")}
               />
-              <Text style={T.title}>
+              <Text role="heading" aria-level={1} style={T.title}>
                 {auth === "register" ? "Create an account" : "Sign in"}
               </Text>
               {auth === "register" && (
@@ -248,7 +228,9 @@ export function Onboarding({
             </>
           ) : (
             <>
-              <Text style={T.title}>Choose your interests</Text>
+              <Text role="heading" aria-level={1} style={T.title}>
+                Choose your interests
+              </Text>
               <Text style={[T.body, { color: C.muted }]}>
                 Select 2–5 topics.
               </Text>

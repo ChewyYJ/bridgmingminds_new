@@ -31,6 +31,7 @@ export function TurnProgress({
   value: number;
   label: string;
 }) {
+  const { C } = useTheme();
   return (
     <View
       accessibilityRole="progressbar"
@@ -46,8 +47,8 @@ export function TurnProgress({
         width: "100%",
         borderRadius: 4,
         borderWidth: 1,
-        borderColor: "#8C7D70",
-        backgroundColor: "#F8F2EA",
+        borderColor: C.border,
+        backgroundColor: C.sage,
         overflow: "hidden",
       }}
     >
@@ -55,7 +56,7 @@ export function TurnProgress({
         style={{
           height: "100%",
           width: `${(value / 3) * 100}%`,
-          backgroundColor: "#78685A",
+          backgroundColor: C.accent,
         }}
       />
     </View>
@@ -63,6 +64,7 @@ export function TurnProgress({
 }
 
 export function VoiceMark({ active = false }: { active?: boolean }) {
+  const { C } = useTheme();
   return (
     <View
       accessible={false}
@@ -81,7 +83,7 @@ export function VoiceMark({ active = false }: { active?: boolean }) {
             width: 3,
             height,
             borderRadius: 2,
-            backgroundColor: active ? "#6F6256" : "#C8BDB1",
+            backgroundColor: active ? C.muted : C.border,
           }}
         />
       ))}

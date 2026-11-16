@@ -177,14 +177,48 @@ function ChallengeHub({
         ? "/vocabulary-review"
         : ("/progress" as never),
     );
+  const streak =
+    state.gamification?.streak.current ?? daily?.streak.current ?? state.streak;
   return (
     <View
       style={{ width: "100%", maxWidth: 1040, alignSelf: "center", gap: 20 }}
       testID="daily-hub"
     >
-      <View style={{ gap: 4 }}>
-        <Text style={T.body}>Hello{first ? ", " + first : ""}</Text>
-        <Text accessibilityRole="header" style={T.title}>
+      <View style={{ gap: 10 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          <Text style={[T.small, { flex: 1 }]}>
+            Hello{first ? ", " + first : ""}
+          </Text>
+          <View
+            testID="home-streak"
+            accessibilityLabel={`${streak} day streak`}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 7,
+              minHeight: 44,
+              paddingHorizontal: 12,
+              borderRadius: 12,
+              backgroundColor: C.yellow,
+            }}
+          >
+            <Icon name="zap" size={18} color={C.orange} />
+            <Text style={[T.body, { fontFamily: "DMBold", color: C.orange }]}>
+              {streak}-day streak
+            </Text>
+          </View>
+        </View>
+        <Text
+          accessibilityRole="header"
+          style={[T.display, { fontSize: 32, lineHeight: 40 }]}
+        >
           A little practice today.
         </Text>
         <Text style={T.small} testID="daily-streak-status">

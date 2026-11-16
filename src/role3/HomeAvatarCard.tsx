@@ -100,16 +100,6 @@ export function HomeAvatarCard({ onOpenAvatar }: HomeAvatarCardProps) {
             />
           </View>
         </View>
-        <View
-          style={styles.streak}
-          testID="home-streak"
-          accessibilityLabel={data.streak.current + " day streak"}
-        >
-          <Icon name="zap" size={17} color={C.orange} />
-          <Text style={[T.small, { color: C.ink, fontFamily: "DMMedium" }]}>
-            {data.streak.current}-day streak
-          </Text>
-        </View>
       </View>
       <Pressable
         accessibilityRole="button"
@@ -190,13 +180,6 @@ const useStyles = createThemedStyles(({ C }) =>
       overflow: "hidden",
     },
     progress: { height: 7, borderRadius: 4, backgroundColor: C.accent },
-    streak: {
-      flexDirection: "row",
-      alignItems: "center",
-      flexWrap: "wrap",
-      gap: 5,
-      alignSelf: "flex-start",
-    },
     pending: {
       minHeight: 184,
       padding: 16,

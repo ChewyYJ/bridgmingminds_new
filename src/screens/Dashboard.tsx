@@ -140,7 +140,7 @@ export function Play({ state, start, navigate }: Props) {
             padding: 18,
             gap: 14,
             overflow: "hidden",
-            backgroundColor: "#F0E7DD",
+            backgroundColor: C.peach,
           }}
         >
           <View
@@ -332,7 +332,11 @@ export function Discover({ articles, start, navigate }: Props) {
       <Text accessibilityRole="header" style={T.title}>
         Something to think about.
       </Text>
-      <View style={s.segment}>
+      <View
+        role="tablist"
+        accessibilityLabel="Discover content"
+        style={s.segment}
+      >
         {(
           [
             { id: "reads", label: "Practice reads" },

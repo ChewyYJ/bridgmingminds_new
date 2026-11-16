@@ -119,3 +119,50 @@ for (const scheme of ["light", "dark"] as const)
       expect(errors).toEqual([]);
     });
   }
+
+test("unknown links recover clearly and saved route aliases still work", async ({
+  page,
+}) => {
+  await page.goto(`${base}/this-page-does-not-exist`);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Let’s find your way back.",
+  );
+  await expect(page).toHaveTitle("Page not found · BridgingMinds");
+  await page.getByRole("button", { name: "Go to Home", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Try as guest", exact: true }),
+  ).toBeVisible();
+  await onboard(page);
+  await page.goto(`${base}/garden`);
+  await expect(page.getByTestId("debate-street")).toBeVisible();
+  await expect(page).toHaveTitle("Debate · BridgingMinds");
+  await page.goto(`${base}/avatar`);
+  await expect(page.getByTestId("equip-avatar")).toBeVisible();
+  await expect(page).toHaveTitle("My profile · BridgingMinds");
+});
+
+test("a failed initial load offers a working retry without exposing a trace", async ({
+  page,
+}) => {
+  await page.request.post(`${base}/api/auth/guest`, { headers, data: {} });
+  await page.request.patch(`${base}/api/me`, {
+    headers,
+    data: { onboardingComplete: true },
+  });
+  await page.route("**/api/state", (route) =>
+    route.fulfill({
+      status: 503,
+      json: { error: "Please try again in a moment." },
+    }),
+  );
+  await page.goto(base);
+  await expect(
+    page.getByRole("heading", { name: "Can’t connect" }),
+  ).toBeVisible();
+  await expect(page.getByRole("alert")).toContainText(
+    "Please try again in a moment.",
+  );
+  await page.unroute("**/api/state");
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(page.getByTestId("daily-hub")).toBeVisible();
+});

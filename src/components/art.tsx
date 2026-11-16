@@ -1,3 +1,4 @@
+import { useTheme } from "../theme/ThemeProvider";
 import React from "react";
 import { BRAND } from "../../shared/brand.mjs";
 import { View } from "react-native";
@@ -325,6 +326,7 @@ export function GardenScene({
   );
 }
 export function BridgingMindsMark({ size = 40 }: { size?: number }) {
+  const { C } = useTheme();
   return (
     <Svg
       style={{ flexShrink: 0 }}
@@ -333,9 +335,9 @@ export function BridgingMindsMark({ size = 40 }: { size?: number }) {
       viewBox="0 0 64 64"
       accessibilityLabel="BridgingMinds"
     >
-      <Path d={BRAND.stem} fill={BRAND.forest} />
-      <Path d={BRAND.leaf} fill={BRAND.sage} />
-      <Circle cx="24" cy="12" r="4" fill={BRAND.gold} />
+      <Path d={BRAND.stem} fill={C.forest} />
+      <Path d={BRAND.leaf} fill={C.accent} />
+      <Circle cx="24" cy="12" r="4" fill={C.orange} />
     </Svg>
   );
 }
