@@ -44,5 +44,5 @@ const outlines: Record<AvatarCategory, string> = {
   accessory: "M3 13h9v8H4l-1-8Zm15 0h9l-1 8h-8v-8Zm-6 3h6M3 13 1 10M27 13l2-3",
 };
 export function WardrobeCategoryIcon({ category, color = "#4B4036" }: { category: AvatarCategory; color?: string }) {
-  return <Svg width={25} height={25} viewBox="0 0 32 32" accessible={false}><Path d={outlines[category]} fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" /></Svg>;
+  return <Svg width={25} height={25} viewBox="0 0 32 32" {...(Platform.OS === "web" ? { "aria-hidden": true } : { accessible: false })}><Path d={outlines[category]} fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" /></Svg>;
 }

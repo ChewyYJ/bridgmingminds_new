@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { C, T } from "../components/ui";
 import { PixelScene } from "./PixelStreetBackdrop";
@@ -38,7 +38,7 @@ export function DebateSteps({ completed }: { completed: number }) {
 }
 
 function Laurel({ mirror = false, color }: { mirror?: boolean; color: string }) {
-  return <Svg width={24} height={40} viewBox="0 0 24 40" accessible={false} style={mirror ? { transform: [{ scaleX: -1 }] } : undefined}>
+  return <Svg width={24} height={40} viewBox="0 0 24 40" {...(Platform.OS === "web" ? { "aria-hidden": true } : { accessible: false })} style={mirror ? { transform: [{ scaleX: -1 }] } : undefined}>
     <Path d="M21 36C8 30 4 14 15 3" fill="none" stroke={color} strokeWidth={1.5} />
     <Path d="M14 6C9 6 9 2 13 0C16 1 17 4 14 6ZM10 12C4 12 3 8 5 5C10 5 12 8 10 12ZM8 19C2 19 0 15 2 12C7 12 10 15 8 19ZM10 26C3 27 0 23 1 20C7 19 10 22 10 26ZM14 32C7 35 3 32 3 28C9 26 13 28 14 32ZM10 14C10 9 15 8 18 10C17 14 14 16 10 14ZM9 21C9 16 14 15 17 17C16 22 12 24 9 21ZM12 28C12 23 17 21 20 23C19 28 16 30 12 28ZM17 34C17 29 21 27 24 30C23 34 20 36 17 34Z" fill={color} />
   </Svg>;
