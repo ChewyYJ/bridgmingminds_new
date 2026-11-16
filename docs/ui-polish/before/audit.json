@@ -1,0 +1,1751 @@
+{
+  "screens": [
+    {
+      "name": "welcome",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "Grow your point of view."
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "welcome",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "Grow your point of view."
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "welcome",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "Grow your point of view."
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "welcome",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "Grow your point of view."
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "welcome",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "Grow your point of view."
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "welcome",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "Grow your point of view."
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "preferences",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "preferences",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "preferences",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "preferences",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "preferences",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "preferences",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "home",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "A little practice today.",
+        "Level 1",
+        "Today’s practice"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "home",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "A little practice today.",
+        "Level 1",
+        "Today’s practice"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "home",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "A little practice today.",
+        "Level 1",
+        "Today’s practice"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "home",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "A little practice today.",
+        "Level 1",
+        "Today’s practice"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "home",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "A little practice today.",
+        "Level 1",
+        "Today’s practice"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "home",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/",
+      "title": "BridgingMinds",
+      "headings": [
+        "A little practice today.",
+        "Level 1",
+        "Today’s practice"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "play",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/play",
+      "title": "BridgingMinds",
+      "headings": [
+        "What would you like to practise?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "play",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/play",
+      "title": "BridgingMinds",
+      "headings": [
+        "What would you like to practise?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "play",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/play",
+      "title": "BridgingMinds",
+      "headings": [
+        "What would you like to practise?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "play",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/play",
+      "title": "BridgingMinds",
+      "headings": [
+        "What would you like to practise?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "play",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/play",
+      "title": "BridgingMinds",
+      "headings": [
+        "What would you like to practise?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "play",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/play",
+      "title": "BridgingMinds",
+      "headings": [
+        "What would you like to practise?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "discover",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/discover",
+      "title": "BridgingMinds",
+      "headings": [
+        "Something to think about.",
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "discover",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/discover",
+      "title": "BridgingMinds",
+      "headings": [
+        "Something to think about.",
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "discover",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/discover",
+      "title": "BridgingMinds",
+      "headings": [
+        "Something to think about.",
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "discover",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/discover",
+      "title": "BridgingMinds",
+      "headings": [
+        "Something to think about.",
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "discover",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/discover",
+      "title": "BridgingMinds",
+      "headings": [
+        "Something to think about.",
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "discover",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/discover",
+      "title": "BridgingMinds",
+      "headings": [
+        "Something to think about.",
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "debate",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/debate",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "debate",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/debate",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "debate",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/debate",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "debate",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/debate",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "debate",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/debate",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "debate",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/debate",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "profile",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/profile",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "Girl styles",
+          "width": 40.75,
+          "height": 44
+        },
+        {
+          "label": "Boy styles",
+          "width": 41.6875,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "name": "profile",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/profile",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "Girl styles",
+          "width": 40.75,
+          "height": 44
+        },
+        {
+          "label": "Boy styles",
+          "width": 41.6875,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "name": "profile",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/profile",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        },
+        {
+          "label": "Girl styles",
+          "width": 40.75,
+          "height": 44
+        },
+        {
+          "label": "Boy styles",
+          "width": 41.6875,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "name": "profile",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/profile",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "Girl styles",
+          "width": 40.75,
+          "height": 44
+        },
+        {
+          "label": "Boy styles",
+          "width": 41.6875,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "name": "profile",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/profile",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "Girl styles",
+          "width": 40.75,
+          "height": 44
+        },
+        {
+          "label": "Boy styles",
+          "width": 41.6875,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "name": "profile",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/profile",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        },
+        {
+          "label": "Girl styles",
+          "width": 40.75,
+          "height": 44
+        },
+        {
+          "label": "Boy styles",
+          "width": 41.6875,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "name": "progress",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/progress",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "progress",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/progress",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "progress",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/progress",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "progress",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/progress",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "progress",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/progress",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "progress",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/progress",
+      "title": "BridgingMinds",
+      "headings": [
+        "My profile"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/settings",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "Reduce motion",
+          "width": 40,
+          "height": 20
+        },
+        {
+          "label": "Private recording storage",
+          "width": 40,
+          "height": 20
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/settings",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "Reduce motion",
+          "width": 40,
+          "height": 20
+        },
+        {
+          "label": "Private recording storage",
+          "width": 40,
+          "height": 20
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/settings",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        },
+        {
+          "label": "Reduce motion",
+          "width": 40,
+          "height": 20
+        },
+        {
+          "label": "Private recording storage",
+          "width": 40,
+          "height": 20
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/settings",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "Reduce motion",
+          "width": 40,
+          "height": 20
+        },
+        {
+          "label": "Private recording storage",
+          "width": 40,
+          "height": 20
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/settings",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "Reduce motion",
+          "width": 40,
+          "height": 20
+        },
+        {
+          "label": "Private recording storage",
+          "width": 40,
+          "height": 20
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/settings",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        },
+        {
+          "label": "Reduce motion",
+          "width": 40,
+          "height": 20
+        },
+        {
+          "label": "Private recording storage",
+          "width": 40,
+          "height": 20
+        }
+      ]
+    },
+    {
+      "name": "food",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/food",
+      "title": "BridgingMinds",
+      "headings": [
+        "Food & care"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "food",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/food",
+      "title": "BridgingMinds",
+      "headings": [
+        "Food & care"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "food",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/food",
+      "title": "BridgingMinds",
+      "headings": [
+        "Food & care"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "food",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/food",
+      "title": "BridgingMinds",
+      "headings": [
+        "Food & care"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "food",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/food",
+      "title": "BridgingMinds",
+      "headings": [
+        "Food & care"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "food",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/food",
+      "title": "BridgingMinds",
+      "headings": [
+        "Food & care"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "achievements",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/achievements",
+      "title": "BridgingMinds",
+      "headings": [
+        "Achievements"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "achievements",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/achievements",
+      "title": "BridgingMinds",
+      "headings": [
+        "Achievements"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "achievements",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/achievements",
+      "title": "BridgingMinds",
+      "headings": [
+        "Achievements"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "achievements",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/achievements",
+      "title": "BridgingMinds",
+      "headings": [
+        "Achievements"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "achievements",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/achievements",
+      "title": "BridgingMinds",
+      "headings": [
+        "Achievements"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "achievements",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/achievements",
+      "title": "BridgingMinds",
+      "headings": [
+        "Achievements"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "tournament",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/tournament",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street",
+        "Singapore Civic Cup"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "tournament",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/tournament",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street",
+        "Singapore Civic Cup"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "tournament",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/tournament",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street",
+        "Singapore Civic Cup"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "tournament",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/tournament",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street",
+        "Singapore Civic Cup"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "tournament",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/tournament",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street",
+        "Singapore Civic Cup"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "tournament",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/tournament",
+      "title": "BridgingMinds",
+      "headings": [
+        "Debate street",
+        "Singapore Civic Cup"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "friends",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/friends",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "friends",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/friends",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "friends",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/friends",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "friends",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/friends",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "friends",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/friends",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "friends",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/friends",
+      "title": "BridgingMinds",
+      "headings": [],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": [
+        {
+          "label": "BridgingMinds home",
+          "width": 215,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "name": "read-aloud",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/read-aloud",
+      "title": "BridgingMinds",
+      "headings": [
+        "Read aloud"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "read-aloud",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/read-aloud",
+      "title": "BridgingMinds",
+      "headings": [
+        "Read aloud"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "read-aloud",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/read-aloud",
+      "title": "BridgingMinds",
+      "headings": [
+        "Read aloud"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "read-aloud",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/read-aloud",
+      "title": "BridgingMinds",
+      "headings": [
+        "Read aloud"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "read-aloud",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/read-aloud",
+      "title": "BridgingMinds",
+      "headings": [
+        "Read aloud"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "read-aloud",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/read-aloud",
+      "title": "BridgingMinds",
+      "headings": [
+        "Read aloud"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "word-review",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/vocabulary-review",
+      "title": "BridgingMinds",
+      "headings": [
+        "Word review"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "word-review",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/vocabulary-review",
+      "title": "BridgingMinds",
+      "headings": [
+        "Word review"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "word-review",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/vocabulary-review",
+      "title": "BridgingMinds",
+      "headings": [
+        "Word review"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "word-review",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/vocabulary-review",
+      "title": "BridgingMinds",
+      "headings": [
+        "Word review"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "word-review",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/vocabulary-review",
+      "title": "BridgingMinds",
+      "headings": [
+        "Word review"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "word-review",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/vocabulary-review",
+      "title": "BridgingMinds",
+      "headings": [
+        "Word review"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "spin-entry",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Spin & Speak"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "spin-entry",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Spin & Speak"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "spin-entry",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Spin & Speak"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "spin-entry",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Spin & Speak"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "spin-entry",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Spin & Speak"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "spin-entry",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Spin & Speak"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "read-reflect",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "read-reflect",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "read-reflect",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "read-reflect",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "read-reflect",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "read-reflect",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "planning-board",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "planning-board",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "What can a distant planet teach us about evidence?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "planning-board",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Plan your response"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "planning-board",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Plan your response"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "planning-board",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Plan your response"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "planning-board",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Plan your response"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "speak",
+      "width": 375,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Understand: What did the observations suggest, and what did they not establish?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "speak",
+      "width": 768,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Understand: What did the observations suggest, and what did they not establish?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "speak",
+      "width": 1440,
+      "colorScheme": "light",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Understand: What did the observations suggest, and what did they not establish?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "speak",
+      "width": 375,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Understand: What did the observations suggest, and what did they not establish?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "speak",
+      "width": 768,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Understand: What did the observations suggest, and what did they not establish?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    },
+    {
+      "name": "speak",
+      "width": 1440,
+      "colorScheme": "dark",
+      "url": "/practice",
+      "title": "BridgingMinds",
+      "headings": [
+        "Understand: What did the observations suggest, and what did they not establish?"
+      ],
+      "overflow": false,
+      "background": "rgba(0, 0, 0, 0)",
+      "smallControls": []
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "type": "warning",
+      "text": "Animated: `useNativeDriver` is not supported because the native animated module is missing. Falling back to JS-based animation. To resolve this, add `RCTAnimation` module to this app, or remove `useNativeDriver`. Make sure to run `bundle exec pod install` first. Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md"
+    }
+  ],
+  "failures": [
+    {
+      "route": "http://localhost:3002/debate",
+      "error": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /^Walk to Ari,/ })\u001b[22m\n\u001b[2m    - locator resolved to <button tabindex=\"0\" role=\"button\" type=\"button\" class=\"css-g5y9jx r-1loqt21 r-1otgn73\" aria-label=\"Walk to Ari, The careful questioner\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - performing click action\u001b[22m\n"
+    }
+  ]
+}
