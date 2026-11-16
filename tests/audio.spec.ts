@@ -45,7 +45,7 @@ test("record, pause, restart, cancel, replay, correct, and persist a private spo
     .getByRole("textbox", { name: "Your name", exact: true })
     .fill("Voice Gardener");
   await page
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   await page.getByRole("button", { name: "Spin & Speak", exact: true }).click();
   await page
@@ -308,7 +308,7 @@ test("a spoken reflection stops at the 60-second limit and remains editable", as
   await page.goto(base);
   await page.getByRole("button", { name: "Try as guest", exact: true }).click();
   await page
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Navigate to Discover", exact: true })
@@ -436,7 +436,7 @@ test("denied microphone access preserves the write alternative", async ({
   await page.goto(base);
   await page.getByRole("button", { name: "Try as guest", exact: true }).click();
   await page
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   await page.getByRole("button", { name: "Spin & Speak", exact: true }).click();
   await page

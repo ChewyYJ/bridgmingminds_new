@@ -34,7 +34,7 @@ async function onboard(page: Page) {
     .getByRole("textbox", { name: "Your name", exact: true })
     .fill("Daily Learner");
   await page
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Read aloud", exact: true })

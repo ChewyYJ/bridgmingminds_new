@@ -15,7 +15,7 @@ test("exhausted optional allowance cannot block the two required daily activitie
     .getByRole("textbox", { name: "Your name", exact: true })
     .fill("Daily Access Learner");
   await page
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   const state = async () =>
     (await page.request.get(`${origin}/api/state`)).json();

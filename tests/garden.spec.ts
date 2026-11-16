@@ -37,7 +37,7 @@ async function startGarden(page: Page, name: string) {
     .getByRole("textbox", { name: "Your name", exact: true })
     .fill(name);
   await page
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   await goToGarden(page);
 }

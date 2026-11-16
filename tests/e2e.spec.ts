@@ -202,7 +202,7 @@ test("complete the learning loop, preserve drafts and accounts, and isolate pers
     .fill("Curious Tester");
   await page.getByRole("button", { name: "Reasoning", exact: true }).click();
   await page
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   await expect(
     page.getByRole("heading", { name: /Hi, Curious/ }),
@@ -549,7 +549,7 @@ test("complete the learning loop, preserve drafts and accounts, and isolate pers
     .getByRole("textbox", { name: "Your name", exact: true })
     .fill("Separate Gardener");
   await stranger
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   const strangerState = await state(stranger);
   expect(strangerState.profile.id).not.toBe(account.profile.id);

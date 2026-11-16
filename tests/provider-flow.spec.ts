@@ -58,7 +58,7 @@ async function onboard(page: Page, name: string) {
     .getByRole("textbox", { name: "Your name", exact: true })
     .fill(name);
   await page
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Spin & Speak", exact: true }),

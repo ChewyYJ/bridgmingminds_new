@@ -37,7 +37,7 @@ test("reflection drafts resume separately, and Skip clears a saved note without 
     .getByRole("textbox", { name: "Your name", exact: true })
     .fill("Reflecting Gardener");
   await page
-    .getByRole("button", { name: "Grow my garden", exact: true })
+    .getByRole("button", { name: "Start learning", exact: true })
     .click();
   await page.getByRole("button", { name: "Spin & Speak", exact: true }).click();
   await page

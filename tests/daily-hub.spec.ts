@@ -10,7 +10,7 @@ for (const size of [{ name: "phone", width: 360, height: 800 }, { name: "desktop
     await page.goto(base);
     await page.getByRole("button", { name: "Try as guest", exact: true }).click();
     await page.getByRole("textbox", { name: "Your name", exact: true }).fill("Alex");
-    await page.getByRole("button", { name: "Grow my garden", exact: true }).click();
+    await page.getByRole("button", { name: "Start learning", exact: true }).click();
     const read = page.getByRole("button", { name: "Read aloud", exact: true });
     const spin = page.getByRole("button", { name: "Spin and reflect", exact: true });
     await expect(read).toBeVisible(); await expect(spin).toBeVisible();
