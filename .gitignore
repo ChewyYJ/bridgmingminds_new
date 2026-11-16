@@ -54,3 +54,6 @@ dist-native/
 
 # Generated presentation build workspace (the final artifact is under output/)
 artifacts/tech-stack/.build/
+
+# Working UI captures; reviewed evidence is in docs/ui-polish/after.
+/artifacts/ui-polish/

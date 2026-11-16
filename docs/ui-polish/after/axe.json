@@ -1,0 +1,155 @@
+{
+  "scans": [
+    {
+      "name": "welcome",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "welcome",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "preferences",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "preferences",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "home",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "home",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "play",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "play",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "discover",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "discover",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "settings",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "settings",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "profile",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "profile",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "progress",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "progress",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "food",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "food",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "achievements",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "achievements",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "tournament",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "tournament",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "friends",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "friends",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "debate",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "debate",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "debate-setup",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "debate-setup",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "name": "debate-preparation",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "name": "debate-preparation",
+      "theme": "dark",
+      "violations": []
+    }
+  ],
+  "warnings": []
+}
