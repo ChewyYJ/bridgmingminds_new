@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, Platform, StyleSheet, Text, View } from "react-native";
 import type { DebateSession } from "../../shared/debate.mjs";
 import {
   createPlanningBoard,
@@ -37,7 +37,7 @@ function PositionRoll({
       toValue: -last * 64,
       duration: 1900,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== "web",
     });
     animation.start(({ finished }) => {
       if (finished) finish.current();

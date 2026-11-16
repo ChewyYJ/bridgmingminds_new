@@ -34,6 +34,11 @@ async function setup(page: Page, reducedMotion: boolean) {
   await expect(
     page.getByRole("button", { name: "Argue against", exact: true }),
   ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Change topic", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Read background", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Hide background", exact: true })).toBeVisible();
 }
 
 async function roll(page: Page) {

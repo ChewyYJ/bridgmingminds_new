@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, AppState, Pressable, ScrollView, Text, View } from "react-native";
+import { Animated, AppState, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import type { DebateOpponent } from "../../shared/debate.mjs";
 import { C, T } from "../components/ui";
 import { LayeredAvatar } from "../avatar/LayeredAvatar";
@@ -42,7 +42,7 @@ export function DebateStreet({ selection, opponents, onMeet }: { selection: Avat
     position.stopAnimation();
     if (match) setNearby(match.opponent);
     setWalking(!reduced && distance > 0);
-    Animated.timing(position, { toValue: next - 50, duration: reduced ? 0 : Math.min(1800, distance * 4), useNativeDriver: true }).start(() => { if (version === movementVersion.current) setWalking(false); });
+    Animated.timing(position, { toValue: next - 50, duration: reduced ? 0 : Math.min(1800, distance * 4), useNativeDriver: Platform.OS !== "web" }).start(() => { if (version === movementVersion.current) setWalking(false); });
     scroll.current?.scrollTo({ x: Math.max(0, Math.min(960 - viewport, next - viewport * 0.35)), animated: !reduced });
   }
   return <View style={{ gap: 12 }} testID="debate-street">

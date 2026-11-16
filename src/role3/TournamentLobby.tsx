@@ -27,9 +27,9 @@ export function DebateSetup({ randomPosition = false, topics, topic, position, p
   return <View style={{ gap: 14 }}>
     <View style={[R.smallCard, { gap: 10 }]}>
       <Text style={T.label}>YOUR MOTION</Text><Text accessibilityRole="header" style={T.h3}>{topic.title}</Text>
-      <View style={R.row}><Action label={choosing ? "Close topics" : "Change topic"} selected={choosing} disabled={busy} onPress={() => setChoosing(!choosing)} /><Action label={background ? "Hide background" : "Read background"} selected={background} onPress={() => setBackground(!background)} /></View>
+      <View style={R.row}>{!randomPosition && <Action label={choosing ? "Close topics" : "Change topic"} selected={choosing} disabled={busy} onPress={() => setChoosing(!choosing)} />}<Action label={background ? "Hide background" : "Read background"} selected={background} onPress={() => setBackground(!background)} /></View>
       {background && <TopicContext topic={topic} />}
-      {choosing && <View style={{ gap: 8 }}>{topics.map(entry => <Action key={entry.id} label={entry.title} selected={topic.id === entry.id} disabled={busy} onPress={() => { onTopic(entry.id); setChoosing(false); }} />)}</View>}
+      {!randomPosition && choosing && <View style={{ gap: 8 }}>{topics.map(entry => <Action key={entry.id} label={entry.title} selected={topic.id === entry.id} disabled={busy} onPress={() => { onTopic(entry.id); setChoosing(false); }} />)}</View>}
     </View>
     {!randomPosition && <><Text style={T.h3}>Your position</Text><View style={R.row}><Action label="Argue for" selected={position === "for"} disabled={busy} onPress={() => onPosition("for")} style={{ flex: 1 }} /><Action label="Argue against" selected={position === "against"} disabled={busy} onPress={() => onPosition("against")} style={{ flex: 1 }} /></View></>}
     <Text style={T.h3}>Speaking confidence</Text><View style={R.row}>{(Object.entries(confidence) as [DebateProficiency, string][]).map(([value, label]) => <Action key={value} label={label} selected={proficiency === value} disabled={busy} onPress={() => onProficiency(value)} />)}</View>
